@@ -260,7 +260,7 @@ export default class App extends Component {
 
 const styles = StyleSheet.create({
 	headerStyle: {
-		backgroundColor: '#ff8184',
+		backgroundColor: '#fb8184',
 		height: 44
 		//	fontSize: 19
 	},
