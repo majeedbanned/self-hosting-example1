@@ -1,0 +1,42 @@
+{
+	"speed": "empty",
+	"namayesh_pasokh": "",
+	"selectedClass": [
+		{
+			"FirstName": "",
+			"LastName": "کلاس هشتم 1",
+			"username": "*1484782",
+			"coursename": "هشتم 1",
+			"RowNumber": 1,
+			"check": "true"
+		},
+		{
+			"FirstName": "",
+			"LastName": "کلاس هفتم 1",
+			"username": "*1484792",
+			"coursename": "هفتم 1",
+			"RowNumber": 2,
+			"check": "true"
+		}
+	],
+	"soal1": "",
+	"soal2": "",
+	"soal3": "",
+	"soal1base64": "",
+	"soal2base64": "",
+	"soal3base64": "",
+	"name": "1",
+	"tozihat": "2",
+	"shoro_namayesh": "۱۳۹۹/۰۳/۰۶",
+	"payan_namayesh": "۱۳۹۹/۰۳/۱۱",
+	"t_shoro_namayesh": "۱۶:۱۶",
+	"t_payan_namayesh": "۱۷:۰۳",
+	"time_pasokh": "2",
+	"time_pasokh_sec": "6",
+	"tartib_namayesh": 1,
+	"direction": 1,
+	"soal_random": "10",
+	"payam": "55",
+	"show_nomre": true,
+	"G_random": true
+}
