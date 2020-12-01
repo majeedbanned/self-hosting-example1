@@ -5,6 +5,7 @@ import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
 import { withNavigation } from 'react-navigation';
 import * as SQLite from 'expo-sqlite';
 import Loading from '../components/loading';
+import DropdownAlert from 'react-native-dropdownalert';
 
 import Database from '../components/database';
 
@@ -12,6 +13,8 @@ import Menu from '../screen/menu';
 import GLOBAL from './global';
 import Birthday from '../screen/birthday';
 import Stories from '../screen/modules/story/stories';
+import NetInfo from '@react-native-community/netinfo';
+
 const database_name = 'Reactoffline.db';
 const database_version = '1.0';
 const database_displayname = 'SQLite React Offline Database';
@@ -237,33 +240,10 @@ class page1 extends Component {
 		};
 	};
 
-	// static navigationOptions = {
-	// 	//To set the header image and title for the current Screen
-	// 	title: 'انتخاب کاربر',
-	// 	//Title
-	// 	headerLeft: <ActionBarImage />,
-
-	// 	headerBackTitle: 'Backee',
-	// 	navigationOptions: {
-	// 		headerBackTitle: 'Home'
-	// 	},
-
-	// 	//Image in Navigation Bar
-
-	// 	headerStyle: {
-	// 		backgroundColor: '#e3e3e3'
-	// 		//Background Color of Navigation Bar
-	// 	},
-
-	// 	headerTintColor: '#606070'
-	// 	//Text Color of Navigation Bar
-	// };
 	handletouch = () => {
-		//console.log('sssssss');
 		GLOBAL.ActionBarImage.setState({
 			avatarSrc: 'http://192.168.1.15:8080/upload/95100040/child/1080687149.jpg'
 		});
-		///console.log('sss');
 	};
 	onRefresh() {
 		//console.log('refresh');
@@ -273,52 +253,50 @@ class page1 extends Component {
 	}
 
 	async componentDidMount() {
-		this.setState({
-			dummystory: [
-				{
-					name: '',
-					image: '',
-					id: '48'
-				},
-				{
-					name: '',
-					image: '',
-					id: '47'
-				},
-				{
-					name: '',
-					image: '',
-					id: '1'
-				},
-				{
-					name: '',
-					image: '',
-					id: '2'
-				},
-				{
-					name: '',
-					image: '',
-					id: '3'
-				}
-			]
-		});
+		this.setState(
+			{
+				// dummystory: [
+				// 	{
+				// 		name: '',
+				// 		image: '',
+				// 		id: '48'
+				// 	},
+				// 	{
+				// 		name: '',
+				// 		image: '',
+				// 		id: '47'
+				// 	},
+				// 	{
+				// 		name: '',
+				// 		image: '',
+				// 		id: '1'
+				// 	},
+				// 	{
+				// 		name: '',
+				// 		image: '',
+				// 		id: '2'
+				// 	},
+				// 	{
+				// 		name: '',
+				// 		image: '',
+				// 		id: '3'
+				// 	}
+				// ]
+			}
+		);
 
 		let results = await Database.executeSql('select * from users ', []);
-		//alert(results.rows.length);
 
 		if (results.rows.length == 0) {
 			const { navigate } = this.props.navigation;
-			alert();
 			navigate('Login', { mode: false });
 		} else {
-			//const db = SQLite.openDatabase('db');
 			db.transaction((tx) => {
 				tx.executeSql('SELECT * FROM users limit 1', [], (tx, results) => {
 					var temp = [];
 					for (let i = 0; i < results.rows.length; ++i) {
 						temp.push(results.rows.item(i));
 					}
-					//alert(temp[0]['ttype']);
 					global.username = temp[0]['username'];
 					global.password = temp[0]['password'];
 					global.schoolcode = temp[0]['schoolcode'];
@@ -330,102 +308,103 @@ class page1 extends Component {
 				});
 			});
 		}
-		// await Font.loadAsync({
-		// 	iransans: require('./../../assets/IRANSansMobile.ttf')
-		// });
 
-		this.setState({
-			stories: [
-				{
-					id: 1,
-					image: '12.jpg',
-					name: 'آزمایشگاه',
-					caption: 'آزمایشگاه'
-				},
-				{
-					id: 2,
-					image: '13.jpg',
-					name: 'آب بازی',
-					caption: 'آب بازی'
-				},
-				{
-					id: 3,
-					image: '14.jpg',
-					name: 'انتخابات دانش آموزی',
-					caption: ''
-				},
-				{
-					id: 4,
-					image: '15.jpg',
-					name: 'امتحانات',
-					caption: 'امتحانات'
-				},
-				{
-					id: 5,
-					image: '16.jpg',
-					name: 'کلاس آنلاین',
-					caption: 'کلاس آنلاین'
-				},
-				{
-					id: 6,
-					image: '17.jpg',
-					name: 'معلمین',
-					caption: ''
-				},
-				{
-					id: 7,
-					image: '18.jpg',
-					name: 'زمین بازی',
-					caption: ''
-				},
-				{
-					id: 8,
-					image: '19.jpg',
-					name: '',
-					caption: ''
-				}
-			]
-		});
-		this.setState({
-			datamain: [
-				{
-					caption: 'دانش آموزان برتر',
+		this.setState(
+			{
+				// stories: [
+				// 	{
+				// 		id: 1,
+				// 		image: '12.jpg',
+				// 		name: 'آزمایشگاه',
+				// 		caption: 'آزمایشگاه'
+				// 	},
+				// 	{
+				// 		id: 2,
+				// 		image: '13.jpg',
+				// 		name: 'آب بازی',
+				// 		caption: 'آب بازی'
+				// 	},
+				// 	{
+				// 		id: 3,
+				// 		image: '14.jpg',
+				// 		name: 'انتخابات دانش آموزی',
+				// 		caption: ''
+				// 	},
+				// 	{
+				// 		id: 4,
+				// 		image: '15.jpg',
+				// 		name: 'امتحانات',
+				// 		caption: 'امتحانات'
+				// 	},
+				// 	{
+				// 		id: 5,
+				// 		image: '16.jpg',
+				// 		name: 'کلاس آنلاین',
+				// 		caption: 'کلاس آنلاین'
+				// 	},
+				// 	{
+				// 		id: 6,
+				// 		image: '17.jpg',
+				// 		name: 'معلمین',
+				// 		caption: ''
+				// 	},
+				// 	{
+				// 		id: 7,
+				// 		image: '18.jpg',
+				// 		name: 'زمین بازی',
+				// 		caption: ''
+				// 	},
+				// 	{
+				// 		id: 8,
+				// 		image: '19.jpg',
+				// 		name: '',
+				// 		caption: ''
+				// 	}
+				// ]
+			}
+		);
+		this.setState(
+			{
+				// datamain: [
+				// 	{
+				// 		caption: 'دانش آموزان برتر',
+				// 		items: [
+				// 			{
+				// 				studentcode: '1080687149',
+				// 				name: 'علی بهتاش',
+				// 				caption: ''
+				// 			},
+				// 			{
+				// 				studentcode: '1274593263',
+				// 				name: 'حامد ارشیان سالار پور',
+				// 				caption: ''
+				// 			},
+				// 			{
+				// 				studentcode: '214237683',
+				// 				name: 'هوشنگ ابتهاج',
+				// 				caption: ''
+				// 			},
+				// 			{
+				// 				studentcode: '45',
+				// 				name: 'محمود احمدی',
+				// 				caption: ''
+				// 			},
+				// 			{
+				// 				studentcode: '39',
+				// 				name: 'صمد بهرامی',
+				// 				caption: ''
+				// 			},
+				// 			{
+				// 				studentcode: '229',
+				// 				name: 'جمال شوریجه',
+				// 				caption: ''
+				// 			}
+				// 		]
+				// 	}
+				// ]
+			}
+		);
 
-					items: [
-						{
-							studentcode: '1080687149',
-							name: 'علی بهتاش',
-							caption: ''
-						},
-						{
-							studentcode: '1274593263',
-							name: 'حامد ارشیان سالار پور',
-							caption: ''
-						},
-						{
-							studentcode: '214237683',
-							name: 'هوشنگ ابتهاج',
-							caption: ''
-						},
-						{
-							studentcode: '45',
-							name: 'محمود احمدی',
-							caption: ''
-						},
-						{
-							studentcode: '39',
-							name: 'صمد بهرامی',
-							caption: ''
-						},
-						{
-							studentcode: '229',
-							name: 'جمال شوریجه',
-							caption: ''
-						}
-					]
-				}
-			]
-		});
 		setTimeout(async () => {
 			this.loadAPI(1);
 			this.loadAPIBadge();
@@ -437,16 +416,6 @@ class page1 extends Component {
 			//this.setState({ refreshing: false });
 		}
 
-		/* #region  check internet */
-
-		// let state = await NetInfo.fetch();
-		// if (!state.isConnected) {
-		// 	this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-
-		// 	return;
-		// }
-		/* #endregion */
-
 		this.setState({ refreshing: true });
 
 		let param = userInfo();
@@ -456,7 +425,7 @@ class page1 extends Component {
 		let uurl = global.adress + '/pApi.asmx/getMainMenuBadge?id=' + '1' + '&p=' + param;
 
 		//let uurl = 'http://192.168.1.12:8080/papi.asmx/mobileMainScreen?test=d';
-		console.log(uurl);
+		//console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -475,13 +444,9 @@ class page1 extends Component {
 					routes: retJson
 				});
 				this.setState({
-					//data: page === 1 ? retJson : [ ...this.state.data, ...retJson ],
-
-					//data: retJson,
-
 					refreshing: false
 				});
-				console.log('data');
+				//console.log('data');
 			}
 		} catch (e) {
 			this.dropDownAlertRef.alertWithType('error', 'پیام', 'خطادر دستیابی به اطلاعات');
@@ -498,13 +463,14 @@ class page1 extends Component {
 		}
 
 		/* #region  check internet */
+		//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
 
-		// let state = await NetInfo.fetch();
-		// if (!state.isConnected) {
-		// 	this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
+		let state = await NetInfo.fetch();
+		if (!state.isConnected) {
+			this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
 
-		// 	return;
-		// }
+			return;
+		}
 		/* #endregion */
 
 		this.setState({ refreshing: true });
@@ -549,8 +515,13 @@ class page1 extends Component {
 		GLOBAL.page1 = this;
 		//alert();
 		//return <View />;
-		if (!this.state.data) return <Loading />;
-
+		if (!this.state.data)
+			return (
+				<React.Fragment>
+					<Loading />
+					<DropdownAlert ref={(ref) => (this.dropDownAlertRef = ref)} />
+				</React.Fragment>
+			);
 		//alert(this.state.data[0].length);
 		//console.log(this.state.datamain[0].items);
 		return (
@@ -580,6 +551,7 @@ class page1 extends Component {
 				{/* <Birthday caption={this.state.data[0].caption} Items={this.state.datamain[0].items} /> */}
 				{this.state.data[1].length > 0 && <Birthday Items={this.state.data[1]} />}
 				{/* </View> */}
+				<DropdownAlert ref={(ref) => (this.dropDownAlertRef = ref)} />
 			</ScrollView>
 		);
 	}
