@@ -412,6 +412,7 @@ class page1 extends Component {
 	}
 
 	loadAPIBadge = async (page) => {
+		//return;
 		if (global.adress == 'undefined') {
 			//this.setState({ refreshing: false });
 		}
@@ -450,6 +451,7 @@ class page1 extends Component {
 			}
 		} catch (e) {
 			this.dropDownAlertRef.alertWithType('error', 'پیام', 'خطادر دستیابی به اطلاعات');
+			//alert();
 			this.setState({
 				isSubmitting: false
 			});
@@ -480,7 +482,7 @@ class page1 extends Component {
 		let uurl = global.adress + '/pApi.asmx/getMainMenu?id=' + page + '&p=' + param;
 
 		//let uurl = 'http://192.168.1.12:8080/papi.asmx/mobileMainScreen?test=d';
-		console.log(uurl);
+		//console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -501,7 +503,7 @@ class page1 extends Component {
 
 					refreshing: false
 				});
-				console.log('data');
+				console.log('page1 load');
 			}
 		} catch (e) {
 			this.dropDownAlertRef.alertWithType('error', 'پیام', 'خطادر دستیابی به اطلاعات');
@@ -538,19 +540,17 @@ class page1 extends Component {
 			>
 				{/* <Menu items={this.state.data1[0]} /> */}
 				{/* <Menu items={this.state.data[0]} /> */}
-
 				{/* <Menu items={this.state.data1[0]} /> */}
+				{/* this.state.data[2] */}
 				{this.state.data[2].length == 0 && (
 					<Stories ccolor={'#ddd'} Items={this.state.dummystory} Navigation={this.props.navigation} />
 				)}
 				{this.state.data[2].length > 0 && (
-					<Stories ccolor={'#f76d6d'} Items={this.state.data[2]} Navigation={this.props.navigation} />
+					<Stories ccolor={'#f76d6d'} Items={[]} Navigation={this.props.navigation} />
 				)}
 				<View>{this.state.data[0].length > 0 && <Menu items={this.state.data[0]} />}</View>
-				{/* <View> */}
-				{/* <Birthday caption={this.state.data[0].caption} Items={this.state.datamain[0].items} /> */}
 				{this.state.data[1].length > 0 && <Birthday Items={this.state.data[1]} />}
-				{/* </View> */}
+
 				<DropdownAlert ref={(ref) => (this.dropDownAlertRef = ref)} />
 			</ScrollView>
 		);

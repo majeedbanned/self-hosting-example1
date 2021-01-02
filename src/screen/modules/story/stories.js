@@ -27,51 +27,15 @@ const stories = ({ Navigation, Items, caption, ccolor, ...rest }) => (
 	>
 		{global.ttype == 'administrator' && (
 			<View>
-				<View
-					style={[
-						{
-							justifyContent: 'center',
-							alignItems: 'center',
-							marginRight: 0,
-							borderRadius: 15,
-							backgroundColor: 'white'
-						}
-					]}
-				>
-					<View
-						style={[
-							{
-								borderWidth: 0,
-								borderRadius: 45,
-								marginRight: 0
-
-								//backgroundColor: '#f76d6d'
-							}
-						]}
-					>
+				<View style={[ styles.st1 ]}>
+					<View style={[ styles.st2 ]}>
 						<TouchableOpacity
 							activeOpacity={0.5}
 							onPress={() => {
-								//global.storyID = item.id;
 								Navigation.navigate('storyList');
 							}}
 						>
-							<View
-								style={[
-									styles.imageavatar,
-
-									{
-										justifyContent: 'center',
-										alignItems: 'center',
-										borderColor: 'black',
-										borderStyle: 'dashed',
-										borderWidth: 2,
-										borderColor: '#aaa',
-										margin: 2
-										//backgroundColor: 'white'
-									}
-								]}
-							>
+							<View style={[ styles.imageavatar ]}>
 								<Icon size={35} name="md-add" color="#aaa" />
 							</View>
 							{/* <Image
@@ -89,19 +53,7 @@ const stories = ({ Navigation, Items, caption, ccolor, ...rest }) => (
 						</TouchableOpacity>
 					</View>
 
-					<Text
-						numberOfLines={1}
-						style={[
-							{
-								paddingTop: 4,
-								paddingBottom: 3,
-								width: 80,
-								textAlign: 'center',
-								fontFamily: 'iransans',
-								fontSize: 12
-							}
-						]}
-					>
+					<Text numberOfLines={1} style={[ styles.st3 ]}>
 						جدید
 					</Text>
 				</View>
@@ -115,6 +67,39 @@ const stories = ({ Navigation, Items, caption, ccolor, ...rest }) => (
 			// keyExtractor={(item) => {
 			// 	return item.id;
 			// }}
+			rtjs
+			ListEmptyComponent={() => (
+				<View style={[ styles.st1 ]}>
+					<View style={[ styles.st2 ]}>
+						<TouchableOpacity
+							activeOpacity={0.5}
+							onPress={() => {
+								Navigation.navigate('storyList');
+							}}
+						>
+							<View style={[ styles.imageavatar ]}>
+								<Icon size={35} name="md-add" color="#aaa" />
+							</View>
+							{/* <Image
+						style={[
+							styles.imageavatar,
+
+							{
+								borderWidth: 2,
+								borderColor: 'white',
+								margin: 2
+							}
+						]}
+						source={{ uri: getHttpAdress() + 'media/' }}
+					/> */}
+						</TouchableOpacity>
+					</View>
+
+					<Text numberOfLines={1} style={[ styles.st3 ]}>
+						جدید
+					</Text>
+				</View>
+			)}
 			renderItem={({ item, index }) => {
 				return (
 					<View
@@ -193,7 +178,34 @@ const styles = StyleSheet.create({
 		height: 60,
 		borderRadius: 60,
 		borderWidth: 0,
-		borderColor: '#ccc'
+		borderColor: '#ccc',
+		justifyContent: 'center',
+		alignItems: 'center',
+		borderColor: 'black',
+		//borderStyle: 'dashed',
+		borderWidth: 2,
+		borderColor: '#aaa',
+		margin: 2
+	},
+	st1: {
+		justifyContent: 'center',
+		alignItems: 'center',
+		marginRight: 0,
+		borderRadius: 15,
+		backgroundColor: 'white'
+	},
+	st2: {
+		borderWidth: 0,
+		borderRadius: 45,
+		marginRight: 0
+	},
+	st3: {
+		paddingTop: 4,
+		paddingBottom: 3,
+		width: 80,
+		textAlign: 'center',
+		fontFamily: 'iransans',
+		fontSize: 12
 	}
 });
 export default withNavigation(stories);

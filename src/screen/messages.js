@@ -514,8 +514,6 @@ class messages extends Component {
 					// ListEmptyComponent={
 					// 	<View style={{ borderWidth: 0, height: 350 }}>
 					// 		<View
-					// 			style={{
-					// 				borderWidth: 0,
 
 					// 				justifyContent: 'center',
 					// 				flex: 1,

@@ -46,7 +46,6 @@ const VclassRoute = () => <Vclass key="1" />;
 const WebinarRoute = () => <Webinar key="1" />;
 const HomeRoute = () => <Page1 key="1" />;
 const EventRoute = (er) => {
-	//this.setState({ isModalVisible: !this.state.isModalVisible });
 	return <Cal />;
 };
 
