@@ -1,22 +1,26 @@
 import React, { Component } from 'react';
 import { StyleSheet, Linking, ActivityIndicator, SafeAreaView, Alert } from 'react-native';
 import ActionButton from 'react-native-action-button';
-import defaultStyles from '../config/styles';
-import { Menu, MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu';
+import defaultStyles from '../../config/styles';
+import Loading from '../../components/loading';
+//import ActionButton from 'react-native-action-button';
+import { SearchBar } from 'react-native-elements';
+import Iconw from 'react-native-vector-icons/FontAwesome';
 
-import Loading from '../components/loading';
 import DropdownAlert from 'react-native-dropdownalert';
 import { withNavigation } from 'react-navigation';
 import { FlatGrid } from 'react-native-super-grid';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { Menu, MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu';
+
 import IconAnt from 'react-native-vector-icons/AntDesign';
-import i18n from 'i18n-js';
-import Mstyles from '../components/styles';
-import FormButton from '../component/FormButton';
-import ExamAdd from './examAdd';
+
+import Mstyles from '../../components/styles';
+import FormButton from '../../component/FormButton';
+//import ExamAdd from '../../examAdd';
 import { AntDesign, Entypo } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
-import SelectUser from './selectUser';
+//import SelectUser from '../../selectUser';
 import NetInfo from '@react-native-community/netinfo';
 import Modal, {
 	ModalTitle,
@@ -26,23 +30,15 @@ import Modal, {
 	SlideAnimation,
 	ScaleAnimation
 } from 'react-native-modals';
-import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+import { userInfo, toFarsi, getHttpAdress } from '../../components/DB';
 import { FlatList, ScrollView, Image, View, Text, RefreshControl, TouchableOpacity } from 'react-native';
-import GLOBAL from './global';
+import GLOBAL from '../global';
 import { LinearGradient } from 'expo-linear-gradient';
 import { NavigationEvents } from 'react-navigation';
 
-const colorhead = '#5dd891';
-const colorlight = '#7be8a9';
+const colorhead = '#2e95d8';
+const colorlight = '#2e95d8';
 const iconname_ = 'form';
-
-if (global.username == '') {
-	i18n.locale = 'en';
-} else {
-	i18n.locale = 'fa';
-}
-
-//i18n.fallbacks = true;
 
 const optionsStyles = {
 	optionsContainer: {
@@ -70,11 +66,12 @@ const optionsStyles = {
 	}
 };
 
-class webinar extends Component {
+class bankfile extends Component {
 	constructor(props) {
 		super(props);
 		(this.page = 1),
 			(this.state = {
+				searchText: '',
 				bottomModalAndTitle: false,
 				refreshing: false,
 				isModalVisible: false,
@@ -92,76 +89,15 @@ class webinar extends Component {
 			});
 
 		this.props.navigation.addListener('willFocus', () => {
-			this.loadAPI(1, 'pull');
+			//	this.loadAPI(1, 'pull');
 			this.loadAPI_grp(1, 'pull');
 		});
 	}
-
-	delAPI = async (index, eformsID) => {
-		//console.log('sdsdsdsdsdsds');
-		const { navigation } = this.props;
-		const instanseID = navigation.getParam('instanseID');
-
-		if (global.adress == 'undefined') {
-			GLOBAL.main.setState({ isModalVisible: true });
-		}
-		/* #region  check internet */
-		let state = await NetInfo.fetch();
-		if (!state.isConnected) {
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
-		}
-		/* #endregion */
-
-		//this.setState({ loading: true });
-		let param = userInfo();
-		let uurl =
-			global.adress +
-			'/pApi.asmx/delFormMain?fId=' +
-			eformsID +
-			'&p=' +
-			param +
-			'&isAdminForms=' +
-			this.isAdminForms +
-			'&instanceid=' +
-			eformsID;
-		console.log(uurl);
-		//	console.log('sdsdsdsdsdsds');
-
-		try {
-			const response = await fetch(uurl);
-			if (response.ok) {
-				let retJson = await response.json();
-				//alert(retJson[0].selectedClass[0].username);
-				if (Object.keys(retJson).length == 0) {
-					this.setState(
-						{
-							//isEditing: false
-						}
-					);
-					return;
-				}
-			}
-
-			let newimagesAddFile = this.state.data;
-			//alert(index);
-			newimagesAddFile.splice(index, 1); //to remove a single item starting at index
-			this.setState({ data: newimagesAddFile });
-		} catch (e) {
-			console.log(e.message);
-			this.dropDownAlertRef.alertWithType('error', 'پیام', 'خطادر دستیابی به اطلاعات');
-			this.setState({
-				loading: false
-			});
-			return;
-		}
-	};
-
 	static navigationOptions = ({ navigation }) => {
 		const { params } = navigation.state;
 
 		return {
-			headerTitle: i18n.t('frmListCaption'),
+			headerTitle: ' بانک فایل',
 			headerRight: () => null,
 			headerBackTitle: 'بازگشت',
 			navigationOptions: {
@@ -197,20 +133,21 @@ class webinar extends Component {
 		let param = userInfo();
 		let uurl =
 			global.adress +
-			'/pApi.asmx/getFormCat?id=' +
+			'/pApi.asmx/stdCourseListfile?id=' +
 			page +
 			'&p=' +
 			param +
 			'&g=' +
 			this.state.selectedItem +
 			'&mode=list';
-		//console.log(uurl);
+		console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
 				if (Object.keys(retJson).length == 0) {
 					this.setState({
+						cat: [],
 						loading: false
 					});
 					return;
@@ -220,6 +157,12 @@ class webinar extends Component {
 
 					loading: false
 				});
+			}
+			if (this.state.cat.length != 0) {
+				this.setState({
+					selectedItem: this.state.cat[0].id
+				});
+				this.loadAPI(1, 'pull');
 			}
 		} catch (e) {
 			console.log('err');
@@ -247,13 +190,16 @@ class webinar extends Component {
 		let param = userInfo();
 		let uurl =
 			global.adress +
-			'/pApi.asmx/getFormsList?currentPage=' +
-			page +
+			'/pApi.asmx/getfiles?id=' +
+			this.page +
 			'&p=' +
 			param +
 			'&g=' +
+			global.adress +
+			'&coursecode=' +
 			this.state.selectedItem +
-			'&stdid=&instanceid=';
+			'&q=' +
+			this.state.searchText;
 		console.log(uurl);
 		try {
 			const response = await fetch(uurl);
@@ -261,7 +207,7 @@ class webinar extends Component {
 				let retJson = await response.json();
 				if (Object.keys(retJson).length == 0) {
 					this.setState({
-						data: [],
+						//data: [],
 						loading: false,
 						dataLoading: false,
 						isRefreshing: false
@@ -269,12 +215,12 @@ class webinar extends Component {
 					return;
 				}
 				//console.log('ret:' + retJson);
+				// this.setState({
+				// 	data: []
+				// });
 				this.setState({
-					data: []
-				});
-				this.setState({
-					//data: page === 1 ? retJson : [ ...this.state.data, ...retJson ],
-					data: retJson,
+					data: page === 1 ? retJson : [ ...this.state.data, ...retJson ],
+					//data: retJson,
 					dataLoading: false,
 
 					isRefreshing: false,
@@ -316,33 +262,125 @@ class webinar extends Component {
 		this.loadAPI(1, 'pull');
 	}
 	onPressHandler(id) {
+		this.page = 1;
 		this.setState({ selectedItem: id, data: [], dataLoading: true });
 		this.loadAPI(1, 'pull');
 	}
+	imageload(teacherCode) {
+		return <Image style={styles.imageavatar} source={{ uri: getHttpAdress() + 'child/' + teacherCode + '.jpg' }} />;
+		//return <Image style={styles.imageavatar} source={require('./../../../assets/images/logo.png')} />;
+		var url = getHttpAdress() + 'child/' + teacherCode + '.jpg';
+		//console.log(url);
+		fetch(url)
+			.then((res) => {
+				if (res.status == 404) {
+					console.log('not found');
+					return <Image style={styles.imageavatar} source={require('./../../../assets/images/logo.png')} />;
+				} else {
+					//console.log('found');
+					return <Text style={{ width: 14, height: 15 }}>salam</Text>;
+					// return  <Image style={styles.imageavatar} source={{ uri: url }} />;
+				}
+			})
+			.catch((err) => {
+				console.log('erer');
+				return <Image style={styles.imageavatar} source={require('./../../../assets/images/logo.png')} />;
+			});
+
+		//		return <Image style={styles.imageavatar} source={{ uri: getHttpAdress() + 'child/' + teacherCode + '.jpg' }} />;
+	}
+
+	delAPI = async (eid, index) => {
+		if (global.adress == 'undefined') {
+			GLOBAL.main.setState({ isModalVisible: true });
+		}
+		/* #region  check internet */
+		let state = await NetInfo.fetch();
+		if (!state.isConnected) {
+			this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
+			return;
+		}
+		/* #endregion */
+
+		let param = userInfo();
+		let uurl = global.adress + '/pApi.asmx/delFile?fId=' + eid + '&p=' + param; //+
+
+		console.log(uurl);
+
+		try {
+			const response = await fetch(uurl);
+			if (response.ok) {
+				let retJson = await response.json();
+				if (Object.keys(retJson).length == 0) {
+					this.setState({
+						loading: false,
+						dataLoading: false,
+						isRefreshing: false
+					});
+					return;
+				}
+
+				this.setState({ issnack: true, msg: retJson.msg });
+
+				let newimagesAddFile = this.state.data;
+				//alert(index);
+				newimagesAddFile.splice(index, 1); //to remove a single item starting at index
+				this.setState({ data: newimagesAddFile });
+
+				//console.log(retJson);
+				// this.setState(
+				// 	{
+				// 		// data: page === 1 ? retJson : [ ...this.state.data, ...retJson ],
+				// 		// loading: false,
+				// 		// dataLoading: false,
+				// 		// isRefreshing: false
+				// 	}
+				// );
+			}
+		} catch (e) {
+			console.log('err');
+			this.dropDownAlertRef.alertWithType('error', 'پیام', 'خطادر دستیابی به اطلاعات');
+			this.setState({
+				loading: false,
+				dataLoading: false,
+				isRefreshing: false
+			});
+			return;
+		}
+	};
+
+	searchFilterFunction = (text) => {
+		//alert();
+		this.setState({ searchText: text });
+		if (text == '' || text == undefined) {
+			this.page = 1;
+			this.loadAPI(1, '');
+			//this.flatListRef.scrollToOffset({ animated: true, offset: 0 });
+		}
+		if (text.length < 2) return;
+		this.page = 1;
+		this.loadAPI(1, text);
+		this.flatListRef.scrollToOffset({ animated: true, offset: 0 });
+
+		return;
+	};
+
 	renderHeader = () => {
 		//console.log(this.state.cat);
 		return (
 			<View style={{ backgroundColor: 'white' }}>
 				<FlatList
-					extraData={this.state.selectedItem}
 					showsHorizontalScrollIndicator={false}
+					extraData={this.state.selectedItem}
 					data={this.state.cat}
-					//keyExtractor={(item) => item.id.toString()}
-
 					keyExtractor={(item) => item.id.toString()}
 					horizontal
-					style={{
-						flexDirection: 'column-reverse',
-						paddingBottom: 4,
-						borderWidth: 0,
-						marginTop: 4,
-						marginRight: 4,
-						marginLeft: 4
-					}}
+					style={{ paddingBottom: 4, borderWidth: 0, marginTop: 4, marginRight: 4, marginLeft: 4 }}
 					renderItem={({ item, index }) => {
 						return (
 							<TouchableOpacity
-								activeOpacity={0.7}
+								key={item.id}
+								activeOpacity={0.6}
 								onPress={() => {
 									//console.log(item.id);
 									this.onPressHandler(item.id);
@@ -355,14 +393,14 @@ class webinar extends Component {
 												flexDirection: 'row',
 												backgroundColor: colorhead,
 												fontFamily: 'iransans',
-												borderWidth: 1,
+												borderWidth: 0,
 												borderColor: colorhead,
-												borderRadius: 15,
+												borderRadius: 30,
 												margin: 3,
-												paddingTop: 8,
+												paddingTop: 0,
 												paddingRight: 8,
-												paddingLeft: 8,
-												paddingBottom: 3
+												paddingLeft: 0,
+												paddingBottom: 0
 											}
 										) : (
 											{
@@ -371,40 +409,108 @@ class webinar extends Component {
 												fontFamily: 'iransans',
 												borderWidth: 1,
 												borderColor: colorhead,
-												borderRadius: 15,
+												borderRadius: 30,
 												margin: 3,
-												paddingTop: 8,
+												paddingTop: 0,
 												paddingRight: 8,
-												paddingLeft: 8,
-												paddingBottom: 3
+												paddingLeft: 0,
+												paddingBottom: 0
 											}
 										)
 									}
 								>
-									<Text
-										style={
-											this.state.selectedItem === item.id ? (
-												{
-													color: 'white',
-													fontFamily: 'iransans'
-												}
-											) : (
-												{
-													color: colorlight,
+									{this.imageload(item.TeacherCode)}
 
-													fontFamily: 'iransans'
-												}
-											)
-										}
-									>
-										{item.name}
-									</Text>
+									<View>
+										<Text
+											style={
+												this.state.selectedItem === item.id ? (
+													{
+														color: 'white',
+														fontSize: 12,
+														paddingTop: 5,
+														paddingStart: 5,
+														textAlign: 'left',
+														paddingEnd: 5,
+														fontFamily: 'iransans'
+													}
+												) : (
+													{
+														paddingTop: 5,
+														paddingStart: 5,
+														textAlign: 'left',
+														paddingEnd: 5,
+														color: colorlight,
+														fontSize: 12,
+														fontFamily: 'iransans'
+													}
+												)
+											}
+										>
+											{toFarsi(item.name)}
+										</Text>
+										<Text
+											style={
+												this.state.selectedItem === item.id ? (
+													{
+														color: 'white',
+														fontSize: 10,
+														fontFamily: 'iransans',
+
+														paddingStart: 5,
+														textAlign: 'left',
+														marginTop: -3,
+														paddingEnd: 5
+													}
+												) : (
+													{
+														color: 'black',
+														//color: colorlight,
+														fontSize: 10,
+														fontFamily: 'iransans',
+														textAlign: 'left',
+														paddingStart: 5,
+														marginTop: -3,
+														paddingEnd: 5
+													}
+												)
+											}
+										>
+											{toFarsi(item.teachname)}
+										</Text>
+									</View>
 									{this.state.selectedItem !== item.id ||
-										(this.state.dataLoading && <ActivityIndicator />)}
+										(this.state.dataLoading && <ActivityIndicator color={'white'} />)}
 								</View>
 							</TouchableOpacity>
 						);
 					}}
+				/>
+
+				<SearchBar
+					inputContainerStyle={{ backgroundColor: '#eee' }}
+					containerStyle={{
+						flex: 2,
+						marginStart: 8,
+						marginEnd: 8,
+						height: 30,
+						marginBottom: 5,
+						padding: 0,
+						borderBottomWidth: 0,
+						backgroundColor: 'white',
+						borderTopRightRadius: 24,
+						borderTopLeftRadius: 24
+					}}
+					placeholder="جستجو"
+					lightTheme
+					showLoading={this.state.loading}
+					//round
+					inputContainerStyle={{ borderRadius: 10, height: 15, backgroundColor: '#eee' }}
+					inputStyle={{ textAlign: 'center', fontSize: 13, fontFamily: 'iransans' }}
+					//showLoading={this.state.loading}
+					onChangeText={(text) => this.searchFilterFunction(text)}
+					autoCorrect={false}
+					value={this.state.searchText}
 				/>
 			</View>
 		);
@@ -421,7 +527,7 @@ class webinar extends Component {
 
 		//	GLOBAL.vclass = this;
 
-		if (!this.state.data) {
+		if (!this.state.cat) {
 			return (
 				<SafeAreaView style={{ flex: 1 }}>
 					<ScrollView
@@ -437,6 +543,10 @@ class webinar extends Component {
 		return (
 			<View style={Mstyles.container}>
 				<FlatList
+					ref={(ref) => {
+						this.flatListRef = ref;
+					}}
+					keyExtractor={(item) => item.id.toString()}
 					ListHeaderComponent={this.renderHeader}
 					stickyHeaderIndices={[ 0 ]}
 					ListFooterComponent={this._renderFooter}
@@ -461,28 +571,29 @@ class webinar extends Component {
 							</View>
 						</View>
 					}
-					//onEndReachedThreshold={0.4}
-					//	onEndReached={this._handleLoadMore.bind(this)}
+					onEndReachedThreshold={0.4}
+					onEndReached={this._handleLoadMore.bind(this)}
 					refreshControl={
 						<RefreshControl refreshing={this.state.isRefreshing} onRefresh={this.onRefresh.bind(this)} />
 					}
 					style={Mstyles.contentList}
 					columnWrapperStyle={styles.listContainer}
 					data={this.state.data}
+					keyExtractor={(item, index) => item.id.toString()}
 					// keyExtractor={(item) => {
 					// 	return item.id;
 					// }}
-					keyExtractor={(item) => item.id.toString()}
 					renderItem={({ item, index }) => {
 						return (
 							<TouchableOpacity
 								key={item.id}
 								onPress={() => {
-									const { navigate } = this.props.navigation;
-									global.eformsID = item.id;
-									navigate('eforms', { eformsID: item.id, mode: 'add' });
+									Linking.openURL(item.filename);
+									// const { navigate } = this.props.navigation;
+									// global.eformsID = item.id;
+									// navigate('eforms', { eformsID: item.id, mode: 'add' });
 								}}
-								activeOpacity={0.9}
+								activeOpacity={0.8}
 								style={{
 									height: 68,
 									borderRadius: 13,
@@ -493,161 +604,146 @@ class webinar extends Component {
 									<View style={{ borderWidth: 0, flex: 1, flexDirection: 'row', marginStart: 0 }}>
 										<View style={styles.view1}>
 											<View style={styles.view2}>
-												<View style={styles.view3}>
-													<IconAnt
+												<View style={[ styles.view3, { flex: 1 } ]}>
+													{/* <IconAnt
 														name={iconname_}
 														style={styles.image}
 														size={34}
 														color="white"
-													/>
+													/> */}
+
+													{item.type == 'pdf' && (
+														<Iconw
+															style={styles.image}
+															name="file-pdf-o"
+															size={34}
+															color="white"
+														/>
+													)}
+													{(item.type == 'jpg' ||
+														item.type == 'jpeg' ||
+														item.type == 'png') && (
+														<Iconw
+															style={styles.image}
+															name="file-picture-o"
+															size={34}
+															color="white"
+														/>
+													)}
+													{(item.type == 'xls' || item.type == 'xlsx') && (
+														<Iconw
+															style={styles.image}
+															name="file-excel-o"
+															size={34}
+															color="white"
+														/>
+													)}
+													{(item.type == 'doc' || item.type == 'docx') && (
+														<Iconw
+															style={styles.image}
+															name="file-word-o"
+															size={34}
+															color="white"
+														/>
+													)}
 												</View>
-												<View style={[ styles.view4, { marginTop: 15 } ]}>
+												<View style={[ styles.view4, { flex: 4 } ]}>
 													<Text style={[ styles.aztitle, { color: 'black' } ]}>
-														{item.caption}
+														{item.name}
 													</Text>
-													{item.enddate ? (
-														<Text style={[ styles.aztitlet, { paddingTop: 2 } ]}>
-															{' مهلت تا: ' + toFarsi(item.enddate)}
+
+													{item.disc ? (
+														<Text
+															numberOfLines={1}
+															style={[ styles.aztitlet, { paddingTop: -4 } ]}
+														>
+															{toFarsi(item.disc)}
 														</Text>
 													) : null}
-
-													<Text style={[ styles.aztitlet, { paddingBottom: 10 } ]}>
-														{'تعداد شرکت کننده : ' + item.d + ' نفر'}
-													</Text>
+													<View style={{ flexDirection: 'row' }}>
+														<Text
+															numberOfLines={1}
+															style={[ styles.aztitlet, { paddingTop: 0, flex: 1 } ]}
+														>
+															{toFarsi(item.time_)}
+														</Text>
+														<Text
+															numberOfLines={1}
+															style={[ styles.aztitlet, { paddingTop: 0, flex: 1 } ]}
+														>
+															{toFarsi(item.date_)}
+														</Text>
+														<Text
+															numberOfLines={1}
+															style={[ styles.aztitlet, { paddingTop: 0, flex: 1 } ]}
+														>
+															{toFarsi(item.size)}
+														</Text>
+													</View>
 												</View>
+												{item.owner == global.username &&
+												(global.ttype == 'administrator' || global.ttype == 'teacher') && (
+													<View style={{ flex: 1 }}>
+														<Menu>
+															<MenuTrigger>
+																<Ionicons
+																	name="ios-menu"
+																	size={32}
+																	color="#000"
+																	style={{ marginRight: 15, marginTop: 15 }}
+																/>
 
-												{/* <View style={{ flex: 1 }}> */}
-												{(item.isadmin == 1 || item.isaccess == 1) && (
-													<Menu>
-														<MenuTrigger>
-															<Ionicons
-																name="ios-menu"
-																size={32}
-																color="#000"
-																style={{ marginRight: 15, marginTop: 15 }}
-															/>
-
-															{/* <Text style={{ fontSize: 40, fontWeight: 'bold' }}>⋮</Text> */}
-														</MenuTrigger>
-														<MenuOptions customStyles={optionsStyles}>
-															{item.isadmin == 1 && (
+																{/* <Text style={{ fontSize: 40, fontWeight: 'bold' }}>⋮</Text> */}
+															</MenuTrigger>
+															<MenuOptions customStyles={optionsStyles}>
 																<MenuOption
 																	customStyles={this.optionStyles}
 																	onSelect={() => {
 																		const { navigate } = this.props.navigation;
 																		//global.eformsID = item.id;
 																		navigate('eforms', {
-																			eformsID: 5,
+																			eformsID: 12,
 																			instanseID: item.id,
 																			stdID: 0,
 																			mode: 'view',
 																			isAdminForms: 'true'
 																		});
 																	}}
-																	text="ویرایش فرم"
+																	text="ویرایش فایل"
 																/>
-															)}
-															{item.isadmin == 1 && (
-																<MenuOption
-																	customStyles={this.optionStyles}
-																	onSelect={() => {
-																		const { navigate } = this.props.navigation;
-																		//global.eformsID = item.id;
-																		navigate('eforms', {
-																			eformsID: item.id,
-																			instanseID: '',
-																			stdID: 0,
-																			mode: 'design',
-																			isAdminForms: ''
-																		});
-																	}}
-																	text="طراحی فرم"
-																/>
-															)}
-															<MenuOption
-																customStyles={this.optionStyles}
-																onSelect={() => {
-																	const { navigate } = this.props.navigation;
-																	//global.eformsID = item.id;
-																	navigate('studentlist', {
-																		eformsID: item.id,
-																		mode: 'list'
-																	});
-																}}
-																text="لیست شرکت کنندگان"
-															/>
 
-															{item.isadmin == 1 && (
-																<MenuOption
-																	customStyles={this.optionStyles}
-																	onSelect={() => {
-																		Alert.alert(
-																			' اخطار',
-																			'آیا مایل به حذف این فرم هستید؟',
-																			[
-																				{
-																					text: 'خیر',
-																					//onPress: () => console.log('Cancel Pressed'),
-																					style: 'cancel'
-																				},
-																				{
-																					text: 'بله',
-																					onPress: () => {
-																						this.delAPI(
-																							this.delAPI(index),
-																							item.id
-																						);
+																{true && (
+																	<MenuOption
+																		customStyles={this.optionStyles}
+																		onSelect={() => {
+																			Alert.alert(
+																				' اخطار',
+																				'آیا مایل به حذف این فایل هستید؟',
+																				[
+																					{
+																						text: 'خیر',
+																						//onPress: () => console.log('Cancel Pressed'),
+																						style: 'cancel'
+																					},
+																					{
+																						text: 'بله',
+																						onPress: () => {
+																							this.delAPI(item.id, this);
+																						}
 																					}
-																				}
-																			],
-																			{ cancelable: false }
-																		);
-																	}}
-																	text="حذف فرم"
-																/>
-															)}
-														</MenuOptions>
-													</Menu>
+																				],
+																				{ cancelable: false }
+																			);
+																		}}
+																		text="حذف فایل"
+																	/>
+																)}
+															</MenuOptions>
+														</Menu>
+													</View>
 												)}
-												{/* </View> */}
-
 												{/* {global.ttype == 'administrator' ||
 														(item.access.indexOf(global.username) > -1 && ( */}
-												{false &&
-												item.isadmin == 1 && (
-													<TouchableOpacity
-														onPress={() => {
-															const { navigate } = this.props.navigation;
-															//global.eformsID = item.id;
-															navigate('studentlist', {
-																eformsID: item.id,
-																mode: 'list'
-															});
-														}}
-														style={{
-															alignItems: 'center',
-															justifyContent: 'center',
-															flex: 0.5
-														}}
-													>
-														<IconAnt
-															name="solution1"
-															style={styles.image}
-															size={28}
-															color="#ccc"
-														/>
-
-														<Text
-															style={[
-																defaultStyles.lbl14,
-																{ fontSize: 14, color: 'black' }
-															]}
-														>
-															لیست
-														</Text>
-													</TouchableOpacity>
-												)}
-												{/* ))} */}
 											</View>
 										</View>
 									</View>
@@ -657,22 +753,29 @@ class webinar extends Component {
 					}}
 				/>
 
-				{global.ttype == 'administrator' && (global.ttype == 'teacher' && false) ? (
-					<ActionButton position="left" buttonColor="rgba(231,76,60,1)">
+				{(true && global.ttype == 'administrator') || global.ttype == 'teacher' ? (
+					<ActionButton useNativeDriver position="left" buttonColor="rgba(231,76,60,1)">
 						<ActionButton.Item
 							buttonColor="#9b59b6"
-							title="تعریف آزمون"
+							title=" افزودن فایل "
+							textStyle={{ fontFamily: 'iransans' }}
 							onPress={() => {
 								global.examEditID = '';
+
 								const { navigate } = this.props.navigation;
-								navigate('examAdd');
+								//27429
+								navigate('eforms', {
+									eformsID: 12,
+									instanseID: '',
+									stdID: 0,
+									mode: 'view',
+									isAdminForms: 'true'
+								});
 							}}
 						>
 							<IconAnt name="edit" style={styles.actionButtonIcon} />
-							{/* <Iconan name="edit" style={styles.actionButtonIcon} /> */}
-						</ActionButton.Item>
-						<ActionButton.Item buttonColor="#3498db" title="بانک سئوالات" onPress={() => {}}>
-							<Icon name="md-notifications-off" style={styles.actionButtonIcon} />
+
+							{/* <Icon name="edit" style={styles.actionButtonIcon} /> */}
 						</ActionButton.Item>
 					</ActionButton>
 				) : null}
@@ -737,56 +840,22 @@ class webinar extends Component {
 					</ModalContent>
 				</Modal.BottomModal>
 
-				{(true && global.ttype == 'administrator') || global.ttype == 'teacher' ? (
-					<ActionButton useNativeDriver position="left" buttonColor="rgba(231,76,60,1)">
+				{global.ttype == 'administrator' && (global.ttype == 'teacher' && true) ? (
+					<ActionButton position="left" buttonColor="rgba(231,76,60,1)">
 						<ActionButton.Item
 							buttonColor="#9b59b6"
-							title="تعریف فرم "
-							textStyle={{ fontFamily: 'iransans' }}
+							title="تعریف آزمون"
 							onPress={() => {
 								global.examEditID = '';
-
 								const { navigate } = this.props.navigation;
-								//27429
-								navigate('eforms', {
-									eformsID: 5,
-									instanseID: '',
-									stdID: 0,
-									mode: 'view',
-									isAdminForms: 'true'
-								});
+								navigate('examAdd');
 							}}
 						>
-							<IconAnt name="edit" style={styles.actionButtonIcon} />
+							<Icon name="edit" style={styles.actionButtonIcon} />
 						</ActionButton.Item>
-
-						{/* <ActionButton.Item
-							buttonColor="#9b59b6"
-							title="تعریف آزمون با فایل عکس"
-							textStyle={{ fontFamily: 'iransans' }}
-							onPress={() => {
-								global.examEditID = '';
-
-								const { navigate } = this.props.navigation;
-								//27429
-								navigate('eforms', {
-									eformsID: 2,
-									instanseID: '',
-									stdID: 0,
-									mode: 'view',
-									isAdminForms: 'true'
-								});
-							}}
-						>
-							<Icon name="md-create" style={styles.actionButtonIcon} />
-						</ActionButton.Item> */}
-
-						{/* <ActionButton.Item buttonColor="#3498db" title="بانک سئوالات" onPress={() => {}}>
+						<ActionButton.Item buttonColor="#3498db" title="بانک سئوالات" onPress={() => {}}>
 							<Icon name="md-notifications-off" style={styles.actionButtonIcon} />
-						</ActionButton.Item> */}
-						{/* <ActionButton.Item buttonColor='#1abc9c' title="All Tasks" onPress={() => {}}>
-            <Icon name="md-done-all" style={styles.actionButtonIcon} />
-          </ActionButton.Item> */}
+						</ActionButton.Item>
 					</ActionButton>
 				) : null}
 			</View>
@@ -795,11 +864,49 @@ class webinar extends Component {
 }
 
 const styles = StyleSheet.create({
+	bluebadge: {
+		fontSize: 15,
+		overflow: 'hidden',
+		//borderColor: 'green',
+		//borderWidth: 1,
+		backgroundColor: '#2e95d8',
+		padding: 5,
+		borderRadius: 7,
+		color: 'white'
+	},
+	redbadge: {
+		fontSize: 15,
+		overflow: 'hidden',
+		//borderColor: 'green',
+		//borderWidth: 1,
+		backgroundColor: '#e64d3f',
+		padding: 5,
+		borderRadius: 7,
+		color: 'white'
+	},
+	greenbadge: {
+		fontSize: 15,
+		overflow: 'hidden',
+		borderColor: 'green',
+		//borderWidth: 1,
+		backgroundColor: '#2acb6e',
+		padding: 5,
+		borderRadius: 7,
+		color: 'white'
+	},
 	view4: {
 		paddingStart: 10,
 		borderWidth: 0,
 		justifyContent: 'center',
 		flex: 2
+	},
+
+	imageavatar: {
+		width: 42,
+		height: 42,
+		borderRadius: 42,
+		borderWidth: 1,
+		borderColor: colorlight
 	},
 	view3: {
 		backgroundColor: colorlight,
@@ -876,7 +983,7 @@ const styles = StyleSheet.create({
 		fontFamily: 'iransans',
 		textAlign: 'left',
 		//width: '100%',
-		fontSize: 13,
+		fontSize: 14,
 		borderWidth: 1,
 		padding: 1,
 		borderColor: 'white',
@@ -890,8 +997,8 @@ const styles = StyleSheet.create({
 	},
 	image: {
 		width: 50,
-		paddingTop: 13,
-		paddingLeft: 10,
+		paddingTop: 8,
+		paddingRight: 6,
 		height: 50,
 		alignSelf: 'center',
 		//borderRadius: 55,
@@ -945,13 +1052,7 @@ const styles = StyleSheet.create({
 		marginStart: 40,
 		position: 'absolute'
 	},
-	imageavatar: {
-		width: 40,
-		height: 50,
-		borderRadius: 10,
-		borderWidth: 1,
-		borderColor: '#ccc'
-	},
+
 	gridView: {
 		marginTop: 2,
 		flex: 1
@@ -974,6 +1075,22 @@ const styles = StyleSheet.create({
 		fontWeight: '600',
 		fontSize: 12,
 		color: '#fff'
+	},
+	badge: {
+		color: '#fff',
+		position: 'absolute',
+		zIndex: 10,
+		top: -4,
+		width: 20,
+		height: 20,
+		left: -6,
+		textAlign: 'center',
+		padding: 1,
+		overflow: 'hidden',
+		backgroundColor: '#eb5757',
+		borderRadius: 10,
+		borderWidth: 0,
+		borderColor: '#000'
 	}
 });
-export default withNavigation(webinar);
+export default withNavigation(bankfile);

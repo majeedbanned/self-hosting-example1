@@ -4,7 +4,7 @@ import LottieView from 'lottie-react-native';
 
 export default class intro extends React.Component {
 	componentDidMount() {
-		this.animation.play();
+		if (global.lang == 'fa') this.animation.play();
 		// Or set a specific startFrame and endFrame with:
 		//this.animation.play(0, 250);
 	}

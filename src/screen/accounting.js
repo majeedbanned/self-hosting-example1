@@ -272,7 +272,7 @@ class accounting extends React.PureComponent {
 
 		return {
 			headerTitle: 'حسابداری',
-			headerRight: null,
+			headerRight: () => null,
 			headerBackTitle: 'بازگشت',
 			navigationOptions: {
 				headerBackTitle: 'Home'

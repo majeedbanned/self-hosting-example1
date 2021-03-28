@@ -16,13 +16,19 @@ YellowBox.ignoreWarnings([
 	'VirtualizedLists should never be nested inside plain' // TODO: Remove when fixed
 ]);
 
-I18nManager.allowRTL(true);
-I18nManager.forceRTL(true);
+// I18nManager.allowRTL(true);
+// I18nManager.forceRTL(true);
 
 const stories = ({ Navigation, Items, caption, ccolor, ...rest }) => (
 	<View
 		style={[
-			{ flexDirection: 'row', borderColor: '#eee', borderBottomWidth: 1, backgroundColor: 'white', paddingTop: 8 }
+			{
+				flexDirection: 'row',
+				borderColor: '#eee',
+				borderBottomWidth: 1,
+				backgroundColor: 'white',
+				paddingTop: Items.length == 0 ? 0 : 8
+			}
 		]}
 	>
 		{global.ttype == 'administrator' && (
@@ -67,39 +73,7 @@ const stories = ({ Navigation, Items, caption, ccolor, ...rest }) => (
 			// keyExtractor={(item) => {
 			// 	return item.id;
 			// }}
-			rtjs
-			ListEmptyComponent={() => (
-				<View style={[ styles.st1 ]}>
-					<View style={[ styles.st2 ]}>
-						<TouchableOpacity
-							activeOpacity={0.5}
-							onPress={() => {
-								Navigation.navigate('storyList');
-							}}
-						>
-							<View style={[ styles.imageavatar ]}>
-								<Icon size={35} name="md-add" color="#aaa" />
-							</View>
-							{/* <Image
-						style={[
-							styles.imageavatar,
 
-							{
-								borderWidth: 2,
-								borderColor: 'white',
-								margin: 2
-							}
-						]}
-						source={{ uri: getHttpAdress() + 'media/' }}
-					/> */}
-						</TouchableOpacity>
-					</View>
-
-					<Text numberOfLines={1} style={[ styles.st3 ]}>
-						جدید
-					</Text>
-				</View>
-			)}
 			renderItem={({ item, index }) => {
 				return (
 					<View

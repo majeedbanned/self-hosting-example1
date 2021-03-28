@@ -1,4 +1,5 @@
 import * as SQLite from 'expo-sqlite';
+
 const db = SQLite.openDatabase('db');
 import NetInfo from '@react-native-community/netinfo';
 import { parseString } from 'react-native-xml2js/lib/parser';
@@ -24,13 +25,62 @@ export function _query(query) {
 }
 
 export function getHttpAdress(code) {
-	return global.adress + '/upload/' + global.schoolcode + '/';
+	if (global.adress) return global.adress.replace('papi', '') + '/upload/' + global.schoolcode + '/';
+}
+export function getHttpAdressPure(code) {
+	return global.adress.replace('papi', '') + '/upload/' + global.schoolcode + '/';
+}
+
+export async function isNet() {
+	let state = await NetInfo.fetch();
+	if (!state.isConnected) {
+		return false;
+	}
+
+	return true;
+}
+
+export function encrypt(text) {
+	key = 'abcdefghijklmnopabcdefgh';
+	var CryptoJS = require('crypto-js');
+	var key = CryptoJS.enc.Utf8.parse(key);
+	var iv = CryptoJS.enc.Base64.parse('QUJDREVGR0g=');
+	//QUJDREVGR0g=
+	var encoded = CryptoJS.enc.Utf8.parse(text);
+	var ciphertext = CryptoJS.TripleDES.encrypt(encoded, key, { mode: CryptoJS.mode.CBC, iv: iv });
+
+	return ciphertext.toString();
+}
+
+export function decrypt(encryptedText) {
+	key = '357611123qwe!@#A35761112';
+
+	var CryptoJS = require('crypto-js');
+	var key = CryptoJS.enc.Utf8.parse(key);
+	var iv = CryptoJS.enc.Base64.parse('QUJDREVGR0g=');
+	var bytes = CryptoJS.TripleDES.decrypt(encryptedText, key, { mode: CryptoJS.mode.CBC, iv: iv });
+	var decryptedText = bytes.toString(CryptoJS.enc.Utf8);
+
+	return decryptedText;
+}
+
+export function tozang(str) {
+	if (str == '1') return 'ساعت اول';
+	else if (str == '2') return 'ساعت دوم';
+	else if (str == '4') return 'ساعت سوم';
+	else if (str == '8') return 'ساعت چهارم';
+	else if (str == '16') return 'ساعت پنجم';
+	else if (str == '32') return 'ساعت ششم';
+	else if (str == '64') return 'ساعت هفتم';
+	else if (str == '128') return 'ساعت هشتم';
+	else if (str == '256') return 'ساعت نهم';
 }
 export function toFarsi(str) {
 	try {
+		if (str == '' || str == null || str == undefined) return '';
 		const id = [ '۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹' ];
 		if (str == null) str = '';
-
+		str = str.toString();
 		return str.replace(/[0-9]/g, function(w) {
 			return id[+w];
 		});
@@ -38,9 +88,26 @@ export function toFarsi(str) {
 		return;
 	}
 }
-export function userInfo() {
+
+export function toEng(str) {
+	try {
+		if (str == '' || str == null || str == undefined) return '';
+		const persianNumbers = [ /۰/g, /۱/g, /۲/g, /۳/g, /۴/g, /۵/g, /۶/g, /۷/g, /۸/g, /۹/g ];
+		const arabicNumbers = [ /٠/g, /١/g, /٢/g, /٣/g, /٤/g, /٥/g, /٦/g, /٧/g, /٨/g, /٩/g ];
+
+		if (typeof str === 'string') {
+			for (var i = 0; i < 10; i++) {
+				str = str.replace(persianNumbers[i], i).replace(arabicNumbers[i], i);
+			}
+		}
+		return str;
+	} catch (e) {
+		return;
+	}
+}
+export function userInfo(std = 0) {
 	return (
-		global.username +
+		(std != 0 ? std : global.username) +
 		'`' +
 		global.password +
 		'`' +

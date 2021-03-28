@@ -145,6 +145,7 @@ export default class App extends React.Component {
 			staysActiveInBackground: true
 		});
 		if (this.recording !== null) {
+			alert(recording);
 			this.recording.setOnRecordingStatusUpdate(null);
 			this.recording = null;
 		}
@@ -175,7 +176,7 @@ export default class App extends React.Component {
 		const data = await FileSystem.readAsStringAsync(this.recording.getURI(), {
 			encoding: FileSystem.EncodingType.Base64
 		});
-		console.log(data);
+		console.log(data.url);
 		console.log(`FILE INFO: ${JSON.stringify(info)}`);
 		await Audio.setAudioModeAsync({
 			allowsRecordingIOS: false,

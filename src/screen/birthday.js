@@ -7,34 +7,34 @@ import Menu from '../screen/menu';
 import GLOBAL from './global';
 
 const birthday = ({ Items, caption, ...rest }) => (
-	<View style={{ marginTop: 20, backgroundColor: 'white' }}>
+	<View style={{ marginTop: 10, backgroundColor: 'white' }}>
 		{Items.map((item, index) => (
 			<View key={index}>
 				<View
 					style={{
 						marginTop: 4,
 						marginStart: 15,
-						marginBottom: 10,
+						marginBottom: 0,
 						borderRadius: 20,
 						borderWidth: 0,
-						backgroundColor: '#8BBEE8FF',
-						alignSelf: 'flex-start',
+						//backgroundColor: '#8BBEE8FF',
+						alignSelf: 'flex-start'
 
-						shadowColor: '#8BBEE8FF',
-						shadowOffset: {
-							width: 3,
-							height: 3
-						},
-						shadowOpacity: 0.37,
-						shadowRadius: 2.49,
-						elevation: 3
+						// shadowColor: '#8BBEE8FF',
+						// shadowOffset: {
+						// 	width: 3,
+						// 	height: 3
+						// },
+						// shadowOpacity: 0.37,
+						// shadowRadius: 2.49,
+						// elevation: 3
 					}}
 				>
 					<Text
 						style={{
 							alignSelf: 'flex-start',
 							padding: 7,
-							color: 'white',
+							color: '#1693A5',
 							borderWidth: 0,
 							fontFamily: 'iransans',
 							textAlign: 'left',
@@ -50,6 +50,7 @@ const birthday = ({ Items, caption, ...rest }) => (
 					keyExtractor={(item) => item.studentcode.toString()}
 					//keyExtractor={(item, index) => String(index)}
 					data={item.list}
+					style={{ marginLeft: 10 }}
 					horizontal
 					// keyExtractor={(item) => {
 					// 	return item.id;
@@ -59,11 +60,11 @@ const birthday = ({ Items, caption, ...rest }) => (
 							<View
 								key={index}
 								style={[
-									defaultStyles.shadow,
+									defaultStyles.shadow1,
 									{
 										justifyContent: 'center',
 										alignItems: 'center',
-										marginRight: 10,
+										marginLight: 10,
 										borderRadius: 15,
 										backgroundColor: 'white'
 									}
@@ -72,8 +73,9 @@ const birthday = ({ Items, caption, ...rest }) => (
 								<View
 									style={[
 										{
-											borderWidth: 0,
-											marginRight: 5,
+											borderWidth: 0.3,
+											borderColor: '#ADD8C7',
+											marginRight: 25,
 											borderRadius: 15,
 											backgroundColor: 'white'
 										}
@@ -84,7 +86,7 @@ const birthday = ({ Items, caption, ...rest }) => (
 											styles.imageavatar,
 
 											{
-												margin: 5
+												margin: 1
 											}
 										]}
 										source={{ uri: getHttpAdress() + 'child/' + item.studentcode + '.jpg' }}
@@ -95,10 +97,15 @@ const birthday = ({ Items, caption, ...rest }) => (
 									numberOfLines={1}
 									style={[
 										{
+											marginRight: 15,
+
+											//borderWidth: 1,
 											width: 80,
 											textAlign: 'center',
 											fontFamily: 'iransans',
-											fontSize: 12
+											fontSize: 11,
+											color: 'gray',
+											paddingTop: 9
 										}
 									]}
 								>

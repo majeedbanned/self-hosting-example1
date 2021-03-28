@@ -929,11 +929,18 @@ class addgallery extends Component {
 																const xhr = new XMLHttpRequest();
 																//xhr.open('POST', 'http://api.farsmahd.ir/api/upload');
 																//alert(global.adress + '' + ':8180' + '/api/upload');
+																// xhr.open(
+																// 	'POST',
+																// 	global.adress.replace(':8080', '') +
+																// 		'' +
+																// 		':8181' +
+																// 		'/api/upload'
+																// );
 																xhr.open(
 																	'POST',
-																	global.adress.replace(':8080', '') +
+																	global.adress.replace('/papi', ':8181') +
 																		'' +
-																		':8181' +
+																		'' +
 																		'/api/upload'
 																);
 

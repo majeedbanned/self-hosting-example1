@@ -168,6 +168,7 @@ class PureChild extends React.PureComponent {
 					}}
 					activeOpacity={0.7}
 					style={{
+						zIndex: 11111,
 						borderColor: '#ccc',
 						margin: 2,
 						backgroundColor: '#e3f1fc',
@@ -184,27 +185,42 @@ class PureChild extends React.PureComponent {
 					/> */}
 					{/* <Text style={styles.cap}>{toFarsi(value.teachercode)}</Text> */}
 					<View style={{ flexDirection: 'row' }}>
-						<Text numberOfLines={1} style={[ styles.cap1, { fontSize: 12 } ]}>
-							{toFarsi(value.rclass)}
-						</Text>
-						<Text numberOfLines={1} style={[ styles.cap2, { fontSize: 12 } ]}>
-							{toFarsi(value.rkol)}
-						</Text>
+						{value.rclass != '0' &&
+						value.grade != '' && (
+							<Text numberOfLines={1} style={[ styles.cap1, { fontSize: 12 } ]}>
+								{toFarsi(value.rclass)}
+							</Text>
+						)}
+						{value.rkol != '0' &&
+						value.grade != '' && (
+							<Text numberOfLines={1} style={[ styles.cap2, { fontSize: 12 } ]}>
+								{toFarsi(value.rkol)}
+							</Text>
+						)}
 					</View>
 					<Text numberOfLines={1} style={[ styles.cap, { color: 'green', fontFamily: 'iransansbold' } ]}>
 						{toFarsi(value.grade)}
 					</Text>
-					{value.progress != null && (
+					{value.progress != null &&
+					value.grade != '' && (
 						<Text
 							numberOfLines={1}
 							style={[
-								styles.cap3
+								styles.cap3,
+								{
+									//backgroundColor: 'red',
+									color: value.progress.includes('-') ? 'red' : 'green',
+									borderRadius: 5,
+									paddingTop: -1,
+									paddingBottom: -6
+								}
 								// item.progress != ''
 								// 	? { fontSize: 11, backgroundColor: 'lightgreen' }
 								// 	: { backgroundColor: 'green' }
 							]}
 						>
-							{toFarsi(value.progress)}
+							{toFarsi(value.progress) +
+								(value.progress.includes('-') ? '↓' : value.progress == '' ? '' : '↑')}
 						</Text>
 					)}
 				</View>
@@ -621,6 +637,7 @@ class Sheet extends React.PureComponent {
 		);
 	}
 	formatCell(col, row, value) {
+		// return <Text>dfdfd</Text>;
 		return (
 			<TouchableOpacity
 				activeOpacity={0.5}
@@ -636,9 +653,10 @@ class Sheet extends React.PureComponent {
 
 				onPress={() => {
 					//alert('de');
-					this.setState({ isModalpiker_message_Visible: true });
+					this.setState({ isModalpiker_message_Visible: false });
 				}}
 			>
+				{/* //<Text>s</Text> */}
 				<PureChild
 					identity={this.state.maindata[col].coursecode}
 					col1={col}
@@ -802,6 +820,7 @@ class Sheet extends React.PureComponent {
 		for (let i = 0; i < this.state.NUM_COLS; i++) {
 			data.push({ key: `${i}` });
 		}
+		//return
 		//scrollToEnd = () => this.carousel.scrollToEnd({ animated: false });
 		return (
 			<View>
@@ -811,7 +830,8 @@ class Sheet extends React.PureComponent {
 					horizontal={true}
 					data={data}
 					renderItem={this.formatColumn}
-					stickyHeaderIndices={[ 0 ]}
+					//renderItem={() => <Text>dree</Text>}
+					//stickyHeaderIndices={[ 0 ]}
 					onScroll={this.scrollEvent}
 					scrollEventThrottle={16}
 					extraData={this.state}
@@ -886,7 +906,7 @@ class Sheet extends React.PureComponent {
 
 		return {
 			headerTitle: 'ارزشیابی ماهیانه',
-			headerRight: null,
+			headerRight: () => null,
 			headerBackTitle: 'بازگشت',
 			navigationOptions: {
 				headerBackTitle: 'Home'

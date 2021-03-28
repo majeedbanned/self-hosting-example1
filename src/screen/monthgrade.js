@@ -1,12 +1,16 @@
 import React, { PureComponent } from 'react';
-import { Snackbar } from 'react-native-paper';
 import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
-import { WebView } from 'react-native-webview';
 import Modal from 'react-native-modalbox';
+import Eform2 from '../screen/modules/forms/eforms2';
+import update from 'immutability-helper';
+
 import Loading from '../components/loading';
 import NetInfo from '@react-native-community/netinfo';
-import { REAL_WINDOW_HEIGHT } from 'react-native-extra-dimensions-android';
+import * as FileSystem from 'expo-file-system';
+import GLOBAL from '../screen/global';
 
+import ActionButton from 'react-native-action-button';
+import { Alert, Linking } from 'react-native';
 import Modalm from 'react-native-modal';
 import { Animated, ActivityIndicator, FlatList, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { TouchableOpacity, TouchableWithoutFeedback, Button, Image, Dimensions } from 'react-native';
@@ -15,8 +19,9 @@ import { FormButton } from '../component/FormButton';
 import Workbookdt from './workbook-detail';
 
 import defaultStyles from '../config/styles';
+import { REAL_WINDOW_HEIGHT } from 'react-native-extra-dimensions-android';
 
-import Icon from 'react-native-vector-icons/Ionicons';
+import Icon from 'react-native-vector-icons/AntDesign';
 import { Ionicons, AntDesign } from '@expo/vector-icons';
 // import Modal, {
 // 	ModalTitle,
@@ -44,7 +49,7 @@ const black = '#000';
 const white = '#fff';
 
 const styles = StyleSheet.create({
-	container: { backgroundColor: 'white', marginVertical: 0, marginBottom: 140 },
+	container: { backgroundColor: 'white', marginVertical: 0, marginBottom: 110 },
 	header: { flexDirection: 'row', borderTopWidth: 0, borderColor: black },
 	identity: { position: 'absolute' },
 	// width: CELL_WIDTH
@@ -89,6 +94,11 @@ const styles = StyleSheet.create({
 		//	borderRadius: 10,
 		backgroundColor: 'white',
 		borderColor: '#ccc'
+	},
+	actionButtonIcon: {
+		fontSize: 24,
+		height: 22,
+		color: 'white'
 	},
 	gridView: {
 		marginTop: 2,
@@ -224,7 +234,7 @@ class ImpureChild extends React.Component {
 	}
 }
 
-class tahlil extends React.PureComponent {
+class monthgrade extends React.PureComponent {
 	constructor(props: {}) {
 		super(props);
 
@@ -261,8 +271,11 @@ class tahlil extends React.PureComponent {
 	static navigationOptions = ({ navigation }) => {
 		const { params } = navigation.state;
 
+		//const { navigation } = this.props;
+		this.reportName = navigation.getParam('reportName');
+
 		return {
-			headerTitle: 'نتیجه و تحلیل آزمون',
+			headerTitle: this.reportName,
 			headerRight: () => null,
 			headerBackTitle: 'بازگشت',
 			navigationOptions: {
@@ -307,7 +320,7 @@ class tahlil extends React.PureComponent {
 			/>
 		);
 	}
-	formatCell(col, row, value) {
+	formatCell(col, row, value, data1) {
 		return (
 			<TouchableOpacity
 				activeOpacity={0.5}
@@ -322,6 +335,18 @@ class tahlil extends React.PureComponent {
 				// }}
 
 				onPress={() => {
+					//alert(data1.std);
+					this.setState({
+						extra: value.day + '-' + data1.std + '-' + this.coursecode + '-' + this.groupcode,
+						acForm: 23,
+						insid: 10
+					});
+					//	this.setState({ datacell: [] });
+					//	this.loadcell();
+					//alert(value.zang + '-' + value.day + '-' + data1.studentcode);
+					global.fix_col = col;
+					global.fix_row = row;
+					this.refs.modal1.open();
 					//alert('de');
 					//this.setState({ isModalpiker_message_Visible: true });
 				}}
@@ -439,7 +464,8 @@ class tahlil extends React.PureComponent {
 				this.formatCell(
 					i,
 					item.key,
-					this.state.maindata[i].days[parseInt(item.key)] //.disc
+					this.state.maindata[i].days[parseInt(item.key)], //.disc
+					this.state.maindata[i]
 				)
 			);
 		}
@@ -526,7 +552,10 @@ class tahlil extends React.PureComponent {
 
 	componentDidMount() {
 		const { navigation } = this.props;
-		this.examID = navigation.getParam('examID');
+		this.examID = navigation.getParam('reportID');
+		this.coursecode = navigation.getParam('coursecode');
+		this.groupcode = navigation.getParam('groupcode');
+
 		//const mode = navigation.getParam('mode');
 
 		this.listener = this.scrollPosition.addListener((position) => {
@@ -563,18 +592,20 @@ class tahlil extends React.PureComponent {
 
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
-        if (!state.isConnected) {
-            this.setState({ issnackin: true });
-            return;
-        }
+
+		if (!state.isConnected) {
+			//alert(state.isConnected);
+			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
+			//return;
+		}
 		/* #endregion */
 
 		this.setState({ loading: true });
 		let param = userInfo();
 		let uurl =
 			global.adress +
-			'/pApi.asmx/getTahlilCat?id=' +
-			page +
+			'/pApi.asmx/getReportDetailCat?id=' +
+			this.examID +
 			'&p=' +
 			param +
 			'&g=' +
@@ -587,8 +618,11 @@ class tahlil extends React.PureComponent {
 				let retJson = await response.json();
 				if (Object.keys(retJson).length == 0) {
 					this.setState({
-						loading: false
+						loading: false,
+						cat: [],
+						maindata: []
 					});
+					this.loadAPI(this.examID, 'pull');
 					return;
 				}
 				this.setState({
@@ -621,91 +655,171 @@ class tahlil extends React.PureComponent {
 		}
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
-        if (!state.isConnected) {
-            this.setState({ issnackin: true });
-            return;
-        }
+		if (!state.isConnected) {
+			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
+			//return;
+		}
 		/* #endregion */
-		const { navigation } = this.props;
-		this.examID = navigation.getParam('examID');
+
 		this.setState({ loading: true });
 		let param = userInfo();
 		let uurl =
 			global.adress +
-			'/pApi.asmx/getAzmoonResult?id=' +
-			this.examID +
+			'/pApi.asmx/getReportResult?id=' +
+			idaz +
 			'&p=' +
 			param +
 			'&g=' +
 			this.state.selectedItem +
-			'&dmn=' +
-			global.adress;
-
+			'&courcecode=' +
+			this.coursecode +
+			'&classcode=' +
+			this.groupcode;
 		console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
 				if (Object.keys(retJson).length == 0) {
-					//	return;
 					this.setState({
 						//data: [],
 						loading: false,
 						dataLoading: false,
-						isRefreshing: false,
-						maindata: []
+						isRefreshing: false
 					});
 					return;
 				}
 				//console.log('ret:' + retJson);
+				this.setState({
+					maindata: []
+				});
+				this.setState({
+					//data: page === 1 ? retJson : [ ...this.state.data, ...retJson ],
+					maindata: retJson,
+					count: retJson.length,
+					NUM_COLS: retJson[0].days.length,
+					dataLoading: false,
+
+					isRefreshing: false,
+					loading: false
+				});
 				//alert();
-				//return;
-				if (this.state.selectedItem == 5) {
-					console.log(retJson.msg);
-					this.setState({
-						urlview: retJson.msg.replace('papi', ''),
-						showbrowser: true,
-						isRefreshing: false,
-						loading: false
+				this.setState({
+					count: this.state.maindata.length,
+					NUM_COLS: this.state.maindata[0].days.length,
+					haspdf: this.state.maindata[0].haspdf,
+					hasxls: this.state.maindata[0].hasxls,
 
-						//dataLoading: false
-					});
-				} else {
-					this.setState(
-						{
-							//	maindata: []
-						}
-					);
+					HEADER_COLOR: this.state.maindata[0].HEADER_COLOR,
+					IDENTITY_COLOR: this.state.maindata[0].IDENTITY_COLOR,
+					FROZEN_COLOR: this.state.maindata[0].FROZEN_COLOR,
+					MAIN_CELL_COLOR: this.state.maindata[0].MAIN_CELL_COLOR,
+					colorhead: this.state.maindata[0].colorhead,
+
+					FIRST_CELL_MARGIN: parseInt(this.state.maindata[0].FIRST_CELL_MARGIN),
+					FIRST_CELL_WIDTH: parseInt(this.state.maindata[0].FIRST_CELL_WIDTH),
+
+					CELL_HEIGHT: parseInt(this.state.maindata[0].CELL_HEIGHT),
+
+					CELL_WIDTH: parseInt(this.state.maindata[0].CELL_WIDTH)
+				});
+			}
+		} catch (e) {
+			console.log('err');
+			this.dropDownAlertRef.alertWithType('error', 'پیام', 'خطادر دستیابی به اطلاعات');
+			this.setState({
+				loading: false,
+				dataLoading: false,
+				isRefreshing: false
+			});
+			return;
+		}
+	};
+
+	genAPI = async (idaz, type) => {
+		if (global.adress == 'undefined') {
+			GLOBAL.main.setState({ isModalVisible: true });
+		}
+		/* #region  check internet */
+		let state = await NetInfo.fetch();
+		if (!state.isConnected) {
+			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
+			//return;
+		}
+		/* #endregion */
+
+		this.setState({ loading: true });
+		let param = userInfo();
+		let uurl =
+			global.adress +
+			'/pApi.asmx/genapi?id=' +
+			this.examID +
+			'&p=' +
+			param +
+			'&g=' +
+			this.state.selectedItem +
+			'&ext=' +
+			idaz;
+		console.log(uurl);
+		try {
+			const response = await fetch(uurl);
+			if (response.ok) {
+				let retJson = await response.json();
+				if (Object.keys(retJson).length == 0) {
 					this.setState({
-						showbrowser: false,
-						//data: page === 1 ? retJson : [ ...this.state.data, ...retJson ],
-						maindata: retJson,
-						count: retJson.length,
-						NUM_COLS: retJson[0].days.length,
+						//data: [],
+						loading: false,
 						dataLoading: false,
-
-						isRefreshing: false,
-						loading: false
+						isRefreshing: false
 					});
-					//alert();
-					this.setState({
-						count: this.state.maindata.length,
-						NUM_COLS: this.state.maindata[0].days.length,
-
-						HEADER_COLOR: this.state.maindata[0].HEADER_COLOR,
-						IDENTITY_COLOR: this.state.maindata[0].IDENTITY_COLOR,
-						FROZEN_COLOR: this.state.maindata[0].FROZEN_COLOR,
-						MAIN_CELL_COLOR: this.state.maindata[0].MAIN_CELL_COLOR,
-						colorhead: this.state.maindata[0].colorhead,
-
-						FIRST_CELL_MARGIN: parseInt(this.state.maindata[0].FIRST_CELL_MARGIN),
-						FIRST_CELL_WIDTH: parseInt(this.state.maindata[0].FIRST_CELL_WIDTH),
-
-						CELL_HEIGHT: parseInt(this.state.maindata[0].CELL_HEIGHT),
-
-						CELL_WIDTH: parseInt(this.state.maindata[0].CELL_WIDTH)
-					});
+					return;
 				}
+				//console.log('ret:' + retJson);
+				if (retJson.result == 'ok') {
+					Alert.alert(
+						'دانلود',
+						'آیا مایل به دانلود فایل خروجی هستید؟',
+						[
+							// {
+							// 	text: 'Ask me later',
+							// 	onPress: () => console.log('Ask me later pressed')
+							// },
+							{
+								text: 'خیر',
+								onPress: () => {
+									this.setState({
+										down_pdf: false
+									});
+								},
+								style: 'cancel'
+							},
+							{
+								text: 'بله',
+								onPress: async () => {
+									// const { uri: localUri } = await FileSystem.downloadAsync(
+									// 	retJson.url,
+									// 	FileSystem.documentDirectory + 'name.pdf'
+									// );
+									Linking.openURL(retJson.url);
+									this.setState({
+										down_pdf: false
+									});
+									//this.deleteapi(item.id, index);
+								}
+							}
+						],
+						{ cancelable: false }
+					);
+				}
+
+				//alert(retJson.msg);
+				this.setState(
+					{
+						//data: page === 1 ? retJson : [ ...this.state.data, ...retJson ],
+					}
+				);
+				//alert();
+				this.setState({});
 			}
 		} catch (e) {
 			console.log('err');
@@ -791,17 +905,16 @@ class tahlil extends React.PureComponent {
 		this.loadAPI(this.examID, 'pull');
 	}
 	render() {
-		//return <Loading />;
+		GLOBAL.monthgrade = this;
 		//alert(this.state.colorhead);
 		if (!this.state.maindata || !this.state.cat) return <Loading />;
 		//alert(this.state.maindata[0].days.length);
-		// alert();
-		// if (this.state.maindata.length == 0)
-		// 	return (
-		// 		<View>
-		// 			<Text>nan</Text>
-		// 		</View>
-		// 	);
+		if (this.state.maindata.length == 0)
+			return (
+				<View>
+					<Text />
+				</View>
+			);
 
 		let body = this.formatBody();
 
@@ -904,32 +1017,17 @@ class tahlil extends React.PureComponent {
 							}}
 						/>
 					</View>
+
 					{/* <Button title="Basic modal" onPress={() => this.refs.modal1.open()} style={styles.btn} /> */}
 					{this.formatHeader()}
-					{this.state.showbrowser ? (
-						// <View style={{ borderWidth: 3, flex: 1, height: 500, padding: 20 }}>
-						// 	<Text>sdfsd</Text>
-						<View style={{ borderWidth: 0, height: '100%', backgroundColor: '#ccc' }}>
-							<WebView
-								bounces={false}
-								onLoad={() => {
-									this.setState({ dataLoading: false });
-								}}
-								originWhitelist={[ '*' ]}
-								source={{ uri: this.state.urlview }}
-								style={{ marginTop: 0 }}
-							/>
-						</View>
-					) : (
-						// </View>
-						<FlatList
-							data={data}
-							renderItem={this.formatRowForSheet}
-							//onEndReached={this.handleScrollEndReached}
-							onEndReachedThreshold={0.005}
-						/>
-					)}
+					<FlatList
+						data={data}
+						renderItem={this.formatRowForSheet}
+						//onEndReached={this.handleScrollEndReached}
+						onEndReachedThreshold={0.005}
+					/>
 					{/* {this.state.loading && <ActivityIndicator />} */}
+
 					<Modalm
 						animationInTiming={0.1}
 						animationOutTiming={0.1}
@@ -946,21 +1044,21 @@ class tahlil extends React.PureComponent {
 						//	swipeDirection={[ 'left' ]}
 						onBackdropPress={() =>
 							this.setState({
-								isModalpiker_message_Visible: false
+								down_pdf: false
 							})}
 						onSwipeComplete={() =>
 							this.setState({
-								isModalpiker_message_Visible: false
+								down_pdf: false
 							})}
 						deviceWidth={deviceWidth}
 						deviceHeight={deviceHeight}
-						isVisible={this.state.isModalpiker_message_Visible}
+						isVisible={this.state.down_pdf}
 					>
-						<View style={{ flex: 1 }}>
+						<View style={{ flex: 0, borderRadius: 25, backgroundColor: 'white', height: 200 }}>
 							<TouchableOpacity
 								onPress={() => {
 									this.setState({
-										isModalpiker_message_Visible: false
+										down_pdf: false
 									});
 								}}
 								activeOpacity={0.8}
@@ -985,36 +1083,100 @@ class tahlil extends React.PureComponent {
 									}}
 								/>
 							</TouchableOpacity>
-
-							{/* <Button title="Hide modal" onPress={this.toggleModal} /> */}
-							<Workbookdt />
+							<View
+								style={{
+									flex: 1,
+									flexDirection: 'column',
+									justifyContent: 'center',
+									alignItems: 'center'
+								}}
+							>
+								<View
+									style={{
+										width: 300,
+										height: 100
+									}}
+								>
+									<Loading />
+								</View>
+							</View>
 						</View>
 					</Modalm>
 
-					<Snackbar
-						visible={this.state.issnackin}
-						onDismiss={() => this.setState({ issnackin: false })}
-						style={{ backgroundColor: 'red', fontFamily: 'iransans' }}
-						wrapperStyle={{ fontFamily: 'iransans' }}
-						action={{
-							label: 'بستن',
-							onPress: () => {
-								this.setState({ issnackin: false });
-								this.setState(
-									{
-										//  loading: false,
-										//  save_loading: false
-									}
-								);
-								//this.props.navigation.goBack(null);
+					<Modal
+						style={[
+							{
+								borderRadius: 25,
+								justifyContent: 'center',
+								alignItems: 'center',
+								alignSelf: 'stretch',
+								height: 260
 							}
-						}}
+						]}
+						entry={'top'}
+						animationDuration={400}
+						position={'center'}
+						ref={'modal1'}
+						swipeToClose={this.state.swipeToClose}
+						onClosed={this.onClose}
+						onOpened={this.onOpen}
+						onClosingState={this.onClosingState}
 					>
-						{'لطفا دسترسی به اینترنت را چک کنید'}
-					</Snackbar>
+						{this.state.acForm == 23 && (
+							<View style={{ borderWidth: 0, width: '90%' }}>
+								<Eform2
+									Extra={this.state.extra}
+									eformId={this.state.acForm}
+									instanseID={this.state.insid}
+									stdID={0}
+									isAdminForms="true"
+									goBack="false"
+									referer="mounth"
+								/>
+							</View>
+						)}
+					</Modal>
+
+					{(this.state.haspdf == 'true' || this.state.hasxls == 'true') && (
+						<ActionButton position="left" buttonColor="#0acc5b">
+							{this.state.hasxls == 'true' && (
+								<ActionButton.Item
+									buttonColor="#069c5d"
+									style={{ fontFamily: 'iransans' }}
+									title="خروجی اکسل"
+									onPress={() => {
+										this.genAPI('pdf');
+										this.setState({
+											down_pdf: true
+										});
+									}}
+								>
+									<Icon name="table" style={styles.actionButtonIcon} />
+								</ActionButton.Item>
+							)}
+
+							{this.state.haspdf == 'true' && (
+								<ActionButton.Item
+									buttonColor="#ff564a"
+									style={{ fontFamily: 'iransans' }}
+									title="خروجی pdf"
+									onPress={() => {
+										this.genAPI('xls');
+										this.setState({
+											down_pdf: true
+										});
+									}}
+								>
+									<Icon name="pdffile1" style={styles.actionButtonIcon} />
+								</ActionButton.Item>
+							)}
+
+							<Icon name="printer" style={styles.actionButtonIcon} />
+						</ActionButton>
+					)}
 				</View>
 			);
 	}
 }
 
-export default tahlil;
+export default monthgrade;

@@ -10,6 +10,15 @@ import { HelloChandu, _getcount, getQuery, _query, _fetch, _connected } from '..
 import FormButton from '../component/FormButton';
 
 import * as SQLite from 'expo-sqlite';
+const database_name = 'Reactoffline.db';
+const database_version = '1.0';
+const database_displayname = 'SQLite React Offline Database';
+const database_size = 200000;
+
+//import { userInfo, toFarsi, getHttpAdress, decrypt, encrypt, toEng } from '../components/DB';
+
+const db = SQLite.openDatabase(database_name, database_version, database_displayname, database_size);
+
 import { height } from '../screen/settingUserDelete';
 import { last } from 'rxjs/operator/last';
 
@@ -34,7 +43,7 @@ export default function App() {
 		const { params } = navigation.state;
 		return {
 			//headerTitle: this.reportName,
-			headerRight: null,
+			headerRight: () => null,
 			headerBackTitle: 'بازگشت',
 			navigationOptions: {
 				headerBackTitle: 'Home'
@@ -48,7 +57,7 @@ export default function App() {
 
 	const handleBarCodeScanned = async ({ type, data }) => {
 		setScanned(true);
-		alert(`Bar code with type ${type} and data ${data} has been scanned!`);
+		//alert(`Bar code with type ${type} and data ${data} has been scanned!`);
 
 		let username = data.split('`')[0];
 		let password = data.split('`')[1];
@@ -58,7 +67,7 @@ export default function App() {
 		let lastname = data.split('`')[5];
 		let schoolname = data.split('`')[6];
 		let ttype = data.split('`')[7];
-		alert(`Bar code with type ${type} and data ${data} has been scanned!`);
+		//alert(`Bar code with type ${type} and data ${data} has been scanned!`);
 
 		let results = await Database.executeSql('select * from users where username=? and schoolcode=?', [
 			username,
@@ -72,7 +81,7 @@ export default function App() {
 			return;
 		}
 
-		const db = SQLite.openDatabase('db');
+		//	const db = SQLite.openDatabase('db');ss
 		db.transaction((tx) => {
 			tx.executeSql(
 				'insert into users (username,password,schoolcode,adress,firstname,lastname,schoolname,ttype) values (?,?,?,?,?,?,?,?)',

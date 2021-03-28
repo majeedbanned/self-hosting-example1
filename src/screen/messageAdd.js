@@ -133,7 +133,7 @@ const newPlaceholder = {
 // 		ip = await Network.getIpAddressAsync();
 // 		macaAress = await Application.getIosIdForVendorAsync();
 // 		//macaAress = await Network.getMacAddressAsync();
-// 	} catch (error) {}
+// 	} catch (error) {}P
 // });
 class Appaa extends Component {
 	/* #region constructor */
@@ -367,6 +367,7 @@ class Appaa extends Component {
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/getMessage?id=' + global.messageEditID + '&p=' + param;
 		console.log(uurl);
+
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -385,7 +386,6 @@ class Appaa extends Component {
 
 				// 	isEditing: false
 				// });
-
 				this.setState((prevState) => ({
 					formikDefault: retJson[0],
 
@@ -516,6 +516,7 @@ class Appaa extends Component {
 	/* #endregion */
 	_selectAndUpload = async (document) => {
 		try {
+			console.log('hoy:' + document);
 			const picked = await DocumentPicker.getDocumentAsync({
 				type: '*/*',
 				copyToCacheDirectory: true

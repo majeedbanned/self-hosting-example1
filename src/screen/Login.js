@@ -8,6 +8,8 @@ import { Input, ButtonGroup } from 'react-native-elements';
 import { withNavigation } from 'react-navigation';
 import defaultStyles from '../config/styles';
 import Icon from 'react-native-vector-icons/AntDesign';
+var Buffer = require('buffer/').Buffer;
+
 import {
 	Picker,
 	TextInput,
@@ -19,7 +21,8 @@ import {
 	TouchableHighlight,
 	TouchableNativeFeedback,
 	TouchableOpacity,
-	TouchableWithoutFeedback
+	TouchableWithoutFeedback,
+	I18nManager
 } from 'react-native';
 import * as yup from 'yup';
 import { compose } from 'recompose';
@@ -56,15 +59,31 @@ const database_name = 'Reactoffline.db';
 const database_version = '1.0';
 const database_displayname = 'SQLite React Offline Database';
 const database_size = 200000;
+
+import { userInfo, toFarsi, getHttpAdress, decrypt, encrypt, toEng } from '../components/DB';
+
 const db = SQLite.openDatabase(database_name, database_version, database_displayname, database_size);
 
 //const db = SQLite.openDatabase({ name: 'testDB.sqlite3', createFromLocation: 1, location: 'Library' });
 
-i18n.locale = 'fa';
-i18n.fallbacks = true;
+// i18n.locale = 'fa';
+// i18n.fallbacks = true;
+
+// if (global.lang == 'en') {
+// 	i18n.locale = 'en';
+
+// 	I18nManager.allowRTL(false);
+// 	I18nManager.forceRTL(false);
+// } else {
+// 	//alert(global.lang);
+// 	i18n.locale = 'fa';
+// 	I18nManager.allowRTL(true);
+// 	I18nManager.forceRTL(true);
+// }
 let connected = false;
 let ip = '';
 let macaAress = '';
+
 //import { useNavigation } from '@react-navigation/native';
 // NetInfo.fetch().then(async (state) => {
 // 	try {
@@ -82,8 +101,27 @@ class Appaa extends Component {
 	}
 
 	async componentDidMount() {
+		if (global.lang == 'en') {
+			i18n.locale = 'en';
+
+			I18nManager.allowRTL(false);
+			I18nManager.forceRTL(false);
+		} else {
+			//alert(global.lang);
+			i18n.locale = 'fa';
+			I18nManager.allowRTL(true);
+			I18nManager.forceRTL(true);
+		}
 		let er = await registerForPushNotificationsAsync();
 		this.setState({ noti: er });
+
+		// var text = 'The text to be سلان encrypted';
+		// var securityKey = '357611123qwe!@#A';
+		// let encryptedText = encrypt(text, securityKey);
+		// let decryptedText = decrypt(encryptedText, securityKey);
+
+		// console.log('encrypted text:', encryptedText);
+		// console.log('decrypted text:', decryptedText);
 		// const responseListener = useRef();
 		// registerForPushNotificationsAsync().then((token) => alert(token));
 		// notificationListener.current = Notifications.addNotificationReceivedListener((notification) => {
@@ -162,6 +200,11 @@ class Appaa extends Component {
 	}
 
 	loadAPI = async (username, password, schoolcode, adress, json) => {
+		username = toEng(username);
+		password = toEng(password);
+		schoolcode = toEng(schoolcode);
+		adress = toEng(adress);
+
 		//await CallModalUtil.confirm('Sure to logout?');
 		//alert('fs');
 		/* #region user exist  */
@@ -269,7 +312,7 @@ class Appaa extends Component {
 		let uurl =
 			'http://' +
 			adress +
-			'/pApi.asmx/ath?p=' +
+			'/papi/pApi.asmx/ath?p=' +
 			username +
 			'`' +
 			password +
@@ -279,7 +322,20 @@ class Appaa extends Component {
 			this.state.noti +
 			'`' +
 			Platform.OS;
-		//console.log(uurl);
+
+		let hash = encrypt(uurl);
+		uurl = uurl + '&hash=' + hash;
+		uurl = uurl + '&salam=' + encrypt('salam');
+		// '&de=' +
+		// encrypt(
+		// 	username + '`' + password + '`' + schoolcode + '`357611123qwe!@$`' + this.state.noti + '`' + Platform.OS
+		// );
+		//alert(toEng(username));
+		//return;
+		//console.log(decrypt('aqENwcoqy0ohNoK5yxtRR7EsOhluUFPJj1t5wwMsFWc547pbEeAFKJJQ/lVRXu3lyLEREHx1Ta8='));
+
+		//let objJsonB64 = Buffer.from(JSON.stringify(uurl)).toString('base64');
+		console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -337,7 +393,9 @@ class Appaa extends Component {
 		global.username = username;
 		global.password = password;
 		global.schoolcode = schoolcode;
-		global.adress = 'http://' + adress + '';
+		global.adress = 'http://' + adress + '/papi';
+		//global.adressPure = 'http://' + adress + '/papi';
+
 		global.firstname = this.state.retUser[0]['firstname'];
 		global.lastname = this.state.retUser[0]['lastname'];
 		global.schoolname = this.state.retUser[0]['schoolname'];
@@ -371,10 +429,10 @@ class Appaa extends Component {
 					<Formik
 						style={{ backgroundColor: 'red' }}
 						initialValues={{
-							username: '1451912412',
-							password: '1',
-							schoolcode: '95100040',
-							adress: '192.168.1.15:8080'
+							username: '', //۱۹۴۱۰۳۶۷۶۷
+							password: '',
+							schoolcode: '',
+							adress: ''
 						}}
 						validateOnBlur={false}
 						validateOnChange={false}
@@ -423,14 +481,15 @@ class Appaa extends Component {
 										,
 										styles.capstyle,
 										{
-											paddingEnd: 20,
+											paddingStart: 20,
 											paddingBottom: 0,
 											fontSize: 13,
-											color: 'black'
+											color: 'black',
+											textAlign: 'left'
 										}
 									]}
 								>
-									نام کاربری
+									{i18n.t('username')}
 								</Text>
 								<Input
 									//keyboardType="numeric"
@@ -443,7 +502,8 @@ class Appaa extends Component {
 									inputContainerStyle={[ defaultStyles.inputc, defaultStyles.shadowx ]}
 									inputStyle={defaultStyles.inputStyle}
 									//label={i18n.t('username')}
-									placeholder="نام کاربری یا کد ملی"
+									//	placeholder="نام کاربری یا کد ملی"
+									placeholder={i18n.t('usernameHint')}
 									errorStyle={defaultStyles.err}
 									errorMessage={errors.username}
 									containerStyle={{ marginTop: 0 }}
@@ -454,15 +514,16 @@ class Appaa extends Component {
 										,
 										styles.capstyle,
 										{
-											paddingEnd: 20,
+											paddingStart: 20,
 											marginTop: -20,
 											marginBottom: 10,
 											fontSize: 13,
-											color: 'black'
+											color: 'black',
+											textAlign: 'left'
 										}
 									]}
 								>
-									کلمه عبور
+									{i18n.t('password')}
 								</Text>
 
 								<Input
@@ -486,15 +547,16 @@ class Appaa extends Component {
 										,
 										styles.capstyle,
 										{
-											paddingEnd: 20,
+											paddingStart: 20,
 											marginTop: -20,
 											marginBottom: 10,
 											fontSize: 13,
-											color: 'black'
+											color: 'black',
+											textAlign: 'left'
 										}
 									]}
 								>
-									کد آموزشگاه
+									{i18n.t('schoolcode')}
 								</Text>
 								<Input
 									//keyboardType="numeric"
@@ -518,15 +580,16 @@ class Appaa extends Component {
 										,
 										styles.capstyle,
 										{
-											paddingEnd: 20,
+											paddingStart: 20,
 											marginTop: -20,
 											marginBottom: 10,
 											fontSize: 13,
-											color: 'black'
+											color: 'black',
+											textAlign: 'left'
 										}
 									]}
 								>
-									آدرس اینترنتی
+									{i18n.t('adress')}
 								</Text>
 								<Input
 									value={values.adress}
@@ -639,7 +702,7 @@ class Appaa extends Component {
 												fontFamily: 'iransansbold'
 											}}
 										>
-											ورود با اسکن بارکد
+											{i18n.t('qrenter')}
 										</Text>
 										<Lotte />
 									</TouchableOpacity>

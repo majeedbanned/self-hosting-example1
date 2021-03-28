@@ -23,7 +23,7 @@ import Modal, {
 	SlideAnimation,
 	ScaleAnimation
 } from 'react-native-modals';
-import { userInfo, toFarsi, getHttpAdress } from '../../../components/DB';
+import { userInfo, toFarsi, getHttpAdress, getHttpAdressPure } from '../../../components/DB';
 import { FlatList, ScrollView, Image, View, Text, RefreshControl, TouchableOpacity } from 'react-native';
 import GLOBAL from './../../global';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -148,7 +148,7 @@ class webinar extends Component {
 		this.setState({ loading: true });
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/getStory?p=' + param;
-		//console.log(uurl);
+		console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {

@@ -65,7 +65,7 @@ class webinarparticipateList extends Component {
 
 		return {
 			headerTitle: 'گزارشات',
-			headerRight: null,
+			headerRight: () => null,
 			headerBackTitle: 'بازگشت',
 			navigationOptions: {
 				headerBackTitle: 'Home'
@@ -490,7 +490,7 @@ class webinarparticipateList extends Component {
 								navigate('examAdd');
 							}}
 						>
-							<Icon name="md-create" style={styles.actionButtonIcon} />
+							<Icon name="edit" style={styles.actionButtonIcon} />
 						</ActionButton.Item>
 						<ActionButton.Item buttonColor="#3498db" title="بانک سئوالات" onPress={() => {}}>
 							<Icon name="md-notifications-off" style={styles.actionButtonIcon} />

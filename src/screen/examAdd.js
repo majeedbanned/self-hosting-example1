@@ -206,7 +206,7 @@ class examAdd extends Component {
 
 		return {
 			title: global.examEditID != '' ? 'ویرایش آزمون' : 'تعریف آزمون',
-			headerRight: null,
+			headerRight: () => null,
 			headerTitleStyle: {
 				fontFamily: 'iransans'
 			}

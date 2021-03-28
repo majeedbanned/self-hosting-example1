@@ -28,6 +28,7 @@ class ActionBarImage extends Component {
 		return (
 			<View style={{ flexDirection: 'row' }}>
 				<TouchableOpacity
+					activeOpacity={1}
 					onPress={() => {
 						navigate('Login', { mode: true });
 					}}
@@ -37,6 +38,7 @@ class ActionBarImage extends Component {
 					</View>
 				</TouchableOpacity>
 				<TouchableOpacity
+					activeOpacity={1}
 					onPress={() => {
 						GLOBAL.main.setState({ isModalVisible: true });
 					}}

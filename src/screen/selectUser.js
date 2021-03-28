@@ -28,11 +28,17 @@ import NetInfo from '@react-native-community/netinfo';
 import DropdownAlert from 'react-native-dropdownalert';
 import { SearchBar } from 'react-native-elements';
 import * as SQLite from 'expo-sqlite';
+const database_name = 'Reactoffline.db';
+const database_version = '1.0';
+const database_displayname = 'SQLite React Offline Database';
+const database_size = 200000;
+const db = SQLite.openDatabase(database_name, database_version, database_displayname, database_size);
+
 import GLOBAL from './global';
 import axios from 'axios';
 //import { getAvailableLocationProviders } from 'react-native-device-info';
-I18nManager.allowRTL(true);
-I18nManager.forceRTL(true);
+// I18nManager.allowRTL(true);
+// I18nManager.forceRTL(true);
 class messages extends Component {
 	constructor(props) {
 		super(props);
@@ -70,7 +76,7 @@ class messages extends Component {
 		await Font.loadAsync({
 			'Inter-Black': require('./../../assets/IRANSansMobile.ttf')
 		});
-		console.log('your fonts loaded!');
+		//	console.log('your fonts loaded!');
 		this.setState({ fontLoaded: true });
 	}
 	async componentDidMount() {
@@ -81,7 +87,7 @@ class messages extends Component {
 		// });
 		//this.getSurfaces();
 
-		const db = SQLite.openDatabase('db');
+		//const db = SQLite.openDatabase('db');
 		db.transaction((tx) => {
 			tx.executeSql('SELECT * FROM users', [], (tx, results) => {
 				var temp = [];
@@ -105,7 +111,7 @@ class messages extends Component {
 		global.password = item.password;
 		global.schoolcode = item.schoolcode;
 		//** */	global.adress = 'http://' + item.adress + ':8080';
-		global.adress = item.adress;
+		global.adress = item.adress + '/papi';
 
 		global.firstname = item.firstname;
 		global.lastname = item.lastname;
@@ -134,6 +140,11 @@ class messages extends Component {
 
 		try {
 			GLOBAL.vclass.loadAPI(1, 'pull');
+		} catch (e) {}
+
+		try {
+			//alert();
+			GLOBAL.events.loadAPI(1, 'pull');
 		} catch (e) {}
 		//global.avatar = global.adress + '/upload/' + global.schoolcode + '/child/' + global.username + '.jpg';
 
@@ -214,7 +225,7 @@ class messages extends Component {
 
 	render() {
 		GLOBAL.selectUser = this;
-		console.log('rege');
+		//console.log('rege');
 		// let [fontsLoaded] = useFonts({
 		//     'Inter-Black': require('./../../assets/IRANSansMobile.ttf'),
 		//   });
@@ -365,13 +376,13 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		alignItems: 'stretch',
 		shadowColor: '#00000021',
-		shadowOffset: {
-			width: 2,
-			height: 1
-		},
-		shadowOpacity: 0.6,
-		shadowRadius: 3,
-		elevation: 1,
+		// shadowOffset: {
+		// 	width: 2,
+		// 	height: 1
+		// },
+		// shadowOpacity: 0.6,
+		// shadowRadius: 3,
+		// elevation: 1,
 
 		marginLeft: 10,
 		marginRight: 10,

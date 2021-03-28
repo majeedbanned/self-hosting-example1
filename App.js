@@ -8,6 +8,7 @@ import LottieView from 'lottie-react-native';
 import ListScreen from './src/screens/listScreen';
 import ActionBarImage from './src/components/ActionBarImage';
 import componentScreen from './src/screens/componentScreen';
+import { enableScreens } from 'react-native-screens';
 import TextScreen from './src/screens/textScreen';
 import Craigslist from './src/screens/Craigslist';
 import FlatListGrid from './src/screens/FlatListGrid';
@@ -38,7 +39,15 @@ import Intro from './src/components/intro';
 import storyList from './src/screen/modules/story/storyList';
 
 import eforms from './src/screen/modules/forms/eforms';
+import eforms2 from './src/screen/modules/forms/eforms2';
+
+import cwebview from './src/screen/modules/forms/Cwebview';
+
 import studentlist from './src/screen/modules/forms/studentlist';
+import speech from './src/screen/speech';
+
+import studentlistforms from './src/screen/modules/forms/studentlistforms';
+
 import qbank from './src/screen/modules/questionBank/qbank';
 import qtesti from './src/screen/modules/questionBank/qtesti';
 
@@ -84,9 +93,13 @@ import * as Font from 'expo-font';
 import Login from './src/screen/Login';
 import Forms from './src/screen/forms';
 import help from './src/screen/help';
+import comment from './src/screen/comment';
+
 import * as Sentry from 'sentry-expo';
 import tahlil from './src/screen/tahlil';
 import reportView from './src/screen/reportView';
+import monthgrade from './src/screen/monthgrade';
+
 import accounting from './src/screen/accounting';
 
 import RecordList from './src/screen/recordList';
@@ -94,6 +107,7 @@ import absentList from './src/screen/absentList';
 
 import Daftar from './src/screen/student/daftar';
 import Workbook from './src/screen/workbook';
+import bankfile from './src/screen/student/bankfile';
 
 messageAdd;
 import messageAdd from './src/screen/messageAdd';
@@ -102,6 +116,9 @@ import Main from './src/screen/main';
 import Test from './src/screen/test';
 import Splash from './src/screen/splash';
 import reports from './src/screen/student/reports';
+import formEntry from './src/screen/student/formEntry';
+import menuList from './src/screen/student/menuList';
+
 import registerForPushNotificationsAsync from './src/screen/registerForPushNotificationsAsync';
 
 reports;
@@ -153,13 +170,12 @@ import { MenuProvider } from 'react-native-popup-menu';
 
 // Sentry.captureException(new Error('Oops!'));
 
-I18nManager.allowRTL(true);
-I18nManager.forceRTL(true);
 //
 const addDataToDb = () => {
 	//console.log('f1');
 	db.transaction((tx) => {
-		tx.executeSql('delete  from   users');
+		//tx.executeSql('DROP TABLE users');
+		//tx.executeSql('delete  from   users');
 		//	alert('d');
 		if (true)
 			tx.executeSql(
@@ -186,7 +202,7 @@ const addDataToDb = () => {
 					// }
 				},
 				function(e, er) {
-					//alert(e);
+					alert(e);
 					//console.log(er);
 				}
 			);
@@ -259,12 +275,12 @@ db.transaction(function(txn) {
 		}
 	);
 });
-
+//const navigator = createNativeStackNavigator(
 const navigator = createStackNavigator(
 	{
 		Home: HomeScreen,
 		Login: Login,
-		Exam: Exam,
+		//	Exam: Exam,
 		Upload: Upload,
 		SelectContact: SelectContact,
 		selectuser: selectuser,
@@ -282,13 +298,19 @@ const navigator = createStackNavigator(
 		Speech: Speech,
 		hookform: hookform,
 		RecordList: RecordList,
-
+		studentlistforms: studentlistforms,
 		Logo: Logo,
 		sheet: sheet,
 		Workbook: Workbook,
 		tcombform: tcombform,
 		settingUserDelete: settingUserDelete,
-		Settings: Settings,
+		Settings: {
+			name: 'Settings',
+			screen: Settings,
+			navigationOptions: {
+				gesturesEnabled: false
+			}
+		},
 		tahlil: tahlil,
 		timetable: timetable,
 		Workbookdt: Workbookdt,
@@ -308,19 +330,24 @@ const navigator = createStackNavigator(
 		fixedtable: fixedtable,
 		persiancalendarpicker: persiancalendarpicker,
 		galio: galio,
+		speech: speech,
 		reportView: reportView,
+		monthgrade: monthgrade,
 		stickytable: stickytable,
 		paparButtomNavigator: paparButtomNavigator,
 		scrollabletab: scrollabletab,
 		FacebookExample: FacebookExample,
 		Mainmenu: Mainmenu,
 		Lightbox: Lightbox,
+		cwebview: cwebview,
 		FlatListGrid: FlatListGrid,
 		qrscanner: qrscanner,
 		Craigslist: Craigslist,
+		comment: comment,
 		component: componentScreen,
 		List: ListScreen,
 		barnameh: barnameh,
+		bankfile: bankfile,
 		Textscr: TextScreen,
 		notification: notification,
 		absentList: absentList,
@@ -332,7 +359,9 @@ const navigator = createStackNavigator(
 		dynamictest: dynamictest,
 		addgallery: addgallery,
 		karnameh: karnameh,
+		formEntry: formEntry,
 		teacherStat: teacherStat,
+		menuList: menuList,
 		//reports: reports,
 
 		reports: {
@@ -341,8 +370,16 @@ const navigator = createStackNavigator(
 				headerBackTitle: 'Home'
 			}
 		},
-
+		Exam: {
+			name: 'Exam',
+			screen: Exam,
+			navigationOptions: {
+				gesturesEnabled: false
+			}
+		},
 		eforms: eforms,
+		eforms2: eforms2,
+
 		studentlist: studentlist,
 		qbank: qbank,
 		qtesti: qtesti,
@@ -358,8 +395,16 @@ const navigator = createStackNavigator(
 		defaultNavigationOptions: {
 			headerTitle: () => (
 				<View style={{ flexDirection: 'column' }}>
-					<Image source={require('./assets/images/logo.png')} />
-					<Text style={{ marginTop: -3, fontFamily: 'iransans', fontSize: 8 }}>{'نگارش ۱۱'}</Text>
+					{global.lang == 'fa' ? (
+						<Image source={require('./assets/images/logo.png')} />
+					) : (
+						<Text>Parsamooz</Text>
+					)}
+					{global.lang == 'fa' ? (
+						<Text style={{ marginTop: -3, fontFamily: 'iransans', fontSize: 8 }}>{'نگارش ۱۱'}</Text>
+					) : (
+						<Text style={{ marginTop: -3, fontFamily: 'iransans', fontSize: 8 }}>{'version 11 '}</Text>
+					)}
 				</View>
 			),
 			headerRight: () => <ActionBarImage />,
@@ -397,12 +442,18 @@ const navigator = createStackNavigator(
 		}
 	}
 );
+if (true) {
+	I18nManager.allowRTL(true);
+	I18nManager.forceRTL(true);
+}
 // SplashScreen.preventAutoHideAsync()
 // 	.then((result) => console.log(`SplashScreen.preventAutoHideAsync() succeeded: ${result}`))
 // 	.catch(console.warn); // it's good to explicitly catch and inspect any error
 const AppContainer = createAppContainer(navigator);
 export default class App extends React.Component {
 	constructor(props) {
+		I18nManager.allowRTL(true);
+		I18nManager.forceRTL(true);
 		super(props);
 		this.state = {
 			fontLoaded: false
@@ -441,6 +492,10 @@ export default class App extends React.Component {
 		}
 	};
 	async componentDidMount() {
+		global.lang = 'fa';
+		I18nManager.allowRTL(true);
+		I18nManager.forceRTL(true);
+
 		addDataToDb();
 		await Font.loadAsync({
 			iransans: require('./assets/IRANSansMobile.ttf'),
@@ -448,12 +503,18 @@ export default class App extends React.Component {
 		});
 
 		this.setState({ fontLoaded: true });
-
-		setTimeout(async () => {
-			//	await SplashScreen.hideAsync();
-			console.log('now');
-			this.setState({ splash: true });
-		}, 1500);
+		if (global.lang == 'fa')
+			setTimeout(async () => {
+				//	await SplashScreen.hideAsync();
+				console.log('now');
+				this.setState({ splash: true });
+			}, 4000);
+		else
+			setTimeout(async () => {
+				//	await SplashScreen.hideAsync();
+				console.log('now');
+				this.setState({ splash: true });
+			}, 100);
 
 		this.registerForPushNotificationsAsync();
 		Notifications.addNotificationReceivedListener(this._handleNotification);

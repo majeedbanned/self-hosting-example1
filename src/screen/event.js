@@ -1,8 +1,14 @@
 import React, { Component } from 'react';
+import GLOBAL from './global';
 import { Alert, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { LocaleConfig, Agenda } from 'react-native-calendars-persian';
 import NetInfo from '@react-native-community/netinfo';
 import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+import { withNavigation } from 'react-navigation';
+import Icon from 'react-native-vector-icons/AntDesign';
+import { Snackbar } from 'react-native-paper';
+
+import ActionButton from 'react-native-action-button';
 
 const testIDs = require('../components/testIDs');
 LocaleConfig.locales['fa'] = {
@@ -40,7 +46,7 @@ LocaleConfig.locales['fa'] = {
 
 LocaleConfig.defaultLocale = 'fa';
 
-export default class AgendaScreen extends Component {
+class AgendaScreen extends Component {
 	constructor(props) {
 		super(props);
 
@@ -57,20 +63,90 @@ export default class AgendaScreen extends Component {
 				'2020-07-07': [ { name: 'آزمون میان ترم فیزیک' }, { name: 'شروع مسابقات قرآن' } ]
 			}
 		};
+
+		this.props.navigation.addListener('willFocus', () => {
+			//alert();
+			this.loadAPI(1, 'pull');
+			//this.loadAPI_grp(1, 'pull');
+		});
 	}
 	async componentDidMount() {
 		this.loadAPI(1, '');
 	}
-	loadAPI = async (page, type) => {
+
+	APIDel = async (eid, index) => {
 		if (global.adress == 'undefined') {
 			GLOBAL.main.setState({ isModalVisible: true });
 		}
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
+
+		/* #endregion */
+
+		let param = userInfo();
+		let uurl = global.adress + '/pApi.asmx/delEvent?eid=' + eid + '&p=' + param; //+
+
+		console.log(uurl);
+
+		try {
+			const response = await fetch(uurl);
+			if (response.ok) {
+				let retJson = await response.json();
+				if (Object.keys(retJson).length == 0) {
+					this.setState({
+						loading: false,
+						dataLoading: false,
+						isRefreshing: false
+					});
+					return;
+				}
+				this.loadAPI();
+				//this.setState({ issnack: true, msg: retJson.msg });
+
+				//let newimagesAddFile = this.state.data;
+				//alert(index);
+				//newimagesAddFile.splice(index, 1); //to remove a single item starting at index
+				//this.setState({ data: newimagesAddFile });
+
+				//console.log(retJson);
+				// this.setState(
+				// 	{
+				// 		// data: page === 1 ? retJson : [ ...this.state.data, ...retJson ],
+				// 		// loading: false,
+				// 		// dataLoading: false,
+				// 		// isRefreshing: false
+				// 	}
+				// );
+			}
+		} catch (e) {
+			console.log('err');
+			this.dropDownAlertRef.alertWithType('error', 'پیام', 'خطادر دستیابی به اطلاعات');
+			this.setState({
+				loading: false,
+				dataLoading: false,
+				isRefreshing: false
+			});
+			return;
+		}
+	};
+
+	loadAPI = async (page, type) => {
+		//	alert('d');
+		//	return;
+		if (global.adress == 'undefined') {
+			GLOBAL.main.setState({ isModalVisible: true });
+		}
+		/* #region  check internet */
+		let state = await NetInfo.fetch();
+		if (!state.isConnected) {
+			this.setState({ issnackin: true });
+			return;
+		}
+
 		/* #endregion */
 
 		this.setState({ loading: true });
@@ -82,6 +158,7 @@ export default class AgendaScreen extends Component {
 			if (response.ok) {
 				let retJson = await response.json();
 				if (Object.keys(retJson).length == 0) {
+					//	alert()
 					this.setState({
 						roy: [],
 						loading: false,
@@ -116,41 +193,127 @@ export default class AgendaScreen extends Component {
 	};
 
 	render() {
+		GLOBAL.events = this;
 		return (
-			<Agenda
-				jalali={true}
-				firstDay={6}
-				testID={testIDs.agenda.CONTAINER}
-				// items={this.state.items}
-				loadItemsForMonth={this.loadItems.bind(this)}
-				items={this.state.roy}
-				theme={{
-					textDayFontFamily: 'iransans',
-					textMonthFontFamily: 'iransans',
-					textDayHeaderFontFamily: 'iransans',
-					textDayFontSize: 14,
-					textMonthFontSize: 10,
-					textDayHeaderFontSize: 14
-				}}
-				onRefresh={() => this.loadAPI(1, '')}
-				renderItem={this.renderItem.bind(this)}
-				renderEmptyDate={this.renderEmptyDate.bind(this)}
-				rowHasChanged={this.rowHasChanged.bind(this)}
-				// markingType={'period'}
-				// markedDates={{
-				//    '2017-05-08': {textColor: '#43515c'},
-				//    '2017-05-09': {textColor: '#43515c'},
-				//    '2017-05-14': {startingDay: true, endingDay: true, color: 'blue'},
-				//    '2017-05-21': {startingDay: true, color: 'blue'},
-				//    '2017-05-22': {endingDay: true, color: 'gray'},
-				//    '2017-05-24': {startingDay: true, color: 'gray'},
-				//    '2017-05-25': {color: 'gray'},
-				//    '2017-05-26': {endingDay: true, color: 'gray'}}}
-				// monthFormat={'yyyy'}
-				// theme={{calendarBackground: 'red', agendaKnobColor: 'green'}}
-				//renderDay={(day, item) => (<Text>{day ? day.day: 'item'}</Text>)}
-				// hideExtraDays={false}
-			/>
+			<React.Fragment>
+				<Agenda
+					jalali={true}
+					firstDay={6}
+					testID={testIDs.agenda.CONTAINER}
+					// items={this.state.items}
+					loadItemsForMonth={this.loadItems.bind(this)}
+					items={this.state.roy}
+					theme={{
+						textDayFontFamily: 'iransans',
+						textMonthFontFamily: 'iransans',
+						textDayHeaderFontFamily: 'iransans',
+						textDayFontSize: 14,
+						textMonthFontSize: 10,
+						textDayHeaderFontSize: 14
+					}}
+					renderEmptyData={() => {
+						return null;
+					}}
+					onRefresh={() => this.loadAPI(1, '')}
+					renderItem={this.renderItem.bind(this)}
+					renderEmptyDate={this.renderEmptyDate.bind(this)}
+					rowHasChanged={this.rowHasChanged.bind(this)}
+					// markingType={'period'}
+					// markedDates={{
+					//    '2017-05-08': {textColor: '#43515c'},
+					//    '2017-05-09': {textColor: '#43515c'},
+					//    '2017-05-14': {startingDay: true, endingDay: true, color: 'blue'},
+					//    '2017-05-21': {startingDay: true, color: 'blue'},
+					//    '2017-05-22': {endingDay: true, color: 'gray'},
+					//    '2017-05-24': {startingDay: true, color: 'gray'},
+					//    '2017-05-25': {color: 'gray'},
+					//    '2017-05-26': {endingDay: true, color: 'gray'}}}
+					// monthFormat={'yyyy'}
+					// theme={{calendarBackground: 'red', agendaKnobColor: 'green'}}
+					//renderDay={(day, item) => (<Text>{day ? day.day: 'item'}</Text>)}
+					// hideExtraDays={false}
+				/>
+				{(true && global.ttype == 'administrator') || global.ttype == 'teacher' ? (
+					<ActionButton
+						offsetX={15}
+						offsetY={15}
+						useNativeDriver
+						position="left"
+						buttonColor="rgba(231,76,60,1)"
+					>
+						<ActionButton.Item
+							buttonColor="#9b59b6"
+							title="تعریف رویداد "
+							textStyle={{ fontFamily: 'iransans' }}
+							onPress={() => {
+								global.examEditID = '';
+
+								const { navigate } = this.props.navigation;
+								//27429
+								navigate('eforms', {
+									eformsID: 16,
+									instanseID: '',
+									stdID: 0,
+									mode: 'view',
+									isAdminForms: 'true'
+								});
+							}}
+						>
+							<Icon name="edit" style={styles.actionButtonIcon} />
+						</ActionButton.Item>
+
+						{/* <ActionButton.Item
+							buttonColor="#9b59b6"
+							title="تعریف آزمون با فایل عکس"
+							textStyle={{ fontFamily: 'iransans' }}
+							onPress={() => {
+								global.examEditID = '';
+
+								const { navigate } = this.props.navigation;
+								//27429
+								navigate('eforms', {
+									eformsID: 2,
+									instanseID: '',
+									stdID: 0,
+									mode: 'view',
+									isAdminForms: 'true'
+								});
+							}}
+						>
+							<Icon name="md-create" style={styles.actionButtonIcon} />
+						</ActionButton.Item> */}
+
+						{/* <ActionButton.Item buttonColor="#3498db" title="بانک سئوالات" onPress={() => {}}>
+							<Icon name="md-notifications-off" style={styles.actionButtonIcon} />
+						</ActionButton.Item> */}
+						{/* <ActionButton.Item buttonColor='#1abc9c' title="All Tasks" onPress={() => {}}>
+            <Icon name="md-done-all" style={styles.actionButtonIcon} />
+          </ActionButton.Item> */}
+					</ActionButton>
+				) : null}
+
+				<Snackbar
+					visible={this.state.issnackin}
+					onDismiss={() => this.setState({ issnackin: false })}
+					style={{ backgroundColor: 'red', fontFamily: 'iransans' }}
+					wrapperStyle={{ fontFamily: 'iransans' }}
+					action={{
+						label: 'بستن',
+						onPress: () => {
+							this.setState({ issnackin: false });
+							this.setState(
+								{
+									//  loading: false,
+									//  save_loading: false
+								}
+							);
+							//this.props.navigation.goBack(null);
+						}
+					}}
+				>
+					{'لطفا دسترسی به اینترنت را چک کنید'}
+				</Snackbar>
+			</React.Fragment>
 		);
 	}
 
@@ -183,28 +346,92 @@ export default class AgendaScreen extends Component {
 	renderItem(item) {
 		return (
 			<TouchableOpacity
+				key={item.id}
 				activeOpacity={0.8}
 				testID={testIDs.agenda.ITEM}
 				style={[
 					styles.item,
 					{ height: item.height },
-					item.usertype == 'modir' ? { backgroundColor: '#70c6e0', color: 'white' } : {}
+					item.usertype == 'modir' ? { backgroundColor: '#f5fcff', color: 'white' } : {}
 				]}
 				//onPress={() => Alert.alert(item.name)}
 			>
-				<Text
-					style={{
-						//borderWidth: 1,
-						fontSize: 11,
-						color: '#575757',
-						fontFamily: 'iransans',
-						textAlign: 'left'
-					}}
-				>
-					{item.teachername + ' [' + item.coursename + ']:'}
-				</Text>
+				<View style={{ flexDirection: 'row' }}>
+					<Text
+						style={{
+							//borderWidth: 1,
+							fontSize: 11,
+							fontWeight: 'bold',
+							color: '#eb5e0b',
+							fontFamily: 'iransans',
+							textAlign: 'left'
+						}}
+					>
+						{item.teachername}
+					</Text>
+					<Text
+						style={{
+							//borderWidth: 1,
+							fontSize: 11,
+							color: '#575757',
+							fontFamily: 'iransans',
+							textAlign: 'left'
+						}}
+					>
+						{' [' + item.coursename + ']:'}
+					</Text>
+				</View>
 
 				<Text style={{ fontFamily: 'iransans', textAlign: 'left' }}>{item.name}</Text>
+				{item.teachercode == global.username && (
+					<View style={{ flexDirection: 'row-reverse' }}>
+						<TouchableOpacity
+							onPress={() => {
+								Alert.alert(
+									' اخطار',
+									'آیا مایل به حذف رویداد هستید؟',
+									[
+										{
+											text: 'خیر',
+											// onPress: () => {
+											// 	this.setState({
+											// 		barom_Visible: false
+											// 	});
+											// },
+											style: 'cancel'
+										},
+										{
+											text: 'بله',
+											onPress: () => {
+												this.APIDel(item.id);
+											}
+										}
+									],
+									{ cancelable: false }
+								);
+							}}
+						>
+							<Icon name="delete" color="green" size={18} style={[ styles.actionButtonIcon, {} ]} />
+						</TouchableOpacity>
+						<TouchableOpacity
+							onPress={() => {
+								global.examEditID = '';
+
+								const { navigate } = this.props.navigation;
+								//27429
+								navigate('eforms', {
+									eformsID: 16,
+									instanseID: item.id,
+									stdID: 0,
+									mode: 'view',
+									isAdminForms: 'true'
+								});
+							}}
+						>
+							<Icon name="edit" size={18} style={[ styles.actionButtonIcon, { marginRight: 30 } ]} />
+						</TouchableOpacity>
+					</View>
+				)}
 			</TouchableOpacity>
 		);
 	}
@@ -240,5 +467,12 @@ const styles = StyleSheet.create({
 		height: 15,
 		flex: 1,
 		paddingTop: 30
+	},
+	actionButtonIcon: {
+		fontSize: 20,
+		height: 22,
+		color: 'gray'
 	}
 });
+
+export default withNavigation(AgendaScreen);

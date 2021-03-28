@@ -65,7 +65,7 @@ class courseslist extends Component {
 
 		return {
 			headerTitle: 'لیست کلاس ها ',
-			headerRight: null,
+			headerRight: () => null,
 			headerBackTitle: 'بازگشت',
 			navigationOptions: {
 				headerBackTitle: 'Home'
@@ -110,7 +110,15 @@ class courseslist extends Component {
 
 		this.setState({ loading: true });
 		let param = userInfo();
-		let uurl = global.adress + '/pApi.asmx/courselist?id=' + page + '&p=' + param + '&g=' + this.state.selectedItem; //+
+		let uurl =
+			global.adress +
+			'/pApi.asmx/courselist?id=' +
+			page +
+			'&p=' +
+			param +
+			'&g=' +
+			this.state.selectedItem +
+			'&q='; //+
 		//'&mode=list';
 		console.log(uurl);
 		try {
@@ -153,7 +161,8 @@ class courseslist extends Component {
 
 		this.setState({ loading: true });
 		let param = userInfo();
-		let uurl = global.adress + '/pApi.asmx/courselist?id=1' + '&p=' + param + '&g=' + this.state.selectedItem;
+		let uurl =
+			global.adress + '/pApi.asmx/courselist?id=1' + '&p=' + param + '&g=' + this.state.selectedItem + '&q=';
 		console.log(uurl);
 		try {
 			const response = await fetch(uurl);
@@ -220,6 +229,7 @@ class courseslist extends Component {
 		this.loadAPI(1, 'pull');
 	}
 	renderHeader = () => {
+		//	return <View />;
 		//console.log(this.state.cat);
 		return (
 			<View style={{ backgroundColor: 'white' }}>
@@ -228,10 +238,18 @@ class courseslist extends Component {
 					data={this.state.cat}
 					keyExtractor={(item) => item.id.toString()}
 					horizontal
-					style={{ paddingBottom: 4, borderWidth: 0, marginTop: 4, marginRight: 4, marginLeft: 4 }}
+					style={{
+						flexDirection: 'column-reverse',
+						paddingBottom: 4,
+						borderWidth: 0,
+						marginTop: 4,
+						marginRight: 4,
+						marginLeft: 4
+					}}
 					renderItem={({ item, index }) => {
 						return (
 							<TouchableOpacity
+								key={item.id}
 								activeOpacity={0.6}
 								onPress={() => {
 									//console.log(item.id);
@@ -330,6 +348,7 @@ class courseslist extends Component {
 					ListHeaderComponent={this.renderHeader}
 					stickyHeaderIndices={[ 0 ]}
 					ListFooterComponent={this._renderFooter}
+					keyExtractor={(item) => item.id.toString()}
 					onScroll={this.onScroll}
 					initialNumToRender={10}
 					ListEmptyComponent={
@@ -356,16 +375,22 @@ class courseslist extends Component {
 					style={Mstyles.contentList}
 					columnWrapperStyle={styles.listContainer}
 					data={this.state.data}
-					keyExtractor={(item) => {
-						return item.id;
-					}}
-					renderItem={({ item }) => {
+					// keyExtractor={(item) => {
+					// 	return item.id;
+					// }}
+					renderItem={({ item, index }) => {
 						return (
 							<TouchableOpacity
+								key={item.id}
 								onPress={() => {
 									const { navigate } = this.props.navigation;
 									global.eformsID = item.id;
-									navigate('eforms', { eformsID: item.id, mode: 'add' });
+									//navigate('eforms', { eformsID: item.id, mode: 'add' });
+									navigate('fixedtable', {
+										coursecode: item.CourseCode,
+										classcode: item.ClassCode,
+										mode: 'add'
+									});
 								}}
 								activeOpacity={0.8}
 								style={{
@@ -399,43 +424,7 @@ class courseslist extends Component {
 
 												{/* {global.ttype == 'administrator' ||
 														(item.access.indexOf(global.username) > -1 && ( */}
-												<TouchableOpacity
-													onPress={() => {
-														const { navigate } = this.props.navigation;
-														//global.eformsID = item.id;
-														navigate('studentlist', {
-															eformsID: item.id,
-															mode: 'list'
-														});
-													}}
-													style={{
-														alignItems: 'center',
-														justifyContent: 'center',
-														flex: 0.5
-													}}
-												>
-													{/* <IconAnt
-														name="solution1"
-														style={styles.image}
-														size={34}
-														color="#ccc"
-													/> */}
 
-													{/* <AntDesign
-														style={styles.image}
-														name="profile"
-														size={34}
-														color="#ccc"
-													/> */}
-													{/* <Text
-														style={[
-															defaultStyles.lbl14,
-															{ fontSize: 14, color: 'black' }
-														]}
-													>
-														لیست
-													</Text> */}
-												</TouchableOpacity>
 												{/* ))} */}
 											</View>
 										</View>
@@ -457,7 +446,7 @@ class courseslist extends Component {
 								navigate('examAdd');
 							}}
 						>
-							<Icon name="md-create" style={styles.actionButtonIcon} />
+							<Icon name="edit" style={styles.actionButtonIcon} />
 						</ActionButton.Item>
 						<ActionButton.Item buttonColor="#3498db" title="بانک سئوالات" onPress={() => {}}>
 							<Icon name="md-notifications-off" style={styles.actionButtonIcon} />
@@ -587,15 +576,15 @@ const styles = StyleSheet.create({
 		flexDirection: 'column'
 	},
 	mainpanel: {
-		zIndex: 1,
-		elevation: 2,
-		shadowColor: '#ddd',
-		shadowOffset: {
-			width: 1,
-			height: 1
-		},
-		shadowOpacity: 0.67,
-		shadowRadius: 2.49
+		zIndex: 1
+		// elevation: 2,
+		// shadowColor: '#ddd',
+		// shadowOffset: {
+		// 	width: 1,
+		// 	height: 1
+		// },
+		// shadowOpacity: 0.67,
+		// shadowRadius: 2.49
 	},
 	aztitle: {
 		width: '100%',

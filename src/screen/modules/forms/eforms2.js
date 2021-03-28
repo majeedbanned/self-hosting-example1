@@ -1,12 +1,12 @@
 import React, { Component, useRef } from 'react';
 import { Input, ButtonGroup } from 'react-native-elements';
 import { RadioButton } from 'react-native-paper';
-import * as ImageManipulator from 'expo-image-manipulator';
-
 import TimePicker from 'react-native-24h-timepicker';
 import { Ionicons } from '@expo/vector-icons';
-import Eform2 from '../../../screen/modules/forms/eforms2';
-import { Icon as Iconelem } from 'react-native-elements';
+//import Eform from './eforms';
+
+import * as ImageManipulator from 'expo-image-manipulator';
+
 import { WebView } from 'react-native-webview';
 import { FlatGrid } from 'react-native-super-grid';
 
@@ -26,6 +26,7 @@ import { withNavigation } from 'react-navigation';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
 import Modal from 'react-native-modalbox';
+import update from 'immutability-helper';
 
 import * as ImagePicker from 'expo-image-picker';
 import { Chip } from 'react-native-paper';
@@ -34,10 +35,6 @@ import Modalm from 'react-native-modal';
 import defaultStyles from '../../../config/styles';
 import { actions, getContentCSS, RichEditor, RichToolbar } from 'react-native-pell-rich-editor';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import Icontools from 'react-native-vector-icons/MaterialCommunityIcons';
-
-import IconFeather from 'react-native-vector-icons/Feather';
-
 import Icon1 from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import { REAL_WINDOW_HEIGHT } from 'react-native-extra-dimensions-android';
@@ -87,6 +84,7 @@ import reactNativeExtraDimensionsAndroid from 'react-native-extra-dimensions-and
 import { HelloChandu, _getcount, getQuery, _query, _fetch, _connected, toFarsi } from '../../../components/DB';
 import { ScrollView } from 'react-native-gesture-handler';
 import { CallModal, CallModalUtil, connectCallModal } from '@fugood/react-native-call-modal';
+import { Global } from '@jest/types';
 
 i18n.locale = 'fa';
 i18n.fallbacks = true;
@@ -104,21 +102,11 @@ const pickerStyle = {
 		textAlign: 'center'
 	},
 	inputAndroid: {
-		// marginTop: 8,
-		// fontSize: 14,
-		//
-		textAlign: 'center',
-		// color: 'black'
+		marginTop: 8,
+		fontSize: 14,
 		fontFamily: 'iransans',
-		fontSize: 16,
-		paddingHorizontal: 10,
-		paddingVertical: 8,
-		//borderWidth: 0.5,
-		width: 400,
-		//borderColor: 'purple',
-		borderRadius: 8,
-		color: 'black',
-		paddingRight: 30 // to ensure the text is never behind the icon
+		//textAlign: 'center',
+		color: 'black'
 	},
 	placeholderColor: 'white',
 	underline: { borderTopWidth: 0 },
@@ -154,23 +142,24 @@ const newPlaceholder = {
 	value: ''
 };
 
-class eforms extends Component {
+class eforms2 extends Component {
 	richText = React.createRef();
 	/* #region constructor */
 	constructor(props) {
 		super(props);
+		this.Extra = props.Extra;
 		this.xeformsID = props.eformId;
+		this.goBack = props.goBack;
 		this.instanseID = props.instanseID;
 		this.stdID = props.stdID;
 		this.isAdminForms = props.isAdminForms;
+		this.referer = props.referer;
+
 		//this.xform = props.eformId;
 
 		//this.isAdminForms = '';
 		this.richHTML = '';
 		this.state = {
-			uploadDir: '',
-			fileSize: '',
-			selectedItems: [],
 			showMenu: true,
 			activeStudentList: '',
 			dateSelected_shoro_namayesh: false,
@@ -296,30 +285,6 @@ class eforms extends Component {
 			messagegrp: [],
 			isModalpikerVisible: false
 		};
-
-		this.props.navigation.addListener('willFocus', () => {
-			//alert();
-			const { navigation } = this.props;
-			if (this.xeformsID) {
-				this.eformsID = this.xeformsID;
-			} else {
-				this.eformsID = navigation.getParam('eformsID');
-
-				this.instanseID = navigation.getParam('instanseID');
-
-				this.stdID = navigation.getParam('stdID');
-
-				this.mode = navigation.getParam('mode');
-				this.setState({ readymode: this.mode });
-				this.isAdminForms = navigation.getParam('isAdminForms');
-			}
-
-			if (this.isAdminForms == undefined) this.isAdminForms = '';
-
-			this.loadAPI(this.eformsID);
-			//if (isAdminForms == '') {
-			this.loadAPI_content(this.eformsID);
-		});
 	}
 	static navigationOptions11 = ({ navigation }) => {
 		const { params } = navigation.state;
@@ -337,54 +302,6 @@ class eforms extends Component {
 				//color: colorhead
 			}
 		};
-	};
-
-	loadAPI_size = async (page, type) => {
-		/* #region  check internet */
-		let state = await NetInfo.fetch();
-		if (!state.isConnected) {
-			this.setState({ issnackin: true });
-			return;
-		}
-
-		/* #endregion */
-
-		this.setState({ loading: true });
-		let param = userInfo();
-		let uurl = global.adress + '/pApi.asmx/getLimiteUpload?id=' + '1' + '&p=' + param + '&g=' + '1';
-		console.log(uurl);
-		try {
-			const response = await fetch(uurl);
-			if (response.ok) {
-				let retJson = await response.json();
-				if (Object.keys(retJson).length == 0) {
-					this.setState(
-						{
-							//loading: false
-						}
-					);
-					return;
-				}
-				//alert(retJson.size);
-				if (retJson.upload != '') {
-					this.setState({
-						uploadDir: retJson.upload
-					});
-				}
-				this.setState({
-					fileSize: retJson.size
-
-					//loading: false
-				});
-			}
-		} catch (e) {
-			console.log('err');
-			this.dropDownAlertRef.alertWithType('error', 'پیام', 'خطادر دستیابی به اطلاعات');
-			this.setState({
-				loading: false
-			});
-			return;
-		}
 	};
 
 	fileUpload1(url) {
@@ -469,120 +386,76 @@ class eforms extends Component {
 		//Formik.name = 'sd';
 	}
 
-	static navigationOptions = ({ navigation, screenProps }) => ({
-		headerRight: navigation.state.params ? navigation.state.params.headerRight : null,
-		headerTitle: navigation.state.params ? navigation.state.params.headerTitle : null
-	});
+	// static navigationOptions = ({ navigation, screenProps }) => ({
+	// 	headerRight: navigation.state.params ? navigation.state.params.headerRight : null,
+	// 	headerTitle: navigation.state.params ? navigation.state.params.headerTitle : null
+	// });
 	componentDidMount() {
-		const { navigation } = this.props;
-		this.mode = navigation.getParam('mode');
-		this.extra = navigation.getParam('extra');
+		// this.props.navigation.setParams({
+		// 	headerTitle: '',
+		// 	headerRight: false && (
+		// 		<View style={{ flexDirection: 'row' }}>
+		// 			<TouchableOpacity
+		// 				onPress={() => {
+		// 					this.setState({ formedit: true });
+		// 				}}
+		// 			>
+		// 				<FontAwesome name="plus" size={25} color="#000" style={{ marginRight: 10 }} />
+		// 			</TouchableOpacity>
+		// 			<FontAwesome name="file-excel-o" size={25} color="#000" style={{ marginRight: 10 }} />
 
-		console.log('mode  :  ' + this.mode);
-
-		this.props.navigation.setParams({
-			headerTitle: '',
-			headerRight: this.mode == 'design' && (
-				<View style={{ flexDirection: 'row' }}>
-					<TouchableOpacity
-						onPress={() => {
-							//alert();
-							//this.refs.modal_arz.close();
-							//this.refs.modal_arz.open();
-							this.setState({ barom_Visible: true });
-						}}
-					>
-						<FontAwesome name="plus" size={25} color="#ff1a00" style={{ marginRight: 10 }} />
-					</TouchableOpacity>
-					{/* <FontAwesome name="file-excel-o" size={25} color="#000" style={{ marginRight: 10 }} />
-
-					<TouchableOpacity /> */}
-				</View>
-			)
-		});
+		// 			<TouchableOpacity />
+		// 		</View>
+		// 	)
+		// });
 		//alert(this.xeformsID);
-		//const { navigation } = this.props;
-		// if (this.xeformsID) {
-		// 	this.eformsID = this.xeformsID;
-		// } else {
-		// 	this.eformsID = navigation.getParam('eformsID');
+		const { navigation } = this.props;
+		if (this.xeformsID) {
+			///	alert();
+			this.eformsID = this.xeformsID;
+			//this.Extra = this.Extra;
+		} else {
+			this.eformsID = navigation.getParam('eformsID');
 
-		// 	this.instanseID = navigation.getParam('instanseID');
+			this.instanseID = navigation.getParam('instanseID');
 
-		// 	this.stdID = navigation.getParam('stdID');
+			this.stdID = navigation.getParam('stdID');
 
-		// 	this.mode = navigation.getParam('mode');
-		// 	this.isAdminForms = navigation.getParam('isAdminForms');
-		// }
+			this.mode = navigation.getParam('mode');
+			this.isAdminForms = navigation.getParam('isAdminForms');
+			this.parentid = navigation.getParam('parentid');
+		}
+		//alert(this.parentid);
 		//this.eformsID = 0;
+		//		alert()
+
 		if (this.isAdminForms == undefined) this.isAdminForms = '';
-		this.loadAPI_size();
+
 		//alert(isAdminForms);
 		this.setState({
 			//	formikDefault: this.props.formikDefault,
 			formid: this.eformsID,
 			fileSize: 5000000
 		});
+		//alert(this.eformsID);
 
-		if (global.messageEditID != '') {
-			this.setState({
+		//if (global.messageEditID != '') {
+		if(true)
+		{
+		this.setState({
 				isEditing: true
-				// formikDefault: {
-				// 	selectedClass: [
-				// 		// {
-				// 		// 	FirstName: 'محمود ',
-				// 		// 	LastName: 'صلح جو ',
-				// 		// 	username: '^13',
-				// 		// 	coursename: 'آموزگار',
-				// 		// 	RowNumber: 4,
-				// 		// 	check: 'true'
-				// 		// },
-				// 		// {
-				// 		// 	FirstName: 'محمد ',
-				// 		// 	LastName: 'فتوحي ',
-				// 		// 	username: '^14',
-				// 		// 	coursename: 'آموزگار',
-				// 		// 	RowNumber: 5,
-				// 		// 	check: 'true'
-				// 		// }
-				// 	],
-
-				// 	image1: '',
-				// 	image1multipart: '',
-
-				// 	title: '1',
-				// 	sex: '1',
-				// 	img2: 'x',
-				// 	img2base64: '',
-				// 	img3: 'x',
-				// 	img3base64: '',
-				// 	img4: 'x',
-				// 	img4base64: '',
-				// 	//file1: 'x',
-				// 	file1base64: '',
-				// 	file2: 'x',
-				// 	file2base64: '',
-				// 	//title: 'Df',
-				// 	group: '23',
-				// 	matn: 'Dfdfdf',
-				// 	img1:
-				// 		'file:///Users/majidghasemi/Library/Developer/CoreSimulator/Devices/40A262B8-DE2E-449D-8148-811A548806E4/data/Containers/Data/Application/8053212C-37F9-4D42-A1E7-046D508A979E/Library/Caches/ExponentExperienceData/%2540anonymous%252Frn-starter-8b8388af-0e8e-4376-9f69-5520acec627c/ImagePicker/399E22B8-4796-4EA0-82B7-002CA4B63B01.jpg',
-				// 	img1base64: 'Uploaded file: BodyPart_a94fd892-6ddb-49c2-9476-c6aa0991bded (215169 bytes)\n'
-				// }
 			});
-			//	console.log('sdsdsdsdsdsds');
+			console.log('sdsdsdsdsdsds');
 
+			this.loadAPI(this.eformsID);
+			//if (isAdminForms == '') {
+			this.loadAPI_content(this.eformsID);
 			//}
-			// setTimeout(async () => {
-
-			// }, 2000);
 		}
 	}
 
 	loadAPI_content = async (eformsID) => {
 		//alert();
-
-		//console.log('mode  :  ' + this.state.readymode);
 		if (global.adress == 'undefined') {
 			GLOBAL.main.setState({ isModalVisible: true });
 		}
@@ -623,7 +496,7 @@ class eforms extends Component {
 		let uurl =
 			global.adress +
 			'/pApi.asmx/getFormId?fId=' +
-			this.eformsID +
+			eformsID +
 			'&p=' +
 			param +
 			'&dmn=' +
@@ -633,11 +506,12 @@ class eforms extends Component {
 			'&instanceid=' +
 			insID +
 			'&isadminform=' +
-			this.isAdminForms +
+			//this.isAdminForms +
+			'true' +
 			'&mode=' +
 			this.mode +
 			'&extra=' +
-			this.extra;
+			this.Extra;
 		console.log(uurl);
 		//alert();
 		try {
@@ -666,6 +540,15 @@ class eforms extends Component {
 
 					isEditing: false
 				}));
+
+				this.setState((prevState) => ({
+					formikDefault: {
+						...prevState.formikDefault,
+						parentid: this.parentid
+					}
+				}));
+
+				//console.log(this.state.formikDefault);
 
 				//.log('ddd' + retJson[0]);
 				//alert('dddd');
@@ -817,7 +700,7 @@ class eforms extends Component {
 		}
 	};
 	loadAPI = async (eformsID) => {
-		//console.log('sdsdsdsdsdsds');
+		console.log('sdsdsdsdsdsds');
 		const { navigation } = this.props;
 		const instanseID = navigation.getParam('instanseID');
 
@@ -848,7 +731,7 @@ class eforms extends Component {
 			'&mode=' +
 			this.mode +
 			'&extra=' +
-			this.extra;
+			this.Extra;
 		console.log(uurl);
 		//	console.log('sdsdsdsdsdsds');
 
@@ -876,77 +759,72 @@ class eforms extends Component {
 
 					isEditing: false
 				}));
-			}
-		} catch (e) {
-			console.log(e.message);
-			this.dropDownAlertRef.alertWithType('error', 'پیام', 'خطادر دستیابی به اطلاعات');
-			this.setState({
-				loading: false
-			});
-			return;
-		}
-	};
 
-	delAPI = async (eformsID) => {
-		//console.log('sdsdsdsdsdsds');
-		const { navigation } = this.props;
-		const instanseID = navigation.getParam('instanseID');
+				//alert(retJson[0]);
 
-		if (global.adress == 'undefined') {
-			GLOBAL.main.setState({ isModalVisible: true });
-		}
-		/* #region  check internet */
-		let state = await NetInfo.fetch();
-		if (!state.isConnected) {
-			this.setState({ issnackin: true });
-			return;
-		}
+				// if (this.state.formikDefault.img1 != '');
+				// {
+				// 	this.setState((prevState) => ({
+				// 		formikDefault: {
+				// 			...prevState.formikDefault,
+				// 			img1: getHttpAdress() + 'media/' + this.state.formikDefault.img1
+				// 		}
+				// 	}));
+				// }
 
-		/* #endregion */
+				// if (this.state.formikDefault.img1 != '');
+				// {
+				// 	this.setState((prevState) => ({
+				// 		formikDefault: {
+				// 			...prevState.formikDefault,
+				// 			img1: getHttpAdress() + 'media/' + this.state.formikDefault.img2
+				// 		}
+				// 	}));
+				// }
 
-		//this.setState({ loading: true });
-		let param = userInfo();
-		let uurl =
-			global.adress +
-			'/pApi.asmx/delForm?fId=' +
-			this.eformsID +
-			'&p=' +
-			param +
-			'&isAdminForms=' +
-			this.isAdminForms +
-			'&instanceid=' +
-			eformsID;
-		console.log(uurl);
-		//	console.log('sdsdsdsdsdsds');
+				// if (this.state.formikDefault.img3 != '');
+				// {
+				// 	this.setState((prevState) => ({
+				// 		formikDefault: {
+				// 			...prevState.formikDefault,
+				// 			img3: getHttpAdress() + 'media/' + this.state.formikDefault.img3
+				// 		}
+				// 	}));
+				// }
 
-		try {
-			const response = await fetch(uurl);
-			if (response.ok) {
-				let retJson = await response.json();
-				//alert(retJson[0].selectedClass[0].username);
-				if (Object.keys(retJson).length == 0) {
-					this.setState(
-						{
-							//isEditing: false
-						}
-					);
-					return;
-				}
+				// if (this.state.formikDefault.img4 != '');
+				// {
+				// 	this.setState((prevState) => ({
+				// 		formikDefault: {
+				// 			...prevState.formikDefault,
+				// 			img4: getHttpAdress() + 'media/' + this.state.formikDefault.img4
+				// 		}
+				// 	}));
+				// }
 
-				this.loadAPI(this.eformsID);
-				//if (isAdminForms == '') {
-				this.loadAPI_content(this.eformsID);
-				// this.setState({
-				// 	formikDefault: retJson,
+				// if (this.state.formikDefault.file1 != '');
+				// {
+				// 	this.setState((prevState) => ({
+				// 		formikDefault: {
+				// 			...prevState.formikDefault,
+				// 			file1: getHttpAdress() + 'media/' + this.state.formikDefault.file1
+				// 		}
+				// 	}));
+				// }
 
-				// 	isEditing: false
-				// });
+				// if (this.state.formikDefault.file2 != '');
+				// {
+				// 	this.setState((prevState) => ({
+				// 		formikDefault: {
+				// 			...prevState.formikDefault,
+				// 			file2: getHttpAdress() + 'media/' + this.state.formikDefault.file2
+				// 		}
+				// 	}));
+				// }
 
-				// this.setState((prevState) => ({
-				// 	formstruct: retJson,
+				//alert(this.state.formikDefault.selectedClass);
 
-				// 	isEditing: false
-				// }));
+				//	console.log('seeeexy:' + this.state.formikDefault[0].name);
 			}
 		} catch (e) {
 			console.log(e.message);
@@ -961,7 +839,6 @@ class eforms extends Component {
 		this.richHTML = html;
 		this.setState({ a: Math.random });
 	}
-
 	loadAPIFill = async (fill, id) => {
 		//console.log('sdsdsdsdsdsds');
 		const { navigation } = this.props;
@@ -994,7 +871,9 @@ class eforms extends Component {
 			'&fill=' +
 			fill +
 			'&id=' +
-			id;
+			id +
+			'&extra=' +
+			this.Extra;
 		console.log(uurl);
 		//console.log('sdsdsdsdsdsds');
 
@@ -1053,12 +932,7 @@ class eforms extends Component {
 				[this.state.activeTime]: toFarsi(`${hour}:${minute}`)
 			}
 		}));
-		try {
-			this.TimePicker.close();
-		} catch (e) {}
-		try {
-			this.TimePicker180.close();
-		} catch (e) {}
+		this.TimePicker.close();
 	}
 	apiPost = async (jsonstr) => {
 		/* #region  check internet */
@@ -1100,70 +974,102 @@ class eforms extends Component {
 			'&json=' +
 			jsonstr +
 			'&formid=' +
-			this.eformsID +
-			'&isAdminForms=' +
-			this.isAdminForms +
-			'&extra=' +
-			this.extra;
+			this.state.formid +
+			'&isAdminForms=true' +
+			this.isAdminForms;
 		console.log(uurl);
-		try {
-			const response = await fetch(uurl);
-			if (response.ok) {
-				let retJson = await response.json();
-				if (Object.keys(retJson).length == 0) {
-					this.setState({
-						loading: false,
-						savepress: false,
-						saveenable: false
-					});
-					return;
-				}
-				//alert(retJson.msg);
-				if (retJson.result == 'err') {
-					alert(retJson.msg);
-					this.setState({
-						//fulldata: retJson,
-						//butcaption: retJson.msg,
-						loading: false,
-						savepress: false,
-						saveenable: false
-					});
-
-					return;
-				}
+		//try {
+		const response = await fetch(uurl);
+		if (response.ok) {
+			let retJson = await response.json();
+			if (Object.keys(retJson).length == 0) {
 				this.setState({
-					//fulldata: retJson,
-					butcaption: retJson.msg,
 					loading: false,
 					savepress: false,
-					saveenable: true
+					saveenable: false
+				});
+				return;
+			}
+			//alert(retJson.msg);
+			this.setState({
+				//fulldata: retJson,
+				//** */	butcaption: retJson.msg,
+				loading: false,
+				savepress: false,
+				saveenable: true
+			});
+			if (this.referer == 'mounth') {
+				//alert();
+				this.setState({
+					butcaption: retJson.msg
 				});
 
+				GLOBAL.monthgrade.setState({
+					maindata: update(GLOBAL.monthgrade.state.maindata, {
+						[global.fix_col]: {
+							days: {
+								[global.fix_row]: { $set: { grade: retJson.id, day: '' } }
+							}
+						}
+					})
+				});
+				//GLOBAL.closeModal2();
+				GLOBAL.monthgrade.refs.modal1.close();
+			}
+
+			// GLOBAL.fixedtable.setState({
+			// 	maindata: update(GLOBAL.fixedtable.state.maindata, {
+			// 		[global.fix_col]: { days: { [global.fix_row]: { disc: { $splice: [ [ 0, 1 ] ] } } } }
+			// 	})
+			// });
+
+			if (this.referer == 'sheet') {
+				GLOBAL.fixedtable.setState({
+					maindata: update(GLOBAL.fixedtable.state.maindata, {
+						[global.fix_col]: {
+							days: {
+								[global.fix_row]: { disc: { $set: retJson } }
+							}
+						}
+					})
+				});
+				//GLOBAL.closeModal2();
+				GLOBAL.fixedtable.refs.modal2.close();
+			}
+
+			if (this.goBack) {
+				if (this.goBack == 'true')
+					setTimeout(async () => {
+						const { navigation } = this.props;
+						navigation.goBack(null);
+					}, 1000);
+			} else {
 				setTimeout(async () => {
 					const { navigation } = this.props;
 					navigation.goBack(null);
 				}, 1000);
-				//alert(retJson[0].id_azmoon);
-
-				// const elementsIndex = this.state.answers.findIndex((element) => element.id == '125-7');
-				// let newArray = [ ...this.state.answers ];
-				// newArray[elementsIndex] = { ...newArray[elementsIndex], pasokh: '666' };
-				// this.setState({
-				// 	answers: newArray
-				// });
-
-				// console.log(this.state.answers);
 			}
-		} catch (e) {
-			console.log('err9999999');
-			//this.dropDownAlertRef.alertWithType('error', 'پیام', 'خطادر دستیابی به اطلاعات');
-			this.setState({
-				loading: false,
-				savepress: false,
-				saveenable: false
-			});
-			return;
+			//alert(retJson[0].id_azmoon);
+
+			// const elementsIndex = this.state.answers.findIndex((element) => element.id == '125-7');
+			// let newArray = [ ...this.state.answers ];
+			// newArray[elementsIndex] = { ...newArray[elementsIndex], pasokh: '666' };
+			// this.setState({
+			// 	answers: newArray
+			// });
+
+			// console.log(this.state.answers);
 		}
+		// } catch (e) {
+		// 	console.log('err9999999');
+		// 	//this.dropDownAlertRef.alertWithType('error', 'پیام', 'خطادر دستیابی به اطلاعات');
+		// 	this.setState({
+		// 		loading: false,
+		// 		savepress: false,
+		// 		saveenable: false
+		// 	});
+		// 	return;
+		// }
 	};
 
 	handleimgpress = () => {};
@@ -1179,23 +1085,6 @@ class eforms extends Component {
 			Linking.openURL(data);
 			//getHttpAdress() + 'media/' +
 		}
-	};
-
-	onAddItem = (newItemsList) => {
-		console.log('onAddItem - newItemsList: ', newItemsList);
-		this.setState({
-			selectText: newItemsList[newItemsList.length - 1],
-			itemsList: newItemsList,
-			selectedItems: newItemsList[newItemsList.length - 1]
-		});
-	};
-	onCancel = () => {
-		try {
-			this.TimePicker.close();
-		} catch (e) {}
-		try {
-			this.TimePicker180.close();
-		} catch (e) {}
 	};
 	handeleUploadfile = async ([ item ]) => {
 		if (this.state.formikDefault[item.mobileurl] != '' && this.state.formikDefault[item.mobileurl] != undefined) {
@@ -1263,9 +1152,16 @@ class eforms extends Component {
 
 			const xhr = new XMLHttpRequest();
 			// xhr.open('POST', global.adress.replace(':8080', '') + '' + ':8181' + '/api/upload');
-			//xhr.open('POST', global.adress.replace(':8080', '') + '' + ':8181' + '/api/upload');
-			xhr.open('POST', global.adress.replace('/papi', ':8181') + '' + '' + '/api/upload');
+			//	xhr.open('POST', global.adress.replace(':8080', '') + '' + ':8181' + '/api/upload');
+			// xhr.open(
+			// 	'POST',
+			// 	global.adress.replace('/papi', ':8181') +
+			// 		'' +
+			// 		'' +
+			// 		'/api/upload'
+			// );
 
+			xhr.open('POST', global.adress.replace('/papi', ':8181') + '' + '' + '/api/upload');
 			console.log('startmajid!');
 			xhr.onload = () => {
 				console.log('end!');
@@ -1403,13 +1299,12 @@ class eforms extends Component {
 	};
 	render() {
 		let test = [
-			{ fid: '6', name: 'کادر متنی', code: 'white', icon: 'format-line-weight', bkcolor: '#e091ca' },
-			{ fid: '7', name: 'لیست انتخابی', code: 'white', icon: 'format-line-weight', bkcolor: '#fbb97c' },
-			{ fid: '11', name: 'ویرایشگر متن', code: 'white', icon: 'format-line-weight', bkcolor: '#f79383' },
-			{ fid: '8', name: 'چک باکس ', code: 'white', icon: 'format-line-weight', bkcolor: '#34ace0' },
-			{ fid: '9', name: 'بارگزاری فایل', code: 'white', icon: 'format-line-weight', bkcolor: '#34ace0' },
-			{ fid: '10', name: ' انتخاب تاریخ', code: 'white', icon: 'format-line-weight', bkcolor: '#34ace0' }
-			// { name: ' انتخاب ساعت', code: 'white', icon: 'md-checkmark-circle-outline', bkcolor: '#34ace0' }
+			{ name: 'حاضر', code: 'white', icon: 'ios-list', bkcolor: '#e091ca' },
+			{ name: 'غایب', code: 'white', icon: 'ios-add-circle-outline', bkcolor: '#fbb97c' },
+			{ name: 'تاخیر', code: 'white', icon: 'ios-settings', bkcolor: '#f79383' },
+			{ name: 'ثبت ارزشیابی', code: 'white', icon: 'md-checkmark-circle-outline', bkcolor: '#34ace0' },
+			{ name: 'ثبت نمره', code: 'white', icon: 'md-checkmark-circle-outline', bkcolor: '#34ace0' },
+			{ name: 'ثبت عکس', code: 'white', icon: 'md-checkmark-circle-outline', bkcolor: '#34ace0' }
 		];
 		//const { otherParam } = route.params;
 		// if (this.props.formstruct.length == undefined || !this.state.formikDefault)
@@ -1519,84 +1414,24 @@ class eforms extends Component {
 										if (item.type == 'editor')
 											return (
 												<React.Fragment key={item.id}>
-													<View style={{ flexDirection: 'row' }}>
-														{this.mode == 'design' && (
-															<TouchableOpacity
-																onPress={() => {
-																	const { navigate } = this.props.navigation;
-																	navigate('eforms2', {
-																		eformsID: 11,
-																		instanseID: item.id.replace('editor', ''),
-																		stdID: 0,
-																		mode: 'view',
-																		isAdminForms: 'true',
-																		parentid: this.eformsID
-																	});
-																}}
-															>
-																<IconFeather
-																	style={{ marginStart: 15 }}
-																	name="settings"
-																	size={20}
-																	color={defaultStyles.colors.medium}
-																/>
-															</TouchableOpacity>
-														)}
+													<Text
+														style={[
+															defaultStyles.lbl16,
+															,
+															styles.capstyle,
+															{
+																textAlign: 'left',
+																paddingEnd: 20,
+																paddingStart: 20,
 
-														{this.mode == 'design' && (
-															<TouchableOpacity
-																style={{ alignContent: 'center', marginBottom: 5 }}
-																onPress={() => {
-																	Alert.alert(
-																		' اخطار',
-																		'آیا مایل به حذف این فیلد هستید؟',
-																		[
-																			{
-																				text: 'خیر',
-																				//onPress: () => console.log('Cancel Pressed'),
-																				style: 'cancel'
-																			},
-																			{
-																				text: 'بله',
-																				onPress: () => {
-																					this.delAPI(
-																						item.id.replace('editor', '')
-																					);
-																				}
-																			}
-																		],
-																		{ cancelable: false }
-																	);
-																}}
-															>
-																<IconFeather
-																	style={{ marginStart: 15, alignSelf: 'center' }}
-																	name="trash-2"
-																	size={20}
-																	color={'red'}
-																/>
-															</TouchableOpacity>
-														)}
-
-														<Text
-															style={[
-																defaultStyles.lbl16,
-																,
-																styles.capstyle,
-																{
-																	textAlign: 'left',
-																	paddingEnd: 20,
-																	paddingStart: 20,
-
-																	paddingBottom: 0,
-																	fontSize: 13,
-																	color: 'black'
-																}
-															]}
-														>
-															{item.caption}
-														</Text>
-													</View>
+																paddingBottom: 0,
+																fontSize: 13,
+																color: 'black'
+															}
+														]}
+													>
+														{item.caption}
+													</Text>
 
 													{/* <Button
 														title={item.id}
@@ -1641,6 +1476,7 @@ class eforms extends Component {
 														ref={(view) => (this[`sectionItem${item.id}`] = view)}
 														javaScriptEnabled={true}
 														source={{
+															//	uri: 'http://192.168.1.15/editor.aspx?ref=' + item.id
 															uri:
 																global.adress.replace('papi', '') +
 																'editor.aspx?ref=' +
@@ -1668,85 +1504,30 @@ class eforms extends Component {
 											return (
 												<React.Fragment key={item.id}>
 													<View style={{ flexDirection: 'row' }}>
-														{this.mode == 'design' && (
-															<TouchableOpacity
-																onPress={() => {
-																	const { navigate } = this.props.navigation;
-																	navigate('eforms2', {
-																		eformsID: 6,
-																		instanseID: item.id.replace('txtbx', ''),
-																		stdID: 0,
-																		mode: 'view',
-																		isAdminForms: 'true',
-																		parentid: this.eformsID
-																	});
-																}}
-															>
-																<IconFeather
-																	style={{ marginStart: 15 }}
-																	name="settings"
-																	size={20}
-																	color={defaultStyles.colors.medium}
-																/>
-															</TouchableOpacity>
-														)}
+														{/* <Icon
+															style={{ marginStart: 15 }}
+															name="pencil"
+															size={20}
+															color={defaultStyles.colors.medium}
+														/> */}
+														<Text
+															style={[
+																defaultStyles.lbl16,
+																,
+																styles.capstyle,
+																{
+																	textAlign: 'left',
+																	paddingEnd: 20,
+																	paddingStart: 20,
 
-														{this.mode == 'design' && (
-															<TouchableOpacity
-																style={{ alignContent: 'center', marginBottom: 5 }}
-																onPress={() => {
-																	Alert.alert(
-																		' اخطار',
-																		'آیا مایل به حذف این فیلد هستید؟',
-																		[
-																			{
-																				text: 'خیر',
-																				//onPress: () => console.log('Cancel Pressed'),
-																				style: 'cancel'
-																			},
-																			{
-																				text: 'بله',
-																				onPress: () => {
-																					this.delAPI(
-																						item.id.replace('txtbx', '')
-																					);
-																				}
-																			}
-																		],
-																		{ cancelable: false }
-																	);
-																}}
-															>
-																<IconFeather
-																	style={{ marginStart: 15, alignSelf: 'center' }}
-																	name="trash-2"
-																	size={20}
-																	color={'red'}
-																/>
-															</TouchableOpacity>
-														)}
-														<View>
-															<Text
-																//lineBreakMode="clip"
-																numberOfLines={5}
-																style={[
-																	defaultStyles.lbl16,
-																	,
-																	styles.capstyle,
-																	{
-																		textAlign: 'left',
-																		paddingEnd: 20,
-																		paddingStart: 20,
-
-																		paddingBottom: 0,
-																		fontSize: 13,
-																		color: 'black'
-																	}
-																]}
-															>
-																{item.caption}
-															</Text>
-														</View>
+																	paddingBottom: 0,
+																	fontSize: 13,
+																	color: 'black'
+																}
+															]}
+														>
+															{item.caption}
+														</Text>
 													</View>
 
 													{/* <RichToolbar
@@ -1809,7 +1590,6 @@ class eforms extends Component {
 														numberOfLines={item.multiline ? 1 : 4}
 														autoCorrect={false}
 														keyboardType={item.keyboardType}
-														//keyboardType={'numeric'}
 														value={values[item.id]}
 														onChangeText={handleChange(item.id)}
 														onEndEditing={(e) => {
@@ -1841,7 +1621,7 @@ class eforms extends Component {
 														inputContainerStyle={[
 															defaultStyles.inputc,
 															defaultStyles.shadow,
-															item.multiline ? { height: 190, borderRadius: 15 } : {}
+															item.multiline ? { height: 150, borderRadius: 15 } : {}
 														]}
 														inputStyle={[
 															defaultStyles.inputStyle1,
@@ -1861,7 +1641,7 @@ class eforms extends Component {
 																? {
 																		padding: 10,
 
-																		height: 190
+																		height: 150
 																	}
 																: null
 														]}
@@ -1875,86 +1655,25 @@ class eforms extends Component {
 											);
 										else if (item.type == 'time')
 											return (
-												<View key={item.id}>
-													<View style={{ flexDirection: 'row' }}>
-														{this.mode == 'design' && (
-															<TouchableOpacity
-																onPress={() => {
-																	const { navigate } = this.props.navigation;
-																	navigate('eforms2', {
-																		eformsID: 10,
-																		instanseID: item.id.replace('txtbx', ''),
-																		stdID: 0,
-																		mode: 'view',
-																		isAdminForms: 'true',
-																		parentid: this.eformsID
-																	});
-																}}
-															>
-																<IconFeather
-																	style={{ marginStart: 15 }}
-																	name="settings"
-																	size={20}
-																	color={defaultStyles.colors.medium}
-																/>
-															</TouchableOpacity>
-														)}
+												<View>
+													<Text
+														style={[
+															defaultStyles.lbl16,
+															,
+															styles.capstyle,
+															{
+																textAlign: 'left',
+																paddingEnd: 20,
+																paddingStart: 20,
 
-														{this.mode == 'design' && (
-															<TouchableOpacity
-																style={{ alignContent: 'center', marginBottom: 5 }}
-																onPress={() => {
-																	Alert.alert(
-																		' اخطار',
-																		'آیا مایل به حذف این فیلد هستید؟',
-																		[
-																			{
-																				text: 'خیر',
-																				//onPress: () => console.log('Cancel Pressed'),
-																				style: 'cancel'
-																			},
-																			{
-																				text: 'بله',
-																				onPress: () => {
-																					this.delAPI(
-																						item.id.replace('txtbx', '')
-																					);
-																				}
-																			}
-																		],
-																		{ cancelable: false }
-																	);
-																}}
-															>
-																<IconFeather
-																	style={{ marginStart: 15, alignSelf: 'center' }}
-																	name="trash-2"
-																	size={20}
-																	color={'red'}
-																/>
-															</TouchableOpacity>
-														)}
-
-														<Text
-															style={[
-																defaultStyles.lbl16,
-																,
-																styles.capstyle,
-																{
-																	textAlign: 'left',
-																	paddingEnd: 20,
-																	paddingStart: 20,
-
-																	paddingBottom: 0,
-																	fontSize: 13,
-																	color: 'black'
-																}
-															]}
-														>
-															{item.caption}
-														</Text>
-													</View>
-
+																paddingBottom: 0,
+																fontSize: 13,
+																color: 'black'
+															}
+														]}
+													>
+														{item.caption}
+													</Text>
 													{/* <DateTimePickerModal
 														isVisible={this.state.isDatePickerVisible}
 														mode="time"
@@ -1966,8 +1685,7 @@ class eforms extends Component {
 
 													<Input
 														onFocus={() => {
-															if (item.extra != '') this.TimePicker180.open();
-															else this.TimePicker.open();
+															this.TimePicker.open();
 															this.setState({ activeTime: item.id });
 															Keyboard.dismiss();
 														}}
@@ -2013,22 +1731,6 @@ class eforms extends Component {
 															this.TimePicker = ref;
 														}}
 														textCancel="انصراف"
-														//minuteUnit={item.extra == '' ? item.extra : 'rrr'}
-														//maxHour={item.extra == '' ? 180 : 23}
-														textConfirm="تایید"
-														selectedHour={this.state.sh_hour}
-														selectedMinute={this.state.sh_min}
-														onCancel={() => this.onCancel()}
-														onConfirm={(hour, minute) => this.onConfirm(hour, minute)}
-													/>
-													<TimePicker
-														ref={(ref) => {
-															this.TimePicker180 = ref;
-														}}
-														textCancel="انصراف"
-														minuteUnit={'ثانیه'}
-														hourUnit={'دقیقه'}
-														maxHour={180}
 														textConfirm="تایید"
 														selectedHour={this.state.sh_hour}
 														selectedMinute={this.state.sh_min}
@@ -2039,86 +1741,25 @@ class eforms extends Component {
 											);
 										else if (item.type == 'date')
 											return (
-												<View key={item.id} key={item.id}>
-													<View style={{ flexDirection: 'row' }}>
-														{this.mode == 'design' && (
-															<TouchableOpacity
-																onPress={() => {
-																	const { navigate } = this.props.navigation;
-																	navigate('eforms2', {
-																		eformsID: 10,
-																		instanseID: item.id.replace('txtbx', ''),
-																		stdID: 0,
-																		mode: 'view',
-																		isAdminForms: 'true',
-																		parentid: this.eformsID
-																	});
-																}}
-															>
-																<IconFeather
-																	style={{ marginStart: 15 }}
-																	name="settings"
-																	size={20}
-																	color={defaultStyles.colors.medium}
-																/>
-															</TouchableOpacity>
-														)}
+												<View>
+													<Text
+														style={[
+															defaultStyles.lbl16,
+															,
+															styles.capstyle,
+															{
+																textAlign: 'left',
+																paddingEnd: 20,
+																paddingStart: 20,
 
-														{this.mode == 'design' && (
-															<TouchableOpacity
-																style={{ alignContent: 'center', marginBottom: 5 }}
-																onPress={() => {
-																	Alert.alert(
-																		' اخطار',
-																		'آیا مایل به حذف این فیلد هستید؟',
-																		[
-																			{
-																				text: 'خیر',
-																				//onPress: () => console.log('Cancel Pressed'),
-																				style: 'cancel'
-																			},
-																			{
-																				text: 'بله',
-																				onPress: () => {
-																					this.delAPI(
-																						item.id.replace('txtbx', '')
-																					);
-																				}
-																			}
-																		],
-																		{ cancelable: false }
-																	);
-																}}
-															>
-																<IconFeather
-																	style={{ marginStart: 15, alignSelf: 'center' }}
-																	name="trash-2"
-																	size={20}
-																	color={'red'}
-																/>
-															</TouchableOpacity>
-														)}
-
-														<Text
-															style={[
-																defaultStyles.lbl16,
-																,
-																styles.capstyle,
-																{
-																	textAlign: 'left',
-																	paddingEnd: 20,
-																	paddingStart: 20,
-
-																	paddingBottom: 0,
-																	fontSize: 13,
-																	color: 'black'
-																}
-															]}
-														>
-															{item.caption}
-														</Text>
-													</View>
-
+																paddingBottom: 0,
+																fontSize: 13,
+																color: 'black'
+															}
+														]}
+													>
+														{item.caption}
+													</Text>
 													<Input
 														onFocus={() => {
 															Keyboard.dismiss();
@@ -2194,111 +1835,30 @@ class eforms extends Component {
 											);
 										else if (item.type == 'combobox1')
 											return (
-												<View key={item.id} style={{ flex: 1 }}>
-													<View style={{ flexDirection: 'row' }}>
-														{this.mode == 'design' && (
-															<TouchableOpacity
-																onPress={() => {
-																	const { navigate } = this.props.navigation;
-																	navigate('eforms2', {
-																		eformsID: 7,
-																		instanseID: item.id.replace('drp', ''),
-																		stdID: 0,
-																		mode: 'view',
-																		isAdminForms: 'true',
-																		parentid: this.eformsID
-																	});
-																}}
-															>
-																<IconFeather
-																	style={{ marginStart: 15, marginTop: 10 }}
-																	name="settings"
-																	size={20}
-																	color={defaultStyles.colors.medium}
-																/>
-															</TouchableOpacity>
-														)}
-
-														{this.mode == 'design' && (
-															<TouchableOpacity
-																style={{ alignContent: 'center', marginTop: 10 }}
-																onPress={() => {
-																	Alert.alert(
-																		' اخطار',
-																		'آیا مایل به حذف این فیلد هستید؟',
-																		[
-																			{
-																				text: 'خیر',
-																				//onPress: () => console.log('Cancel Pressed'),
-																				style: 'cancel'
-																			},
-																			{
-																				text: 'بله',
-																				onPress: () => {
-																					this.delAPI(
-																						item.id.replace('drp', '')
-																					);
-																				}
-																			}
-																		],
-																		{ cancelable: false }
-																	);
-																}}
-															>
-																<IconFeather
-																	style={{ marginStart: 15, alignSelf: 'center' }}
-																	name="trash-2"
-																	size={20}
-																	color={'red'}
-																/>
-															</TouchableOpacity>
-														)}
-														<Text
-															style={[
-																defaultStyles.lbl16,
-																,
-																styles.capstyle,
-																{
-																	textAlign: 'left',
-																	paddingEnd: 20,
-																	paddingStart: 20,
-																	marginTop: 13,
-																	paddingBottom: Platform.OS === 'ios' ? 0 : 5,
-																	fontSize: 13,
-																	color: 'black'
-																}
-															]}
-														>
-															{item.caption}
-														</Text>
-													</View>
+												<View style={{ flex: 1 }}>
+													<Text
+														style={[
+															defaultStyles.lbl16,
+															,
+															styles.capstyle,
+															{
+																textAlign: 'left',
+																paddingEnd: 20,
+																paddingStart: 20,
+																marginTop: 10,
+																paddingBottom: Platform.OS === 'ios' ? 0 : 5,
+																fontSize: 13,
+																color: 'black'
+															}
+														]}
+													>
+														{item.caption}
+													</Text>
 													<MultiSelect
 														//hideTags
-														textInputProps={{
-															editable: item.type2 == 'studentlist' ? true : false
-														}}
-														searchInputPlaceholderText=""
-														searchIcon={false}
-														//canAddItems={true}
-														items={item.options}
-														uniqueKey="id"
-														ref={(component) => {
-															this.multiSelect = component;
-														}}
-														//onSelectedItemsChange={this.onSelectedItemsChange}
-														onAddItem={this.onAddItem}
-														// onAddItem={(e) => {
-														// 	console.log('onAddItem - newItemsList: ', e);
-														// 	this.setState((prevState) => ({
-														// 		formikDefault: {
-														// 			...prevState.formikDefault,
-														// 			[item.id]: e
-														// 		}
-														// 	}));
 
-														// }}
-
-														onSelectedItemsChange={(e) => {
+														onAddItem={(e) => {
+															console.log('onAddItem - newItemsList: ', e);
 															this.setState((prevState) => ({
 																formikDefault: {
 																	...prevState.formikDefault,
@@ -2306,16 +1866,28 @@ class eforms extends Component {
 																}
 															}));
 														}}
-														// onSelectedItemsChange={(selectedItems) => {
-														// 	console.log(
-														// 		'onSelectedItemsChange - SelectedItems: ',
-														// 		selectedItems
-														// 	);
-														// 	this.setState({
-														// 		selectText: selectedItems[0],
-														// 		selectedItems: selectedItems
-														// 	});
-														// }}
+														items={item.options}
+														canAddItems={true}
+														uniqueKey="id"
+														ref={(component) => {
+															this.multiSelect = component;
+														}}
+														//onSelectedItemsChange={this.onSelectedItemsChange}
+														onSelectedItemsChange={(e) => {
+															this.setState((prevState) => ({
+																formikDefault: {
+																	...prevState.formikDefault,
+																	[item.id]: e
+																}
+															}));
+
+															// this.setState((prevState) => ({
+															// 	formstruct: {
+															// 		...prevState.formstruct,
+															// 		[item.selected]: e
+															// 	}
+															// }));
+														}}
 														selectedItems={values[item.id]}
 														selectText="انتخاب کنید"
 														searchInputPlaceholderText="جستجو"
@@ -2337,14 +1909,12 @@ class eforms extends Component {
 																this.loadAPISTD(e);
 															}
 														}}
-														iconSearch="search"
 														fontFamily="iransans"
 														itemFontFamily="iransans"
 														selectedItemFontFamily="iransans"
 														styleMainWrapper={{
 															marginRight: 15,
 															marginLeft: 15,
-															marginBottom: 15,
 															borderWidth: 1,
 															borderRadius: 15,
 															borderColor: '#ccc'
@@ -2363,7 +1933,7 @@ class eforms extends Component {
 														}}
 														styleDropdownMenuSubsection={{
 															//backgroundColor: 'red',
-															//fontFamily: 'iransans',
+															fontFamily: 'iransans',
 															borderTopLeftRadius: 15,
 															borderTopRightRadius: 15,
 															borderBottomRightRadius: 15,
@@ -2378,105 +1948,42 @@ class eforms extends Component {
 															this.multiselect.getSelectedItemsExt()
 														) : null}
 													</View>
-													<ErrorMessage
-														style={{ borderWidth: 1 }}
-														errorValue={errors[item.id]}
-													/>
+
 													{/* <MultiSelect
-														items={this.state.itemsList}
+														items={[ 'jk', 'j' ]}
 														uniqueKey="id"
 														ref={(component) => {
-															this.multiSelect = component;
+															this.multiSelect1 = component;
 														}}
-														single={true}
 														hideSubmitButton={true}
-														selectText={this.state.selectText}
+														//	selectText={this.state.selectText}
 														searchInputPlaceholderText="Type or select a Role"
 														filterMethod="full"
 														canAddItems={true}
 														onAddItem={this.onAddItem}
-														onSelectedItemsChange={this.onSelectedItemsChange}
+														//onSelectedItemsChange={this.onSelectedItemsChange}
 													/> */}
 												</View>
 											);
 										else if (item.type == 'combobox')
 											return (
 												<View key={item.id}>
-													<View style={{ flexDirection: 'row' }}>
-														{this.mode == 'design' && (
-															<TouchableOpacity
-																onPress={() => {
-																	const { navigate } = this.props.navigation;
-																	navigate('eforms2', {
-																		eformsID: 7,
-																		instanseID: item.id.replace('drp', ''),
-																		stdID: 0,
-																		mode: 'view',
-																		isAdminForms: 'true',
-																		parentid: this.eformsID
-																	});
-																}}
-															>
-																<IconFeather
-																	style={{ marginStart: 15 }}
-																	name="settings"
-																	size={20}
-																	color={defaultStyles.colors.medium}
-																/>
-															</TouchableOpacity>
-														)}
-
-														{this.mode == 'design' && (
-															<TouchableOpacity
-																onPress={() => {
-																	Alert.alert(
-																		' اخطار',
-																		'آیا مایل به حذف این فیلد هستید؟',
-																		[
-																			{
-																				text: 'خیر',
-																				//onPress: () => console.log('Cancel Pressed'),
-																				style: 'cancel'
-																			},
-																			{
-																				text: 'بله',
-																				onPress: () => {
-																					this.delAPI(
-																						item.id.replace('drp', '')
-																					);
-																				}
-																			}
-																		],
-																		{ cancelable: false }
-																	);
-																}}
-															>
-																<IconFeather
-																	style={{ marginStart: 15 }}
-																	name="trash-2"
-																	size={20}
-																	color={'red'}
-																/>
-															</TouchableOpacity>
-														)}
-
-														<Text
-															style={[
-																defaultStyles.lbl16,
-																,
-																styles.capstyle,
-																{
-																	textAlign: 'left',
-																	paddingLeft: 15,
-																	marginTop: 0,
-																	fontSize: 14,
-																	color: '#000'
-																}
-															]}
-														>
-															{item.caption}
-														</Text>
-													</View>
+													<Text
+														style={[
+															defaultStyles.lbl16,
+															,
+															styles.capstyle,
+															{
+																textAlign: 'left',
+																paddingLeft: 15,
+																marginTop: 0,
+																fontSize: 14,
+																color: '#000'
+															}
+														]}
+													>
+														{item.caption}
+													</Text>
 
 													<View style={[ defaultStyles.shadow, defaultStyles.viewBtn ]}>
 														<RNPickerSelect
@@ -2567,23 +2074,11 @@ class eforms extends Component {
 														}}
 														//selectMultiple={true}
 														selectedIndex={values[item.id]}
-														buttonStyle={[ defaultStyles.shadow33, { borderRadius: 45 } ]}
+														buttonStyle={[ defaultStyles.shadow, { borderRadius: 45 } ]}
 														textStyle={{ fontFamily: 'iransans' }}
 														buttons={item.options}
 														innerBorderStyle={{ borderWidth: 4, color: 'white' }}
-														containerStyle={{
-															height: 50,
-															borderRadius: 45,
-															borderWidth: 1,
-															padding: 3,
-															shadowOffset: {
-																width: 5,
-																height: 5
-															},
-															shadowOpacity: 0,
-															shadowRadius: 0,
-															elevation: 0
-														}}
+														containerStyle={{ height: 50, borderRadius: 45 }}
 													/>
 
 													<ErrorMessage
@@ -2595,65 +2090,6 @@ class eforms extends Component {
 										else if (item.type == 'checkbox')
 											return (
 												<View key={item.id} style={{ flexDirection: 'row' }}>
-													{this.mode == 'design' && (
-														<TouchableOpacity
-															onPress={() => {
-																const { navigate } = this.props.navigation;
-																navigate('eforms2', {
-																	eformsID: 8,
-																	instanseID: item.id.replace('chk', ''),
-																	stdID: 0,
-																	mode: 'view',
-																	isAdminForms: 'true',
-																	parentid: this.eformsID
-																});
-															}}
-														>
-															<IconFeather
-																style={{ marginStart: 15, marginTop: 10 }}
-																name="settings"
-																size={20}
-																color={defaultStyles.colors.medium}
-															/>
-														</TouchableOpacity>
-													)}
-
-													{this.mode == 'design' && (
-														<TouchableOpacity
-															style={{ alignContent: 'center', marginBottom: 5 }}
-															onPress={() => {
-																Alert.alert(
-																	' اخطار',
-																	'آیا مایل به حذف این فیلد هستید؟',
-																	[
-																		{
-																			text: 'خیر',
-																			//onPress: () => console.log('Cancel Pressed'),
-																			style: 'cancel'
-																		},
-																		{
-																			text: 'بله',
-																			onPress: () => {
-																				this.delAPI(item.id.replace('chk', ''));
-																			}
-																		}
-																	],
-																	{ cancelable: false }
-																);
-															}}
-														>
-															<IconFeather
-																style={{
-																	marginStart: 15,
-																	alignSelf: 'center',
-																	marginTop: 10
-																}}
-																name="trash-2"
-																size={20}
-																color={'red'}
-															/>
-														</TouchableOpacity>
-													)}
 													<Switch
 														key={item.id}
 														style={{
@@ -2680,9 +2116,7 @@ class eforms extends Component {
 														}}
 														value={values[item.id] == 'True' ? true : false}
 													/>
-													{/* <View> */}
 													<Text
-														//numberOfLines={5}
 														style={[
 															defaultStyles.lbl16,
 															,
@@ -2690,8 +2124,6 @@ class eforms extends Component {
 															{
 																textAlign: 'left',
 																paddingLeft: 5,
-																paddingRight: 15,
-
 																marginTop: 10,
 																fontSize: 14,
 																color: defaultStyles.colors.medium
@@ -2700,348 +2132,213 @@ class eforms extends Component {
 													>
 														{item.caption}
 													</Text>
-													{/* </View> */}
 												</View>
 											);
 										else if (item.type == 'image')
 											return (
-												<View key={item.mobileurl}>
-													<View style={{ flexDirection: 'row' }}>
-														{this.mode == 'design' && (
-															<TouchableOpacity
-																onPress={() => {
-																	const { navigate } = this.props.navigation;
-																	navigate('eforms2', {
-																		eformsID: 9,
-																		instanseID: item.mobileurl.replace('image', ''),
-																		stdID: 0,
-																		mode: 'view',
-																		isAdminForms: 'true',
-																		parentid: this.eformsID
-																	});
-																}}
-															>
-																<IconFeather
-																	style={{ marginStart: 15, marginTop: 15 }}
-																	name="settings"
-																	size={20}
-																	color={defaultStyles.colors.medium}
-																/>
-															</TouchableOpacity>
-														)}
-
-														{this.mode == 'design' && (
-															<TouchableOpacity
-																onPress={() => {
-																	Alert.alert(
-																		' اخطار',
-																		'آیا مایل به حذف این فیلد هستید؟',
-																		[
-																			{
-																				text: 'خیر',
-																				//onPress: () => console.log('Cancel Pressed'),
-																				style: 'cancel'
-																			},
-																			{
-																				text: 'بله',
-																				onPress: () => {
-																					this.delAPI(
-																						item.mobileurl.replace(
-																							'image',
-																							''
-																						)
-																					);
-																				}
-																			}
-																		],
-																		{ cancelable: false }
-																	);
-																}}
-															>
-																<IconFeather
-																	style={{ marginStart: 15, marginTop: 15 }}
-																	name="trash-2"
-																	size={20}
-																	color={'red'}
-																/>
-															</TouchableOpacity>
-														)}
-													</View>
-
-													<View
-														style={{
-															flexDirection: 'column',
-															alignItems: 'center',
-															borderWidth: 1,
-															margin: 15,
-															borderRadius: 15,
-															borderColor: '#ccc',
-															justifyContent: 'space-evenly'
-														}}
+												<View
+													style={{
+														flexDirection: 'column',
+														alignItems: 'center',
+														borderWidth: 1,
+														margin: 15,
+														borderRadius: 15,
+														borderColor: '#ccc',
+														justifyContent: 'space-evenly'
+													}}
+												>
+													<Text
+														style={[
+															defaultStyles.lbl16,
+															,
+															styles.capstyle,
+															{
+																textAlign: 'left',
+																paddingLeft: 15,
+																marginTop: 15,
+																fontSize: 14,
+																color: defaultStyles.colors.medium
+															}
+														]}
 													>
-														<Text
-															style={[
-																defaultStyles.lbl16,
-																,
-																styles.capstyle,
-																{
-																	textAlign: 'left',
-																	paddingLeft: 15,
-																	marginTop: 15,
-																	fontSize: 14,
-																	color: defaultStyles.colors.medium
-																}
-															]}
-														>
-															{item.caption}
-														</Text>
+														{item.caption}
+													</Text>
 
-														<Uploadimg
-															key={item.id}
-															//key={1}
-															progressnum={this.state.formikDefault[item.progress]}
-															onDelete={() => {
-																this.setState((prevState) => ({
-																	formikDefault: {
-																		...prevState.formikDefault,
-																		[item.mobileurl]: 'x',
-																		[item.multipart]: ''
-																	},
-																	img1pgVisible: false
-																}));
-															}}
-															onimgPress={async () => {
+													<Uploadimg
+														key={item.id}
+														//key={1}
+														progressnum={this.state.formikDefault[item.progress]}
+														onDelete={() => {
+															this.setState((prevState) => ({
+																formikDefault: {
+																	...prevState.formikDefault,
+																	[item.mobileurl]: 'x',
+																	[item.multipart]: ''
+																},
+																img1pgVisible: false
+															}));
+														}}
+														onimgPress={async () => {
+															if (
+																this.state.formikDefault[item.mobileurl] != '' &&
+																this.state.formikDefault[item.mobileurl] != undefined
+															) {
 																if (
-																	this.state.formikDefault[item.mobileurl] != '' &&
-																	this.state.formikDefault[item.mobileurl] !=
-																		undefined
+																	this.state.formikDefault[item.mobileurl]
+																		.toString()
+																		.startsWith('http')
 																) {
-																	if (
+																	//alert('ss');
+																	this.handleDownload(
 																		this.state.formikDefault[item.mobileurl]
-																			.toString()
-																			.startsWith('http')
-																	) {
-																		//alert('ss');
-																		this.handleDownload(
-																			this.state.formikDefault[item.mobileurl]
-																		);
-																		return;
-																	}
-																}
-
-																//console.log(this.state.formikDefault[item.mobileurl]);
-																let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
-																if (permissionResult.granted === false) {
-																	alert(
-																		'Permission to access camera roll is required!'
 																	);
 																	return;
 																}
-																let pickerResult = await ImagePicker.launchImageLibraryAsync(
-																	{
-																		allowsEditing: true,
+															}
 
-																		allowsMultipleSelection: true
+															//console.log(this.state.formikDefault[item.mobileurl]);
+															let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
+															if (permissionResult.granted === false) {
+																alert('Permission to access camera roll is required!');
+																return;
+															}
+															let pickerResult = await ImagePicker.launchImageLibraryAsync(
+																{
+																	allowsEditing: true,
+
+																	allowsMultipleSelection: true
+																}
+															);
+															if (!pickerResult.cancelled) {
+																let pickerResultNew = await ImageManipulator.manipulateAsync(
+																	pickerResult.uri,
+																	[ { resize: { width: 768 } } ],
+																	{
+																		compress: 0.5,
+																		format: 'jpeg',
+																		base64: true
 																	}
 																);
-																if (!pickerResult.cancelled) {
-																	let pickerResultNew = await ImageManipulator.manipulateAsync(
-																		pickerResult.uri,
-																		[ { resize: { width: 768 } } ],
-																		{
-																			compress: 0.5,
-																			format: 'jpeg',
-																			base64: true
-																		}
+																try {
+																	let y = await FileSystem.deleteAsync(
+																		pickerResult.uri
 																	);
-																	try {
-																		let y = await FileSystem.deleteAsync(
-																			pickerResult.uri
-																		);
-																	} catch (error) {
-																		console.log(error);
-																	}
+																} catch (error) {
+																	console.log(error);
+																}
 
-																	//this.ImageUpload1(pickerResult.uri);
-																	console.log(
-																		global.adress.replace(':8080', '') +
-																			'' +
-																			':8181' +
-																			'/api/upload'
-																	);
-																	let url = pickerResultNew.uri;
-																	console.log(url);
-																	const xhr = new XMLHttpRequest();
-																	// xhr.open(
-																	// 	'POST',
-																	// 	global.adress.replace(':8080', '') +
-																	// 		'' +
-																	// 		':8181' +
-																	// 		'/api/upload'
-																	// );
-
-																	xhr.open(
-																		'POST',
-																		global.adress.replace('/papi', ':8181') +
-																			'' +
-																			'' +
-																			'/api/upload'
-																	);
-
-																	xhr.onload = () => {
-																		console.log(xhr.response);
-
-																		this.setState((prevState) => ({
-																			formikDefault: {
-																				...prevState.formikDefault,
-																				[item.mobileurl]: url,
-																				[item.multipart]: xhr.response,
-																				[item.progressvisible]: false
-																			}
-																		}));
-
-																		//console.log(this.state.formikDefault.image1);
-																		// ... do something with the successful response
-																	};
-
-																	xhr.onerror = (e) => {
-																		console.log(e, 'upload failed');
-																	};
-																	// 4. catch for request timeout
-																	xhr.ontimeout = (e) => {
-																		console.log(e, 'upload timeout');
-																	};
-
-																	const formData = new FormData();
-
-																	formData.append('file', {
-																		uri: url, // this is the path to your file. see Expo ImagePicker or React Native ImagePicker
-																		type: `image/jpg`, // example: image/jpg
-																		name: `upload.jpg` // example: upload.jpg
-																	});
-																	// 6. upload the request
-																	xhr.send(formData);
-																	// this.setState({
-																	// 	[item.progressvisible]: true
-																	// });
+																//this.ImageUpload1(pickerResult.uri);
+																console.log(
+																	global.adress.replace(':8080', '') +
+																		'' +
+																		':8181' +
+																		'/api/upload'
+																);
+																let url = pickerResultNew.uri;
+																console.log(url);
+																const xhr = new XMLHttpRequest();
+																xhr.open(
+																	'POST',
+																	global.adress.replace(':8080', '') +
+																		'' +
+																		':8181' +
+																		'/api/upload'
+																);
+																xhr.onload = () => {
+																	console.log(xhr.response);
 
 																	this.setState((prevState) => ({
 																		formikDefault: {
 																			...prevState.formikDefault,
-																			[item.progressvisible]: true
+																			[item.mobileurl]: url,
+																			[item.multipart]: xhr.response,
+																			[item.progressvisible]: false
 																		}
 																	}));
 
-																	// 7. track upload progress
-																	if (xhr.upload) {
-																		// track the upload progress
-																		xhr.upload.onprogress = ({ total, loaded }) => {
-																			const uploadProgress = loaded / total;
-																			// this.setState({
-																			// 	[item.progress]: uploadProgress
-																			// });
+																	//console.log(this.state.formikDefault.image1);
+																	// ... do something with the successful response
+																};
 
-																			this.setState((prevState) => ({
-																				formikDefault: {
-																					...prevState.formikDefault,
-																					[item.progress]: uploadProgress
-																				}
-																			}));
-																			console.log(
-																				this.state.formikDefault[item.progress]
-																			);
-																		};
+																xhr.onerror = (e) => {
+																	console.log(e, 'upload failed');
+																};
+																// 4. catch for request timeout
+																xhr.ontimeout = (e) => {
+																	console.log(e, 'upload timeout');
+																};
+
+																const formData = new FormData();
+
+																formData.append('file', {
+																	uri: url, // this is the path to your file. see Expo ImagePicker or React Native ImagePicker
+																	type: `image/jpg`, // example: image/jpg
+																	name: `upload.jpg` // example: upload.jpg
+																});
+																// 6. upload the request
+																xhr.send(formData);
+																// this.setState({
+																// 	[item.progressvisible]: true
+																// });
+
+																this.setState((prevState) => ({
+																	formikDefault: {
+																		...prevState.formikDefault,
+																		[item.progressvisible]: true
 																	}
-																}
-															}}
-															imageSourse={this.state.formikDefault[item.mobileurl]}
-															pgvisible={this.state.formikDefault[item.progressvisible]}
-														/>
+																}));
 
-														<ErrorMessage
-															style={{ borderWidth: 1 }}
-															errorValue={errors[item.mobileurl]}
-														/>
-													</View>
+																// 7. track upload progress
+																if (xhr.upload) {
+																	// track the upload progress
+																	xhr.upload.onprogress = ({ total, loaded }) => {
+																		const uploadProgress = loaded / total;
+																		// this.setState({
+																		// 	[item.progress]: uploadProgress
+																		// });
+
+																		this.setState((prevState) => ({
+																			formikDefault: {
+																				...prevState.formikDefault,
+																				[item.progress]: uploadProgress
+																			}
+																		}));
+																		console.log(
+																			this.state.formikDefault[item.progress]
+																		);
+																	};
+																}
+															}
+														}}
+														imageSourse={this.state.formikDefault[item.mobileurl]}
+														pgvisible={this.state.formikDefault[item.progressvisible]}
+													/>
+
+													<ErrorMessage
+														style={{ borderWidth: 1 }}
+														errorValue={errors[item.mobileurl]}
+													/>
 												</View>
 											);
 										else if (item.type == 'radiolist')
 											return (
-												<View key={item.id}>
-													<View style={{ flexDirection: 'row' }}>
-														{this.mode == 'design' && (
-															<TouchableOpacity
-																onPress={() => {
-																	const { navigate } = this.props.navigation;
-																	navigate('eforms2', {
-																		eformsID: 7,
-																		instanseID: item.id.replace('rdo', ''),
-																		stdID: 0,
-																		mode: 'view',
-																		isAdminForms: 'true',
-																		parentid: this.eformsID
-																	});
-																}}
-															>
-																<IconFeather
-																	style={{ marginStart: 15, marginTop: 15 }}
-																	name="settings"
-																	size={20}
-																	color={defaultStyles.colors.medium}
-																/>
-															</TouchableOpacity>
-														)}
-
-														{this.mode == 'design' && (
-															<TouchableOpacity
-																onPress={() => {
-																	Alert.alert(
-																		' اخطار',
-																		'آیا مایل به حذف این فیلد هستید؟',
-																		[
-																			{
-																				text: 'خیر',
-																				//onPress: () => console.log('Cancel Pressed'),
-																				style: 'cancel'
-																			},
-																			{
-																				text: 'بله',
-																				onPress: () => {
-																					this.delAPI(
-																						item.id.replace('rdo', '')
-																					);
-																				}
-																			}
-																		],
-																		{ cancelable: false }
-																	);
-																}}
-															>
-																<IconFeather
-																	style={{ marginStart: 15, marginTop: 15 }}
-																	name="trash-2"
-																	size={20}
-																	color={'red'}
-																/>
-															</TouchableOpacity>
-														)}
-														<Text
-															style={[
-																defaultStyles.lbl16,
-																,
-																styles.capstyle,
-																{
-																	textAlign: 'left',
-																	paddingLeft: 15,
-																	marginTop: 15,
-																	fontSize: 14,
-																	color: defaultStyles.colors.medium
-																}
-															]}
-														>
-															{item.caption}
-														</Text>
-													</View>
+												<View>
+													<Text
+														style={[
+															defaultStyles.lbl16,
+															,
+															styles.capstyle,
+															{
+																textAlign: 'left',
+																paddingLeft: 15,
+																marginTop: 15,
+																fontSize: 14,
+																color: defaultStyles.colors.medium
+															}
+														]}
+													>
+														{item.caption}
+													</Text>
 													<RadioButton.Group
 														key={item.id}
 														onValueChange={(value) => {
@@ -3063,7 +2360,6 @@ class eforms extends Component {
 																	html={item1.label}
 																	direction={'rtl'}
 																	axg={''}
-																	enabled={'start'}
 																/>
 															);
 														})}
@@ -3077,289 +2373,203 @@ class eforms extends Component {
 											);
 										else if (item.type == 'file')
 											return (
-												<View key={item.mobileurl}>
-													<View style={{ flexDirection: 'row' }}>
-														{this.mode == 'design' && (
-															<TouchableOpacity
-																onPress={() => {
-																	const { navigate } = this.props.navigation;
-																	navigate('eforms2', {
-																		eformsID: 9,
-																		instanseID: item.mobileurl.replace('file', ''),
-																		stdID: 0,
-																		mode: 'view',
-																		isAdminForms: 'true',
-																		parentid: this.eformsID
-																	});
-																}}
-															>
-																<IconFeather
-																	style={{ marginStart: 15, marginTop: 15 }}
-																	name="settings"
-																	size={20}
-																	color={defaultStyles.colors.medium}
-																/>
-															</TouchableOpacity>
-														)}
-
-														{this.mode == 'design' && (
-															<TouchableOpacity
-																onPress={() => {
-																	Alert.alert(
-																		' اخطار',
-																		'آیا مایل به حذف این فیلد هستید؟',
-																		[
-																			{
-																				text: 'خیر',
-																				//onPress: () => console.log('Cancel Pressed'),
-																				style: 'cancel'
-																			},
-																			{
-																				text: 'بله',
-																				onPress: () => {
-																					this.delAPI(
-																						item.mobileurl.replace(
-																							'file',
-																							''
-																						)
-																					);
-																				}
-																			}
-																		],
-																		{ cancelable: false }
-																	);
-																}}
-															>
-																<IconFeather
-																	style={{ marginStart: 15, marginTop: 15 }}
-																	name="trash-2"
-																	size={20}
-																	color={'red'}
-																/>
-															</TouchableOpacity>
-														)}
-													</View>
-
+												<View
+													key={item.id}
+													style={{
+														flexDirection: 'column',
+														alignItems: 'center',
+														borderWidth: 1,
+														margin: 15,
+														borderRadius: 15,
+														borderColor: '#ccc',
+														justifyContent: 'space-evenly'
+													}}
+												>
+													<Text
+														style={[
+															defaultStyles.lbl16,
+															{
+																textAlign: 'left',
+																marginTop: 10,
+																paddingLeft: 10,
+																color: defaultStyles.colors.medium
+															}
+														]}
+													>
+														{[ item.caption ]}
+													</Text>
 													<View
-														key={item.id}
 														style={{
-															flexDirection: 'column',
+															flexDirection: 'row',
 															alignItems: 'center',
-															borderWidth: 1,
-															//	flexDirection: 'row',
-															margin: 15,
-															borderRadius: 15,
-															borderColor: '#ccc',
 															justifyContent: 'space-evenly'
 														}}
 													>
-														<Text
-															style={[
-																defaultStyles.lbl16,
-																{
-																	textAlign: 'left',
-																	marginTop: 10,
-																	paddingLeft: 10,
-																	color: defaultStyles.colors.medium
-																}
-															]}
-														>
-															{[ item.caption ]}
-														</Text>
-														<View
-															style={{
-																flexDirection: 'row',
-																alignItems: 'center',
-																justifyContent: 'space-evenly'
-															}}
-														>
-															<View style={{ alignItems: 'center' }}>
-																<TouchableOpacity
-																	key={item.id}
-																	onPress={() => {
-																		//alert();
-																		console.log(
-																			this.state.formikDefault[item.mobileurl]
-																		);
-																		this.handeleUploadfile([ item ]);
-																	}}
-																>
-																	<Image
-																		//source={{ uri: this.state.formikDefault.soal1 }}
-																		resizeMode="contain"
-																		style={styles.imgplaceholder}
-																	/>
-																	<View style={styles.imgpp}>
-																		{this.state.formikDefault[
-																			item.progressvisible
-																		] && (
-																			<ProgressCircle
-																				outerCircleStyle={{
-																					overflow: 'hidden',
-																					borderTopLeftRadius: 20,
-																					borderTopRightRadius: 20,
-																					borderBottomRightRadius: 20,
-																					borderBottomLeftRadius: 20
-																				}}
-																				percent={
-																					this.state.formikDefault[
+														<View style={{ alignItems: 'center' }}>
+															<TouchableOpacity
+																key={item.id}
+																onPress={() => {
+																	//alert();
+																	console.log(
+																		this.state.formikDefault[item.mobileurl]
+																	);
+																	this.handeleUploadfile([ item ]);
+																}}
+															>
+																<Image
+																	//source={{ uri: this.state.formikDefault.soal1 }}
+																	resizeMode="contain"
+																	style={styles.imgplaceholder}
+																/>
+																<View style={styles.imgpp}>
+																	{this.state.formikDefault[item.progressvisible] && (
+																		<ProgressCircle
+																			outerCircleStyle={{
+																				overflow: 'hidden',
+																				borderTopLeftRadius: 20,
+																				borderTopRightRadius: 20,
+																				borderBottomRightRadius: 20,
+																				borderBottomLeftRadius: 20
+																			}}
+																			percent={
+																				this.state.formikDefault[
+																					item.progress
+																				] * 100
+																			}
+																			radius={20}
+																			borderWidth={4}
+																			color="#3399FF"
+																			shadowColor="#999"
+																			bgColor="#fff"
+																		>
+																			<Text style={{ fontSize: 12 }}>
+																				{Number(
+																					(this.state.formikDefault[
 																						item.progress
-																					] * 100
+																					] * 100).toFixed(0)
+																				)}
+																			</Text>
+																		</ProgressCircle>
+																	)}
+
+																	{!this.state.formikDefault[item.progressvisible] &&
+																	(this.state.formikDefault[item.mobileurl] == '' ||
+																		this.state.formikDefault[item.mobileurl] ==
+																			undefined) && (
+																		<View>
+																			<Text>
+																				{
+																					this.state.formikDefault[
+																						item.mobileurl
+																					]
 																				}
-																				radius={20}
-																				borderWidth={4}
-																				color="#3399FF"
-																				shadowColor="#999"
-																				bgColor="#fff"
-																			>
-																				<Text style={{ fontSize: 12 }}>
-																					{Number(
-																						(this.state.formikDefault[
-																							item.progress
-																						] * 100).toFixed(0)
-																					)}
-																				</Text>
-																			</ProgressCircle>
-																		)}
-
-																		{!this.state.formikDefault[
-																			item.progressvisible
-																		] &&
-																		(this.state.formikDefault[item.mobileurl] ==
-																			'' ||
-																			this.state.formikDefault[item.mobileurl] ==
-																				undefined) && (
-																			<View>
-																				<Text>
-																					{
-																						this.state.formikDefault[
-																							item.mobileurl
-																						]
-																					}
-																				</Text>
+																			</Text>
+																			<Icon
+																				name="folder-open"
+																				size={34}
+																				color="#bbb"
+																			/>
+																		</View>
+																	)}
+																	{/*  */}
+																	{!this.state.formikDefault[item.progressvisible] &&
+																	this.state.formikDefault[item.mobileurl] !=
+																		undefined && (
+																		<View>
+																			{'docdocx'.includes(
+																				this.state.formikDefault[item.mobileurl]
+																					.split('.')
+																					.pop()
+																					.toLowerCase()
+																			) &&
+																			this.state.formikDefault[item.mobileurl] !=
+																				'' && (
 																				<Icon
-																					name="folder-open"
+																					name="file-word-o"
 																					size={34}
-																					color="#bbb"
+																					color="blue"
 																				/>
-																			</View>
-																		)}
-																		{/*  */}
-																		{!this.state.formikDefault[
-																			item.progressvisible
-																		] &&
-																		this.state.formikDefault[item.mobileurl] !=
-																			undefined && (
-																			<View>
-																				{'docdocx'.includes(
-																					this.state.formikDefault[
-																						item.mobileurl
-																					]
-																						.split('.')
-																						.pop()
-																						.toLowerCase()
-																				) &&
-																				this.state.formikDefault[
-																					item.mobileurl
-																				] != '' && (
-																					<Icon
-																						name="file-word-o"
-																						size={34}
-																						color="blue"
-																					/>
-																				)}
-																				{'jpgjpegpng'.includes(
-																					this.state.formikDefault[
-																						item.mobileurl
-																					]
-																						.split('.')
-																						.pop()
-																						.toLowerCase()
-																				) &&
-																				this.state.formikDefault[
-																					item.mobileurl
-																				] != '' && (
-																					<Icon
-																						name="file-picture-o"
-																						size={34}
-																						color="orange"
-																					/>
-																				)}
+																			)}
+																			{'jpgjpegpng'.includes(
+																				this.state.formikDefault[item.mobileurl]
+																					.split('.')
+																					.pop()
+																					.toLowerCase()
+																			) &&
+																			this.state.formikDefault[item.mobileurl] !=
+																				'' && (
+																				<Icon
+																					name="file-picture-o"
+																					size={34}
+																					color="orange"
+																				/>
+																			)}
 
-																				{'pdf'.includes(
-																					this.state.formikDefault[
-																						item.mobileurl
-																					]
-																						.split('.')
-																						.pop()
-																						.toLowerCase()
-																				) &&
-																				this.state.formikDefault[
-																					item.mobileurl
-																				] != '' && (
-																					<Icon
-																						name="file-pdf-o"
-																						size={34}
-																						color="red"
-																					/>
-																				)}
-																				{'xlsxlsx'.includes(
-																					this.state.formikDefault[
-																						item.mobileurl
-																					]
-																						.split('.')
-																						.pop()
-																						.toLowerCase()
-																				) &&
-																				this.state.formikDefault[
-																					item.mobileurl
-																				] != '' && (
-																					<Icon
-																						name="file-excel-o"
-																						size={34}
-																						color="green"
-																					/>
-																				)}
-																			</View>
-																		)}
-																	</View>
-																</TouchableOpacity>
-																{this.state.formikDefault[item.mobileurl] !=
-																	undefined && (
-																	<TouchableOpacity
-																		style={{ alignItems: 'center' }}
-																		onPress={() => this.handeleDeleteM([ item ])}
-																	>
-																		<Icon name="trash" size={24} color="#bbb" />
-																	</TouchableOpacity>
-																)}
-															</View>
-														</View>
-														{this.state.formikDefault[item.maxSizeError] != '' && (
-															<View>
-																<Text
-																	style={{
-																		fontFamily: 'iransans',
-																		color: 'red',
-																		textAlign: 'center'
-																	}}
+																			{'pdf'.includes(
+																				this.state.formikDefault[item.mobileurl]
+																					.split('.')
+																					.pop()
+																					.toLowerCase()
+																			) &&
+																			this.state.formikDefault[item.mobileurl] !=
+																				'' && (
+																				<Icon
+																					name="file-pdf-o"
+																					size={34}
+																					color="red"
+																				/>
+																			)}
+																			{'xlsxlsx'.includes(
+																				this.state.formikDefault[item.mobileurl]
+																					.split('.')
+																					.pop()
+																					.toLowerCase()
+																			) &&
+																			this.state.formikDefault[item.mobileurl] !=
+																				'' && (
+																				<Icon
+																					name="file-excel-o"
+																					size={34}
+																					color="green"
+																				/>
+																			)}
+																		</View>
+																	)}
+																</View>
+															</TouchableOpacity>
+															{this.state.formikDefault[item.mobileurl] != undefined && (
+																<TouchableOpacity
+																	style={{ alignItems: 'center' }}
+																	onPress={() => this.handeleDeleteM([ item ])}
 																>
-																	{this.state.formikDefault[item.maxSizeError]}
-																</Text>
-															</View>
-														)}
-
-														<ErrorMessage
-															style={{ borderWidth: 1 }}
-															errorValue={errors[item.mobileurl]}
-														/>
+																	<Icon name="trash" size={24} color="#bbb" />
+																</TouchableOpacity>
+															)}
+														</View>
 													</View>
+													{this.state.formikDefault[item.maxSizeError] != '' && (
+														<View>
+															<Text
+																style={{
+																	fontFamily: 'iransans',
+																	color: 'red',
+																	textAlign: 'center'
+																}}
+															>
+																{this.state.formikDefault[item.maxSizeError]}
+															</Text>
+														</View>
+													)}
+
+													<ErrorMessage
+														style={{ borderWidth: 1 }}
+														errorValue={errors[item.mobileurl]}
+													/>
 												</View>
 											);
 									})}
 
 									<FormButton
-										//key={item.id}
 										buttonColor="#1f9efd"
 										borderColor="white"
 										backgroundColor="#e3f1fc"
@@ -3397,17 +2607,10 @@ class eforms extends Component {
 													});
 												}
 											});
-											if (this.mode != 'design')
-												setTimeout(() => {
-													handleSubmit();
-												}, 500);
-											else {
-												this.setState({
-													loading: false,
-													savepress: false,
-													saveenable: false
-												});
-											}
+
+											setTimeout(() => {
+												handleSubmit();
+											}, 500);
 										}}
 										// onPress={() => {
 										// 	console.log(JSON.stringify(this.state.formikDefault));
@@ -3416,7 +2619,7 @@ class eforms extends Component {
 										heightb={55}
 										borderRadiusb={45}
 										style={{ margin: 16 }}
-										containerStyle={[ defaultStyles.shadowx, { marginTop: 20 } ]}
+										containerStyle={[ defaultStyles.shadowx, { marginTop: 0 } ]}
 										disabled={this.state.saveenable}
 										//disabled={isValid}
 										loading={this.state.savepress}
@@ -3576,17 +2779,8 @@ class eforms extends Component {
 								<TouchableOpacity
 									activeOpacity={0.8}
 									onPress={() => {
-										//alert();
-										this.setState({ barom_Visible: false });
-										const { navigate } = this.props.navigation;
-										navigate('eforms2', {
-											eformsID: item.fid,
-											instanseID: '',
-											stdID: 0,
-											mode: 'view',
-											isAdminForms: 'true',
-											parentid: this.eformsID
-										});
+										alert();
+										this.setState({ formedit: true });
 										//	this.clickEventListener(item);
 									}}
 									style={{ flex: 1 }}
@@ -3594,13 +2788,7 @@ class eforms extends Component {
 									<View style={[ styles.itemContainer, { backgroundColor: item.bkcolor } ]}>
 										{item.badge > 0 && <Text style={styles.badge}> 2 </Text>}
 
-										{/* <Iconelem
-											name="form-textbox"
-											size={32}
-											type="material-community"
-											color="#fff"
-										/> */}
-										<Icontools
+										<Icon
 											name={item.icon}
 											size={37}
 											color={item.code}
@@ -3628,34 +2816,36 @@ class eforms extends Component {
 					</View>
 				</Modalm>
 
-				<Modal
-					style={[
-						{
-							borderRadius: 25,
-							justifyContent: 'center',
-							alignItems: 'center',
-							alignSelf: 'stretch',
-							height: 560,
-
-							width: '100%'
-						}
-					]}
-					entry={'top'}
-					animationDuration={400}
-					position={'center'}
-					ref={'modal_arz'}
-					//swipeToClose={this.state.swipeToClose}
-					swipeToClose={true}
-					onClosed={this.onClose}
-					onOpened={this.onOpen}
-					onClosingState={this.onClosingState}
+				<Modalm
+					animationInTiming={0.1}
+					animationOutTiming={0.1}
+					backdropTransitionInTiming={0.1}
+					backdropTransitionOutTiming={0.1}
+					useNativeDriver={true}
+					animationIn="fadeIn"
+					animationOut="swing"
+					transparent={true}
+					style={{ borderRadius: 10 }}
+					hideModalContentWhileAnimating={true}
+					deviceWidth={deviceWidth}
+					deviceHeight={deviceHeight}
+					//	swipeDirection={[ 'left' ]}
+					onBackdropPress={() =>
+						this.setState({
+							formedit: false
+						})}
+					onSwipeComplete={() =>
+						this.setState({
+							formedit: false
+						})}
+					deviceWidth={deviceWidth}
+					deviceHeight={deviceHeight}
+					isVisible={this.state.formedit}
 				>
 					<View style={{ borderWidth: 0, width: '90%' }}>
-						<Text />
-						<Eform2 eformId={6} instanseID={0} stdID={0} isAdminForms="true" />
+						{/* <Eform eformId={6} instanseID={0} stdID={0} isAdminForms="true" /> */}
 					</View>
-				</Modal>
-
+				</Modalm>
 				<Snackbar
 					visible={this.state.issnackin}
 					onDismiss={() => this.setState({ issnackin: false })}
@@ -3741,4 +2931,4 @@ const styles = StyleSheet.create({
 });
 
 console.disableYellowBox = true;
-export default withNavigation(eforms);
+export default withNavigation(eforms2);

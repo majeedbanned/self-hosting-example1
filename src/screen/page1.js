@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
-import { View, ScrollView, TouchableOpacity, Text, RefreshControl } from 'react-native';
+import { View, ScrollView, TouchableOpacity, Text, RefreshControl, Alert, StyleSheet } from 'react-native';
 import ActionBarImage from '../components/ActionBarImage';
 import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+import { LinearGradient } from 'expo-linear-gradient';
 import { withNavigation } from 'react-navigation';
 import * as SQLite from 'expo-sqlite';
+import Swiper from 'react-native-swiper';
+
 import Loading from '../components/loading';
 import DropdownAlert from 'react-native-dropdownalert';
 
@@ -228,7 +231,7 @@ class page1 extends Component {
 		const { params } = navigation.state;
 		return {
 			//headerTitle: this.reportName,
-			headerRight: null,
+			headerRight: () => null,
 			headerBackTitle: 'بازگشت',
 			navigationOptions: {
 				headerBackTitle: 'Home'
@@ -300,7 +303,7 @@ class page1 extends Component {
 					global.username = temp[0]['username'];
 					global.password = temp[0]['password'];
 					global.schoolcode = temp[0]['schoolcode'];
-					global.adress = temp[0]['adress'];
+					global.adress = temp[0]['adress'] + '/papi';
 					global.firstname = temp[0]['firstname'];
 					global.lastname = temp[0]['lastname'];
 					global.schoolname = temp[0]['schoolname'];
@@ -425,8 +428,8 @@ class page1 extends Component {
 		if (global.adress == undefined) return;
 		let uurl = global.adress + '/pApi.asmx/getMainMenuBadge?id=' + '1' + '&p=' + param;
 
-		//let uurl = 'http://192.168.1.12:8080/papi.asmx/mobileMainScreen?test=d';
-		//console.log(uurl);
+		//let uurl = 'http://192.168.1.12:8080/papi. asmx/mobileMainScreen?test=d';
+		console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -482,7 +485,101 @@ class page1 extends Component {
 		let uurl = global.adress + '/pApi.asmx/getMainMenu?id=' + page + '&p=' + param;
 
 		//let uurl = 'http://192.168.1.12:8080/papi.asmx/mobileMainScreen?test=d';
-		//console.log(uurl);
+		console.log(uurl);
+
+		if (global.lang == 'en') {
+			this.setState({
+				refreshing: false,
+				data: [
+					[
+						{
+							id: '1',
+							name: '1',
+							caption: ' Grades',
+							icon: 'profile',
+							color: '#f2c514',
+							active: '1',
+							bkcolor: '',
+							access: 'student',
+							idd: '1',
+							badge: '0'
+						},
+						{
+							id: '3',
+							name: '3',
+							caption: 'Forms ',
+							icon: 'form',
+							color: '#2acb6e',
+							active: '1',
+							bkcolor: '',
+							access: 'student,teacher,administrator',
+							idd: '3',
+							badge: '0'
+						},
+						{
+							id: '5',
+							name: '5',
+							caption: 'Mounthly Grades ',
+							icon: 'barchart',
+							color: '#2e95d8',
+							active: '1',
+							bkcolor: '',
+							access: 'student',
+							idd: '5',
+							badge: '0'
+						},
+						{
+							id: '7',
+							name: '2',
+							caption: ' Schedule ',
+							icon: 'calendar',
+							color: '#2ecc71',
+							active: '1',
+							access: 'student,teacher,administrator',
+							idd: '7',
+							badge: '0'
+						},
+						{
+							id: '15',
+							name: '1',
+							caption: 'Files ',
+							icon: 'profile',
+							color: '#f2c214',
+							active: '1',
+							bkcolor: '',
+							access: 'student,teacher,administrator',
+							idd: '16',
+							badge: '0'
+						},
+						{
+							id: '9',
+							name: '4',
+							caption: 'Reports',
+							icon: 'dotchart',
+							color: '#9b59b6',
+							active: '1',
+							access: 'teacher,administrator,student',
+							idd: '9',
+							badge: '0'
+						},
+						{
+							id: '14',
+							caption: 'Setting',
+							icon: 'setting',
+							color: '#37a3ab',
+							access: 'student,teacher,administrator',
+							idd: '15',
+							badge: '0'
+						}
+					],
+					[],
+					[ { name: 'Test', image: 'e7a2eaef-fb1e-45f4-8b46-c2e5e4acccbb.jpg', id: '1' } ],
+					[ { ac: '1', msg: 'hi', cancelable: '10' } ]
+				]
+			});
+			return;
+		}
+
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -503,6 +600,41 @@ class page1 extends Component {
 
 					refreshing: false
 				});
+				//if (false)
+				if (retJson[3][0].ac == 0) {
+					if (true) {
+						Alert.alert(
+							'',
+							retJson[3][0].msg,
+							[
+								{
+									text: 'تایید',
+									onPress: async () => {
+										const { navigate } = this.props.navigation;
+										navigate('Settings');
+									}
+								}
+							],
+							{ cancelable: true }
+						);
+					} else {
+						//Alert.alert('Hello world!');
+						// Alert.alert(
+						// 	'.',
+						// 	retJson[3][0].msg,
+						// 	[
+						// 		{
+						// 			text: 'تایید',
+						// 			onPress: async () => {
+						// 				const { navigate } = this.props.navigation;
+						// 				navigate('Settings');
+						// 			}
+						// 		}
+						// 	],
+						// 	{ cancelable: true }
+						// );
+					}
+				}
 				console.log('page1 load');
 			}
 		} catch (e) {
@@ -542,13 +674,75 @@ class page1 extends Component {
 				{/* <Menu items={this.state.data[0]} /> */}
 				{/* <Menu items={this.state.data1[0]} /> */}
 				{/* this.state.data[2] */}
-				{this.state.data[2].length == 0 && (
+				{/* {this.state.data[2].length == 0 && (
 					<Stories ccolor={'#ddd'} Items={this.state.dummystory} Navigation={this.props.navigation} />
-				)}
-				{this.state.data[2].length > 0 && (
-					<Stories ccolor={'#f76d6d'} Items={[]} Navigation={this.props.navigation} />
-				)}
+				)} */}
+
+				{/* this.state.data[2] */}
+				{/* {this.state.data[2].length > 0|| true && ( */}
+				<Stories ccolor={'#f76d6d'} Items={this.state.data[2]} Navigation={this.props.navigation} />
+				{/* )} */}
 				<View>{this.state.data[0].length > 0 && <Menu items={this.state.data[0]} />}</View>
+				<View>
+					<Swiper
+						paginationStyle={{
+							flexDirection: Platform.OS === 'ios' ? 'row' : 'row-reverse'
+						}}
+						dotColor={'#eee'}
+						loop={true}
+						autoplay={true}
+						autoplayTimeout={4.5}
+						style={styles.wrapper}
+						showsButtons={false}
+					>
+						<LinearGradient
+							colors={[ '#6e80fe', '#a976fb', '#f36af9' ]}
+							start={{ x: 0, y: 1 }}
+							end={{ x: 1, y: 0 }}
+							style={{ margin: 15, borderRadius: 15 }}
+						>
+							<View style={{ height: 100 }}>
+								<Text
+									style={{ color: 'white', fontFamily: 'iransans', textAlign: 'left', padding: 15 }}
+								>
+									روابط خود را هم‌زمان با دو جبهه شرق و غرب گسترش دهد و به یاد داشته باشد که چین در
+									حال آزمودن اولین تجربه
+								</Text>
+							</View>
+						</LinearGradient>
+						<LinearGradient
+							colors={[ '#ff5f9a', '#ff8184', '#ffab68' ]}
+							start={{ x: 0, y: 1 }}
+							end={{ x: 1, y: 0 }}
+							style={{ margin: 15, borderRadius: 15 }}
+						>
+							<View style={{ height: 100 }}>
+								<Text
+									style={{ color: 'white', fontFamily: 'iransans', textAlign: 'left', padding: 15 }}
+								>
+									روابط خود را هم‌زمان با دو جبهه شرق و غرب گسترش دهد و به یاد داشته باشد که چین در
+									حال آزمودن اولین تجربه
+								</Text>
+							</View>
+						</LinearGradient>
+						<LinearGradient
+							colors={[ '#009FFF', '#85b1ff' ]}
+							start={{ x: 0, y: 1 }}
+							end={{ x: 1, y: 0 }}
+							style={{ margin: 15, borderRadius: 15 }}
+						>
+							<View style={{ height: 100 }}>
+								<Text
+									style={{ color: 'white', fontFamily: 'iransans', textAlign: 'left', padding: 15 }}
+								>
+									روابط خود را هم‌زمان با دو جبهه شرق و غرب گسترش دهد و به یاد داشته باشد که چین در
+									حال آزمودن اولین تجربه
+								</Text>
+							</View>
+						</LinearGradient>
+					</Swiper>
+				</View>
+
 				{this.state.data[1].length > 0 && <Birthday Items={this.state.data[1]} />}
 
 				<DropdownAlert ref={(ref) => (this.dropDownAlertRef = ref)} />
@@ -557,4 +751,15 @@ class page1 extends Component {
 	}
 }
 
+const styles = StyleSheet.create({
+	wrapper: {
+		borderRadius: 0,
+		//flex: 1,
+		//borderWidth: 1,
+		marginTop: 0,
+		flexDirection: Platform.OS === 'ios' ? 'row' : 'row-reverse',
+		height: 130,
+		paddingBottom: 0
+	}
+});
 export default withNavigation(page1);

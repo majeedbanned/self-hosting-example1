@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
-import { StyleSheet, Linking, Dimensions } from 'react-native';
+import { StyleSheet, Linking, Dimensions, Alert } from 'react-native';
+import { SearchBar } from 'react-native-elements';
+import Iconan from 'react-native-vector-icons/AntDesign';
+import { Snackbar } from 'react-native-paper';
 import ActionButton from 'react-native-action-button';
 import { withNavigation } from 'react-navigation';
 import { FlatGrid } from 'react-native-super-grid';
@@ -37,6 +40,8 @@ import {
 	TouchableOpacity
 } from 'react-native';
 import GLOBAL from './global';
+import Loading from '../components/loading';
+
 import { LinearGradient } from 'expo-linear-gradient';
 import { NavigationEvents } from 'react-navigation';
 
@@ -44,7 +49,9 @@ class webinar extends Component {
 	constructor(props) {
 		super(props);
 		(this.page = 1),
+			(this.onEndReachedCalledDuringMomentum = true),
 			(this.state = {
+				searchText: '',
 				bottomModalAndTitle: false,
 				refreshing: false,
 				isModalVisible: false,
@@ -57,9 +64,64 @@ class webinar extends Component {
 				data: [],
 				datas: [],
 				test: [],
-				selectedItem: '1'
+				selectedItem: '-1'
 			});
 	}
+
+	deleteapi = async (id, index) => {
+		//alert(id);
+
+		if (global.adress == 'undefined') {
+			GLOBAL.main.setState({ isModalVisible: true });
+		}
+		/* #region  check internet */
+		let state = await NetInfo.fetch();
+		if (!state.isConnected) {
+			this.setState({ issnackin: true });
+			return;
+		}
+
+		let param = userInfo();
+		let uurl = global.adress + '/pApi.asmx/delVclassID?p=' + param + '&id=' + id;
+		console.log(uurl);
+		try {
+			const response = await fetch(uurl);
+			if (response.ok) {
+				let retJson = await response.json();
+				if (Object.keys(retJson).length == 0) {
+					this.setState({
+						loading: false,
+						dataLoading: false,
+						isRefreshing: false
+					});
+					return;
+				}
+				//console.log(retJson);
+				this.setState({
+					//data: page === 1 ? retJson : [ ...this.state.data, ...retJson ],
+					//data: retJson,
+
+					loading: false,
+					dataLoading: false,
+					isRefreshing: false
+				});
+				let newimagesAddFile = this.state.data;
+				//alert(index);
+				newimagesAddFile.splice(index, 1); //to remove a single item starting at index
+				this.setState({ data: newimagesAddFile });
+				//this.loadAPI();
+			}
+		} catch (e) {
+			console.log('err');
+			this.dropDownAlertRef.alertWithType('error', 'پیام', 'خطادر دستیابی به اطلاعات');
+			this.setState({
+				loading: false,
+				dataLoading: false,
+				isRefreshing: false
+			});
+			return;
+		}
+	};
 
 	async componentDidMount() {
 		this.loadAPI(this.page, 'pull');
@@ -108,20 +170,52 @@ class webinar extends Component {
 		this.setState({
 			cat: [
 				{
+					id: '-1',
+
+					name: 'کلاس های  امروز'
+				},
+				{
 					id: '1',
 
-					name: 'کلاس های مجازی امروز'
+					name: 'شنبه'
 				},
 				{
 					id: '2',
 
-					name: 'همه کلاس ها'
+					name: 'یک شنبه'
 				},
 				{
 					id: '3',
 
-					name: 'برنامه هفتگی مجازی'
+					name: 'دو شنبه'
+				},
+				{
+					id: '4',
+
+					name: 'سه شنبه'
+				},
+				{
+					id: '5',
+
+					name: 'چهار شنبه'
+				},
+				{
+					id: '6',
+
+					name: 'پنج شنبه'
+				},
+				{
+					id: '0',
+
+					name: 'جمعه'
 				}
+
+				// },
+				// {
+				// 	id: '10',
+
+				// 	name: 'برنامه هفتگی مجازی'
+				// }
 			]
 		});
 	}
@@ -132,12 +226,12 @@ class webinar extends Component {
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
+			this.setState({ issnackin: true });
 			return;
 		}
 		/* #endregion */
 
-		this.setState({ loading: true });
+		this.setState({ loading: true, isLoading: true });
 		let param = userInfo();
 		let uurl =
 			global.adress +
@@ -146,7 +240,9 @@ class webinar extends Component {
 			'&p=' +
 			param +
 			'&mode=' +
-			this.state.selectedItem;
+			this.state.selectedItem +
+			'&q=' +
+			this.state.searchText;
 		if (page == 1) this.setState({ data: [] });
 		console.log(uurl);
 		try {
@@ -156,16 +252,18 @@ class webinar extends Component {
 				if (Object.keys(retJson).length == 0) {
 					this.setState({
 						loading: false,
-						isRefreshing: false
+						isRefreshing: false,
+						isLoading: false
 					});
 					return;
 				}
-				//	console.log(retJson);
+				//	if(retJson.)
 				this.setState({
 					data: page === 1 ? retJson : [ ...this.state.data, ...retJson ],
 
 					loading: false,
-					isRefreshing: false
+					isRefreshing: false,
+					isLoading: false
 				});
 			}
 		} catch (e) {
@@ -173,7 +271,8 @@ class webinar extends Component {
 			this.dropDownAlertRef.alertWithType('error', 'پیام', 'خطادر دستیابی به اطلاعات');
 			this.setState({
 				loading: false,
-				isRefreshing: false
+				isRefreshing: false,
+				isLoading: false
 			});
 			return;
 		}
@@ -183,9 +282,12 @@ class webinar extends Component {
 		return <ActivityIndicator style={{ color: 'red' }} size="large" />;
 	};
 	_handleLoadMore = () => {
-		if (!this.state.isLoading) {
-			this.page = this.page + 1;
-			this.loadAPI(this.page, 'more');
+		if (!this.onEndReachedCalledDuringMomentum) {
+			if (!this.state.isLoading) {
+				this.page = this.page + 1;
+				this.loadAPI(this.page, 'more');
+			}
+			this.onEndReachedCalledDuringMomentum = true;
 		}
 	};
 	clickEventListener = (item) => {
@@ -238,7 +340,24 @@ class webinar extends Component {
 		}
 	}
 
+	searchFilterFunction = (text) => {
+		//alert();
+		this.setState({ searchText: text });
+		if (text == '' || text == undefined) {
+			this.page = 1;
+			this.loadAPI(1, '');
+			//this.flatListRef.scrollToOffset({ animated: true, offset: 0 });
+		}
+		if (text.length < 2) return;
+		this.page = 1;
+		this.loadAPI(1, text);
+		this.flatListRef.scrollToOffset({ animated: true, offset: 0 });
+
+		return;
+	};
+
 	onPressHandler(id) {
+		this.page = 1;
 		this.setState({ selectedItem: id, data: [], dataLoading: true });
 
 		this.loadAPI(1, '');
@@ -248,7 +367,6 @@ class webinar extends Component {
 		return (
 			<View style={{ backgroundColor: 'white' }}>
 				<FlatList
-					inverted={Platform.OS === 'ios' ? false : true}
 					extraData={this.state.selectedItem}
 					data={this.state.cat}
 					keyExtractor={(item) => item.id.toString()}
@@ -270,9 +388,10 @@ class webinar extends Component {
 												fontFamily: 'iransans',
 												borderWidth: 1,
 												borderColor: '#ff8184',
-												borderRadius: 15,
+												borderRadius: 10,
 												margin: 3,
-												paddingTop: 8,
+
+												paddingTop: 4,
 												paddingRight: 8,
 												paddingLeft: 8,
 												paddingBottom: 3
@@ -283,9 +402,10 @@ class webinar extends Component {
 												fontFamily: 'iransans',
 												borderWidth: 1,
 												borderColor: '#ff8184',
-												borderRadius: 15,
+												borderRadius: 10,
 												margin: 3,
-												paddingTop: 8,
+
+												paddingTop: 4,
 												paddingRight: 8,
 												paddingLeft: 8,
 												paddingBottom: 3
@@ -318,6 +438,32 @@ class webinar extends Component {
 						);
 					}}
 				/>
+
+				<SearchBar
+					inputContainerStyle={{ backgroundColor: '#eee' }}
+					containerStyle={{
+						flex: 2,
+						marginStart: 8,
+						marginEnd: 8,
+						height: 30,
+						marginBottom: 5,
+						padding: 0,
+						borderBottomWidth: 0,
+						backgroundColor: 'white',
+						borderTopRightRadius: 24,
+						borderTopLeftRadius: 24
+					}}
+					placeholder="جستجو"
+					lightTheme
+					showLoading={this.state.loading}
+					//round
+					inputContainerStyle={{ borderRadius: 10, height: 15, backgroundColor: '#eee' }}
+					inputStyle={{ textAlign: 'center', fontSize: 13, fontFamily: 'iransans' }}
+					//showLoading={this.state.loading}
+					onChangeText={(text) => this.searchFilterFunction(text)}
+					autoCorrect={false}
+					value={this.state.searchText}
+				/>
 			</View>
 		);
 	};
@@ -338,7 +484,8 @@ class webinar extends Component {
 		//console.log('seeeeee');
 		//alert(this.state.selectedItem);
 
-		if (this.state.isLoading && this.page === 1) {
+		//if (this.state.isLoading && this.page === 1) {
+		if (!this.state.data) {
 			return (
 				<View
 					style={{
@@ -346,7 +493,7 @@ class webinar extends Component {
 						height: '100%'
 					}}
 				>
-					<ActivityIndicator style={{ color: '#000' }} />
+					<Loading />
 				</View>
 			);
 		}
@@ -354,7 +501,7 @@ class webinar extends Component {
 		return (
 			<View style={Mstyles.container}>
 				<View>
-					<FlatList
+					{/* <FlatList
 						extraData={this.state.selectedItem}
 						data={this.state.cat}
 						keyExtractor={(item) => item.id.toString()}
@@ -376,9 +523,10 @@ class webinar extends Component {
 													fontFamily: 'iransans',
 													borderWidth: 1,
 													borderColor: '#ff8184',
-													borderRadius: 15,
+													borderRadius: 10,
 													margin: 3,
-													paddingTop: 8,
+
+													paddingTop: 4,
 													paddingRight: 8,
 													paddingLeft: 8,
 													paddingBottom: 3
@@ -389,9 +537,10 @@ class webinar extends Component {
 													fontFamily: 'iransans',
 													borderWidth: 1,
 													borderColor: '#ff8184',
-													borderRadius: 15,
+													borderRadius: 10,
 													margin: 3,
-													paddingTop: 8,
+
+													paddingTop: 4,
 													paddingRight: 8,
 													paddingLeft: 8,
 													paddingBottom: 3
@@ -424,20 +573,52 @@ class webinar extends Component {
 							);
 						}}
 					/>
+
+					<SearchBar
+						inputContainerStyle={{ backgroundColor: '#eee' }}
+						containerStyle={{
+							flex: 2,
+							marginStart: 8,
+							marginEnd: 8,
+							height: 30,
+							marginBottom: 5,
+							padding: 0,
+							borderBottomWidth: 0,
+							backgroundColor: 'white',
+							borderTopRightRadius: 24,
+							borderTopLeftRadius: 24
+						}}
+						placeholder="جستجو"
+						lightTheme
+						showLoading={this.state.loading}
+						//round
+						inputContainerStyle={{ borderRadius: 10, height: 15, backgroundColor: '#eee' }}
+						inputStyle={{ textAlign: 'center', fontSize: 13, fontFamily: 'iransans' }}
+						//showLoading={this.state.loading}
+						onChangeText={(text) => this.searchFilterFunction(text)}
+						autoCorrect={false}
+						value={this.state.searchText}
+					/> */}
 				</View>
-				{this.state.selectedItem === '3' && (
+				{/* {this.state.selectedItem === '3' && (
 					//	alert();
 					<Timetable />
-				)}
+				)} */}
 
-				{this.state.selectedItem != '3' && (
+				{true && (
 					<FlatList
-						//ListHeaderComponent={this.renderHeader}
-						//	stickyHeaderIndices={[ 0 ]}
+						ref={(ref) => {
+							this.flatListRef = ref;
+						}}
+						ListHeaderComponent={this.renderHeader}
+						stickyHeaderIndices={[ 0 ]}
 						ListFooterComponent={this._renderFooter}
 						onScroll={this.onScroll}
 						initialNumToRender={10}
 						onEndReachedThreshold={0.4}
+						onMomentumScrollBegin={() => {
+							this.onEndReachedCalledDuringMomentum = false;
+						}}
 						// ListEmptyComponent={
 						// 	<View style={{ borderWidth: 0, height: 350 }}>
 						// 		<View
@@ -477,10 +658,11 @@ class webinar extends Component {
 						style={Mstyles.contentList}
 						columnWrapperStyle={styles.listContainer}
 						data={this.state.data}
-						keyExtractor={(item) => {
-							return item.id;
-						}}
-						renderItem={({ item }) => {
+						keyExtractor={(item, index) => index.toString()}
+						// keyExtractor={(item) => {
+						// 	return item.id;
+						// }}
+						renderItem={({ item, index }) => {
 							return (
 								<View
 									style={{
@@ -533,22 +715,106 @@ class webinar extends Component {
 															/>
 														</View>
 														<View style={{ justifyContent: 'center', flex: 2 }}>
+															{global.ttype == 'administrator' && (
+																<View
+																	style={{
+																		flexDirection: 'row-reverse',
+																		borderWidth: 0,
+																		marginTop: -15
+																	}}
+																>
+																	<TouchableOpacity
+																		onPress={() => {
+																			Alert.alert(
+																				'حذف کلاس مجازی',
+																				'آیا مایل به حدف کلاس هستید؟',
+																				[
+																					// {
+																					// 	text: 'Ask me later',
+																					// 	onPress: () => console.log('Ask me later pressed')
+																					// },
+																					{
+																						text: 'خیر',
+																						onPress: () =>
+																							console.log(
+																								'Cancel Pressed'
+																							),
+																						style: 'cancel'
+																					},
+																					{
+																						text: 'بله',
+																						onPress: () => {
+																							this.deleteapi(
+																								item.id,
+																								index
+																							);
+																						}
+																					}
+																				],
+																				{ cancelable: false }
+																			);
+																		}}
+																	>
+																		<Ionicons
+																			name="ios-trash"
+																			size={25}
+																			color="#fff"
+																			style={{ marginLeft: 25, marginRight: 15 }}
+																		/>
+																	</TouchableOpacity>
+																	<TouchableOpacity
+																		onPress={() => {
+																			global.messageEditID = item.id;
+																			//alert(global.examEditID);
+																			// this.setState({
+																			// 	bottomModalAndTitle: true
+																			// });
+																			const { navigate } = this.props.navigation;
+																			navigate('eforms', {
+																				eformsID: 30,
+																				instanseID: item.id,
+																				stdID: 0,
+																				mode: 'view',
+																				isAdminForms: 'true'
+																				//extra: this.state.extra
+																			});
+
+																			//
+																			//navigate('messageAdd');
+																		}}
+																	>
+																		<Ionicons
+																			name="ios-create"
+																			size={22}
+																			color="#fff"
+																			style={{ marginLeft: 20 }}
+																		/>
+																	</TouchableOpacity>
+																</View>
+															)}
+
 															<Text style={styles.aztitle}>{item.name}</Text>
 															{item.teachersName ? (
-																<Text style={styles.aztitlet}>{item.teachersName}</Text>
+																<Text numberOfLines={1} style={styles.aztitlet}>
+																	{item.teachersName}
+																</Text>
 															) : null}
 														</View>
 													</View>
 													<View style={{ borderWidth: 0, marginStart: 0, flex: 1 }}>
 														<View style={styles.textpart}>
 															<View style={styles.textpart}>
-																<Text style={styles.rtlText}>
-																	{toFarsi(item.azdate)}
-																</Text>
+																{this.state.selectedItem == '-1' && (
+																	<Text style={styles.rtlText}>
+																		{toFarsi(item.azdate)}
+																	</Text>
+																)}
 															</View>
 															<View style={styles.textpart}>
 																<Text style={styles.rtlText}>
-																	{toFarsi(`ساعت:` + item.aztime)}
+																	{toFarsi(
+																		`ساعت: ` + item.aztime.replace('-', ' تا ')
+																	)}
 																</Text>
 															</View>
 														</View>
@@ -563,7 +829,7 @@ class webinar extends Component {
 															</View>
 															<View style={styles.textpart}>
 																<Text style={styles.rtlText}>
-																	{toFarsi(item.duration + `‍‍‍‍‍دقیقه`)}
+																	{toFarsi(item.duration + `‍‍‍‍‍ دقیقه `)}
 																</Text>
 															</View>
 														</View>
@@ -620,7 +886,7 @@ class webinar extends Component {
 														//onPress={handleSubmit}
 														//disabled={!isValid }
 														loading={this.state.isSubmitting}
-														title="آرشیو ضبط جلسات"
+														title="آرشیو"
 														onPress={() => {
 															const { navigate } = this.props.navigation;
 
@@ -670,6 +936,85 @@ class webinar extends Component {
 													/>
 												</View>
 											)}
+											{false && (
+												<View style={styles.textpart} style={{ paddingTop: 20 }}>
+													<FormButton
+														onPress={() => {
+															global.examEditID = item.id;
+															//alert(global.examEditID);
+															this.setState({
+																bottomModalAndTitle: true
+															});
+														}}
+														buttonColor="#ff8184"
+														borderColor="white"
+														fontSizeb={14}
+														heightb={40}
+														borderRadiusb={10}
+														style={{ marginTop: 0 }}
+														backgroundColor="#e3f1fc"
+														buttonType="outline"
+														//onPress={handleSubmit}
+														//disabled={!isValid }
+														loading={this.state.isSubmitting}
+														title="ویرایش "
+														onPress={() => {
+															const { navigate } = this.props.navigation;
+															navigate('eforms', {
+																eformsID: 30,
+																instanseID: item.id,
+																stdID: 0,
+																mode: 'view',
+																isAdminForms: 'true'
+																//extra: this.state.extra
+															});
+															// this.setState({
+															// 	record_list: true
+															// });
+														}}
+													/>
+												</View>
+											)}
+
+											{false && (
+												<View style={styles.textpart} style={{ paddingTop: 20 }}>
+													<FormButton
+														onPress={() => {
+															global.examEditID = item.id;
+															//alert(global.examEditID);
+															this.setState({
+																bottomModalAndTitle: true
+															});
+														}}
+														buttonColor="#ff8184"
+														borderColor="white"
+														fontSizeb={14}
+														heightb={40}
+														borderRadiusb={10}
+														style={{ marginTop: 0 }}
+														backgroundColor="#e3f1fc"
+														buttonType="outline"
+														//onPress={handleSubmit}
+														//disabled={!isValid }
+														loading={this.state.isSubmitting}
+														title="حذف"
+														onPress={() => {
+															const { navigate } = this.props.navigation;
+															navigate('eforms', {
+																eformsID: 30,
+																instanseID: item.id,
+																stdID: 0,
+																mode: 'view',
+																isAdminForms: 'true'
+																//extra: this.state.extra
+															});
+															// this.setState({
+															// 	record_list: true
+															// });
+														}}
+													/>
+												</View>
+											)}
 
 											{item.active == 'True' && (
 												<View style={styles.textpart} style={{ paddingTop: 20 }}>
@@ -678,17 +1023,21 @@ class webinar extends Component {
 															//alert();
 															//console.log(item.url);
 															//return;
-															console.log('http://192.168.1.15/' + item.url);
+															console.log(global.adress.replace('papi', '') + item.url);
 															if (item.scoid == null) {
 																//const message = decodeURIComponent(item.url);
 
-																Linking.openURL('http://192.168.1.15/' + item.url);
+																Linking.openURL(
+																	global.adress.replace('papi', '') + item.url
+																);
 															} else if (item.scoid != null) {
 																//adobe
 																//alert();
 																const message = encodeURIComponent(item.url);
 																//	Linking.openURL(item.url);
-																Linking.openURL('http://192.168.1.15/' + item.url);
+																Linking.openURL(
+																	global.adress.replace('papi', '') + item.url
+																);
 
 																// if (global.ttype == 'student')
 																// 	Linking.openURL(
@@ -720,7 +1069,7 @@ class webinar extends Component {
 														//onPress={handleSubmit}
 														//disabled={!isValid }
 														loading={this.state.isSubmitting}
-														title="ورود به کلاس مجازی"
+														title="ورود به کلاس  "
 													/>
 												</View>
 											)}
@@ -732,23 +1081,28 @@ class webinar extends Component {
 					/>
 				)}
 
-				{global.ttype == 'administrator' && (global.ttype == 'teacher' && false) ? (
+				{global.ttype == 'administrator' ? (
 					<ActionButton position="left" buttonColor="rgba(231,76,60,1)">
 						<ActionButton.Item
 							buttonColor="#9b59b6"
-							title="تعریف آزمون"
+							title="تعریف کلاس مجازی"
 							onPress={() => {
 								global.examEditID = '';
 								const { navigate } = this.props.navigation;
-								navigate('examAdd');
+								navigate('eforms', {
+									eformsID: 30,
+									instanseID: 0,
+									stdID: 0,
+									mode: 'view',
+									isAdminForms: 'true'
+									//extra: this.state.extra
+								});
 							}}
 						>
-							<Icon name="md-create" style={styles.actionButtonIcon} />
+							<Iconan name="edit" style={styles.actionButtonIcon} />
 						</ActionButton.Item>
-						<ActionButton.Item buttonColor="#3498db" title="بانک سئوالات" onPress={() => {}}>
-							<Icon name="md-notifications-off" style={styles.actionButtonIcon} />
-						</ActionButton.Item>
-						{/* <ActionButton.Item buttonColor='#1abc9c' title="All Tasks" onPress={() => {}}>
+
+						{/* <ActionButton.Item buttonColor='#1abc9c' title="All Tasks" onPres‍s={() => {}}>
             <Icon name="md-done-all" style={styles.actionButtonIcon} />
           </ActionButton.Item> */}
 					</ActionButton>
@@ -785,6 +1139,42 @@ class webinar extends Component {
 						{/* <Button title="Hide modal" onPress={this.toggleModal} /> */}
 					</View>
 				</Modalm>
+
+				<Snackbar
+					visible={this.state.issnack}
+					onDismiss={() => this.setState({ issnack: false })}
+					style={{ backgroundColor: '#ffcc00', fontFamily: 'iransans' }}
+					wrapperStyle={{ fontFamily: 'iransans' }}
+					action={{
+						label: 'بستن',
+						onPress: () => {
+							this.setState({ issnack: false });
+						}
+					}}
+				>
+					{this.state.msg}
+				</Snackbar>
+				<Snackbar
+					visible={this.state.issnackin}
+					onDismiss={() => this.setState({ issnackin: false })}
+					style={{ backgroundColor: 'red', fontFamily: 'iransans' }}
+					wrapperStyle={{ fontFamily: 'iransans' }}
+					action={{
+						label: 'بستن',
+						onPress: () => {
+							this.setState({ issnackin: false });
+							this.setState(
+								{
+									//  loading: false,
+									//  save_loading: false
+								}
+							);
+							//this.props.navigation.goBack(null);
+						}
+					}}
+				>
+					{'لطفا دسترسی به اینترنت را چک کنید'}
+				</Snackbar>
 			</View>
 		);
 	}
@@ -835,16 +1225,17 @@ const styles = StyleSheet.create({
 		alignSelf: 'center',
 		fontFamily: 'iransans',
 		textAlign: 'center',
-		fontSize: 18,
+		fontSize: 16,
 		color: 'white'
 	},
 	aztitlet: {
 		alignSelf: 'center',
 		fontFamily: 'iransans',
 		textAlign: 'center',
-		fontSize: 13,
-		borderWidth: 1,
+		fontSize: 12,
+		borderWidth: 0.3,
 		padding: 1,
+		marginRight: 10,
 		borderColor: 'white',
 		borderRadius: 5,
 		color: 'white'

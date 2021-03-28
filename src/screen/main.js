@@ -7,6 +7,8 @@ import Messages from '../screen/messages';
 import Menu from '../screen/menu';
 import Page1 from '../screen/page1';
 import Audio from '../screen/audio';
+import Recorder from '../screen/recorder';
+
 import Webinar from '../screen/webinar';
 
 import Vclass from '../screen/vClass';
@@ -55,16 +57,17 @@ export default class MyComponent extends React.Component {
 		isAudioVisible: false,
 
 		index: 0,
+		//	routes: [],
 		routes: [
-			{ key: 'home', title: 'منو', icon: 'home', color: '#ff756e' },
+			{ key: 'home', title: 'منو', icon: 'home', color: '#1693A5' },
 
 			{
 				key: 'message',
 				title: 'پیام ها',
 				icon: 'email-outline',
 				iconcolor: 'green',
-				color: '#48bdfe',
-				badge: '3'
+				color: '#48bdfe'
+				//badge: '3'
 			},
 			{
 				key: 'vclass',
@@ -74,7 +77,7 @@ export default class MyComponent extends React.Component {
 				color: '#a976fb'
 			},
 
-			{ key: 'webinar', title: 'کلاس مجازی', icon: 'television-play', color: '#ffab68', badge: '2' },
+			{ key: 'webinar', title: 'کلاس مجازی', icon: 'television-play', color: '#ff8184' },
 			{ key: 'event', title: 'رویداد', icon: 'calendar-range', color: '#3F51B5' }
 			// { key: 'login', title: 'ورود', icon: 'qrcode-scan', color: '#019ac3' }
 		]
@@ -86,7 +89,12 @@ export default class MyComponent extends React.Component {
 		});
 		this.setState({ index });
 
-		console.log(index);
+		if (index == 4) {
+			try {
+				GLOBAL.events.loadAPI();
+			} catch (e) {}
+		}
+		console.log('d' + index);
 		//this.setState({ isModalVisible: !this.state.isModalVisible });
 	};
 
@@ -181,6 +189,13 @@ export default class MyComponent extends React.Component {
 					<View style={{ flex: 1 }}>
 						{/* <Button title="Hide modal" onPress={this.toggleModal} /> */}
 						<Audio />
+					</View>
+				</Modal>
+
+				<Modal deviceWidth={deviceWidth} deviceHeight={deviceHeight} isVisible={this.state.isRecorderVisible}>
+					<View style={{ flex: 1 }}>
+						{/* <Button title="Hide modal" onPress={this.toggleModal} /> */}
+						<Recorder />
 					</View>
 				</Modal>
 

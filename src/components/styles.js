@@ -13,8 +13,10 @@ export default StyleSheet.create({
 	},
 	contentList: {
 		flex: 1
+		//marginTop: 15
 	},
 	container: {
+		//width: '100%',
 		flex: 1,
 		marginTop: 0,
 		//f6fbff

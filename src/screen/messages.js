@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
+import { Snackbar } from 'react-native-paper';
 import ActionButton from 'react-native-action-button';
 import defaultStyles from '../config/styles';
 import Loading from '../components/loading';
+//import FastImage from 'react-native-fast-image';
 //import FastImage from 'react-native-fast-image';
 import { withNavigationFocus, NavigationEvents, getActiveChildNavigationOptions } from 'react-navigation';
 //import SwiperFlatList from 'react-native-swiper-flatlist';
@@ -10,6 +12,9 @@ import { REAL_WINDOW_HEIGHT } from 'react-native-extra-dimensions-android';
 
 import Modalm from 'react-native-modal';
 import Icon from 'react-native-vector-icons/Ionicons';
+
+import Iconan from 'react-native-vector-icons/AntDesign';
+
 import SelectContact from '../screen/selectContact';
 import { I18nManager, Platform, Button, Linking, SafeAreaView } from 'react-native';
 import Swiper from 'react-native-swiper';
@@ -38,8 +43,8 @@ import { SearchBar } from 'react-native-elements';
 
 import MessageAdd from '../screen/messageAdd';
 import axios from 'axios';
-I18nManager.allowRTL(true);
-I18nManager.forceRTL(true);
+// I18nManager.allowRTL(true);
+// I18nManager.forceRTL(true);
 import Modal from 'react-native-modal';
 import SelectUser from '../screen/selectUser';
 //import { fromBinary } from 'uuid-js';
@@ -49,6 +54,7 @@ class messages extends Component {
 		super(props);
 		this.page = 1;
 		this.state = {
+			searchText: '',
 			refreshing: false,
 			isModalVisible: false,
 			value: '',
@@ -189,9 +195,10 @@ class messages extends Component {
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
+			this.setState({ issnackin: true });
 			return;
 		}
+
 		/* #endregion */
 
 		this.setState({ loading: true });
@@ -203,7 +210,9 @@ class messages extends Component {
 			'&p=' +
 			param +
 			'&g=' +
-			this.state.selectedItem;
+			this.state.selectedItem +
+			'&q=' +
+			this.state.searchText;
 		if (page == 1) this.setState({ data: [] });
 
 		console.log(uurl);
@@ -249,7 +258,7 @@ class messages extends Component {
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			alert('لطفا دسترسی به اینترنت را چک کنید');
+			this.setState({ issnackin: true });
 			return;
 		}
 
@@ -301,9 +310,10 @@ class messages extends Component {
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
+			this.setState({ issnackin: true });
 			return;
 		}
+
 		/* #endregion */
 
 		this.setState({ loading: true });
@@ -350,6 +360,7 @@ class messages extends Component {
 	}
 	renderHeader = () => {
 		//console.log(this.state.cat);
+		//return null;
 		return (
 			<View style={{ backgroundColor: 'white' }}>
 				<FlatList
@@ -367,6 +378,7 @@ class messages extends Component {
 					renderItem={({ item, index }) => {
 						return (
 							<TouchableOpacity
+								key={item.id}
 								onPress={() => {
 									//	console.log(item.id);
 									this.onPressHandler(item.value);
@@ -381,11 +393,13 @@ class messages extends Component {
 												borderWidth: 1,
 												flexDirection: 'row',
 												borderColor: '#48bdfe',
-												borderRadius: 15,
+												borderRadius: 10,
+
 												margin: 3,
-												paddingTop: 8,
+												paddingTop: 4,
 												paddingRight: 8,
-												paddingLeft: 8
+												paddingLeft: 8,
+												paddingBottom: 3
 											}
 										) : (
 											{
@@ -395,11 +409,13 @@ class messages extends Component {
 												borderWidth: 1,
 
 												borderColor: '#48bdfe',
-												borderRadius: 15,
+												borderRadius: 10,
 												margin: 3,
-												paddingTop: 8,
+
+												paddingTop: 4,
 												paddingRight: 8,
-												paddingLeft: 8
+												paddingLeft: 8,
+												paddingBottom: 3
 											}
 										)
 									}
@@ -429,6 +445,32 @@ class messages extends Component {
 							</TouchableOpacity>
 						);
 					}}
+				/>
+
+				<SearchBar
+					inputContainerStyle={{ backgroundColor: '#eee' }}
+					containerStyle={{
+						flex: 2,
+						marginStart: 8,
+						marginEnd: 8,
+						height: 30,
+						marginBottom: 5,
+						padding: 0,
+						borderBottomWidth: 0,
+						backgroundColor: 'white',
+						borderTopRightRadius: 24,
+						borderTopLeftRadius: 24
+					}}
+					placeholder="جستجو"
+					lightTheme
+					showLoading={this.state.loading}
+					//round
+					inputContainerStyle={{ borderRadius: 10, height: 15, backgroundColor: '#eee' }}
+					inputStyle={{ textAlign: 'center', fontSize: 13, fontFamily: 'iransans' }}
+					//showLoading={this.state.loading}
+					onChangeText={(text) => this.searchFilterFunction(text)}
+					autoCorrect={false}
+					value={this.state.searchText}
 				/>
 			</View>
 		);
@@ -461,6 +503,21 @@ class messages extends Component {
 	// 	this.onRefresh();
 	// };
 
+	searchFilterFunction = (text) => {
+		//alert();
+		this.setState({ searchText: text });
+		if (text == '' || text == undefined) {
+			this.page = 1;
+			this.loadAPI(1, '');
+			//this.flatListRef.scrollToOffset({ animated: true, offset: 0 });
+		}
+		if (text.length < 2) return;
+		this.page = 1;
+		this.loadAPI(1, text);
+		this.flatListRef.scrollToOffset({ animated: true, offset: 0 });
+
+		return;
+	};
 	render() {
 		GLOBAL.message = this;
 		const deviceWidth = Dimensions.get('window').width;
@@ -491,11 +548,14 @@ class messages extends Component {
 				// </View>
 			);
 		}
-
+		//	return null;
 		return (
 			<View style={styles.container}>
 				{/* <Stories Items={this.state.stories} Navigation={this.props.navigation} /> */}
 				<FlatList
+					ref={(ref) => {
+						this.flatListRef = ref;
+					}}
 					ListFooterComponent={this._renderFooter}
 					removeClippedSubviews={false}
 					//onScroll={this.onScroll}
@@ -533,13 +593,22 @@ class messages extends Component {
 					// keyExtractor={(item) => {
 					// 	return item.RowNumber;
 					// }}
+					// keyExtractor={(item, index) => {
+					// 	return item.id;
+					// }}
 
-					keyExtractor={(item) => item.RowNumber.toString()}
+					keyExtractor={(item, index) => index.toString()}
+					//keyExtractor={(item) => item.RowNumber.toString()}
 					//keyExtractor={(item) => item.toString()}
 					renderItem={({ item, index }) => {
+						// return (
+						// 	<View>
+						// 		<Text>fgdfg</Text>
+						// 	</View>
+						// );
 						return (
-							<View style={styles.card}>
-								<View style={{ flexDirection: 'row', height: 40, margin: 10 }}>
+							<View style={styles.card} key={index}>
+								<View key={index} style={{ flexDirection: 'row', height: 40, margin: 10 }}>
 									<Image
 										style={styles.imageavatar}
 										source={{ uri: getHttpAdress() + 'child/' + item.sender_ID + '.jpg' }}
@@ -571,9 +640,8 @@ class messages extends Component {
 											{toFarsi(item.date + ' - ' + item.time)}
 										</Text>
 									</View>
-
-									{item.sender_ID == global.username &&
-									global.ttype != 'student' && (
+									{/* global.ttype != 'student' */}
+									{item.sender_ID == global.username && (
 										<View style={{ flexDirection: 'row' }}>
 											<TouchableOpacity
 												onPress={() => {
@@ -615,9 +683,29 @@ class messages extends Component {
 													// this.setState({
 													// 	bottomModalAndTitle: true
 													// });
-
 													const { navigate } = this.props.navigation;
-													navigate('messageAdd');
+													if (global.ttype == 'student') {
+														navigate('eforms', {
+															eformsID: 33,
+															instanseID: item.id,
+															stdID: 0,
+															mode: 'view',
+															isAdminForms: 'true'
+															//extra: this.state.extra
+														});
+													} else {
+														navigate('eforms', {
+															eformsID: 31,
+															instanseID: item.id,
+															stdID: 0,
+															mode: 'view',
+															isAdminForms: 'true'
+															//extra: this.state.extra
+														});
+													}
+
+													//
+													//navigate('messageAdd');
 												}}
 											>
 												<Ionicons
@@ -649,37 +737,65 @@ class messages extends Component {
 										</MenuOptions>
 									</Menu> */}
 								</View>
-								<View style={{ flex: 1 }}>
-									{item.imgs != '' && (
-										<Swiper
-											onIndexChanged={(index) => {
-												//console.log(item.imgs.split('|')[index]);
-											}}
-											paginationStyle={{
-												flexDirection: Platform.OS === 'ios' ? 'row' : 'row-reverse'
-											}}
-											loop={false}
-											style={styles.wrapper}
-											showsButtons={false}
-										>
-											{item.imgs.split('|').map((data) => {
-												//alert(data);
-												if (data != '') {
-													let ext = data.split('.')[data.split('.').length - 1].toLowerCase();
-													if (ext == 'jpg')
-														return (
-															<View key={data} style={styles.slide1}>
-																<Image
-																	resizeMode="contain"
+								{/* <TouchableOpacity
+									activeOpacity={0.9}
+									onPress={() => {
+										const { navigate } = this.props.navigation;
+
+										navigate('comment', {
+											messageid: item.id,
+											tab: this.state.selectedItem
+										});
+									}}
+									style={{ flex: 1 }}
+								> */}
+								{item.imgs != '' &&
+								item.imgs != '|||' && (
+									<Swiper
+										onIndexChanged={(index) => {
+											//console.log(item.imgs.split('|')[index]);
+										}}
+										paginationStyle={{
+											flexDirection: Platform.OS === 'ios' ? 'row' : 'row-reverse'
+										}}
+										dotColor={'white'}
+										loop={false}
+										style={styles.wrapper}
+										showsButtons={false}
+									>
+										{item.imgs.split('|').map((data) => {
+											//alert(data);
+											if (data != '') {
+												let ext = data.split('.')[data.split('.').length - 1].toLowerCase();
+												if (ext == 'jpg')
+													return (
+														<View key={data} style={styles.slide1}>
+															<Image
+																resizeMode="contain"
+																style={{
+																	width: '100%',
+																	height: '100%',
+																	borderWidth: 0
+																}}
+																source={{ uri: getHttpAdress() + 'media/' + data }}
+															/>
+
+															{/* <FastImage
 																	style={{
 																		width: '100%',
 																		height: '100%',
 																		borderWidth: 0
 																	}}
-																	source={{ uri: data }}
-																/>
+																	source={{ uri: getHttpAdress() + 'media/' + data }}
+																	// source={{
+																	// 	uri: 'https://unsplash.it/400/400?image=1',
+																	// 	headers: { Authorization: 'someAuthToken' },
+																	// 	priority: FastImage.priority.normal
+																	// }}
+																	resizeMode={FastImage.resizeMode.contain}
+																/> */}
 
-																{/* <FastImage
+															{/* <FastImage
 																	style={{
 																		width: '100%',
 																		height: '100%',
@@ -692,55 +808,67 @@ class messages extends Component {
 																	}}
 																	resizeMode={FastImage.resizeMode.contain}
 																/> */}
-															</View>
-														);
-													else if (ext == 'mp4') {
-														return (
-															<View key={data} style={styles.slide1}>
-																<Video
-																	source={{
-																		uri:
-																			'http://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4'
-																	}}
-																	rate={1.0}
-																	volume={1.0}
-																	isMuted={false}
-																	resizeMode="contain"
-																	isLooping
-																	style={{
-																		width: '100%',
-																		height: '100%',
-																		borderWidth: 0
-																	}}
-																/>
-															</View>
-														);
-													} else
-														return (
-															<View key={data} style={styles.slide1}>
-																<Text style={styles.text}>{data}</Text>
-															</View>
-														);
-												}
-											})}
-										</Swiper>
-									)}
+														</View>
+													);
+												else if (ext == 'mp4') {
+													return (
+														<View key={data} style={styles.slide1}>
+															<Video
+																source={{
+																	uri:
+																		'http://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4'
+																}}
+																rate={1.0}
+																volume={1.0}
+																isMuted={false}
+																resizeMode="contain"
+																isLooping
+																style={{
+																	width: '100%',
+																	height: '100%',
+																	borderWidth: 0
+																}}
+															/>
+														</View>
+													);
+												} else
+													return (
+														<View key={data} style={styles.slide1}>
+															<Text style={styles.text}>{data}</Text>
+														</View>
+													);
+											}
+										})}
+									</Swiper>
+								)}
 
-									<View style={styles.cardContent}>
-										<View style={{ flexDirection: 'row', alignSelf: 'flex-end' }}>
-											{false && (
-												<TouchableOpacity
-													onPress={() => {
-														global.forwardID = item.id;
-														this.setState({
-															isModalpiker_message_Visible: true
-														});
-													}}
-												>
-													<Entypo name="forward" size={27} style={styles.forward} />
-												</TouchableOpacity>
-											)}
+								<View style={styles.cardContent}>
+									<View style={{ flexDirection: 'row-reverse', alignSelf: 'flex-end' }}>
+										{true && (
+											<TouchableOpacity
+												// onPress={() => {
+												// 	global.forwardID = item.id;
+												// 	this.setState({
+												// 		isModalpiker_message_Visible: true
+												// 	});
+												// }}
 
+												onPress={() => {
+													const { navigate } = this.props.navigation;
+
+													navigate('comment', {
+														messageid: item.id,
+														tab: this.state.selectedItem
+													});
+												}}
+											>
+												<AntDesign name="laptop" size={25} style={styles.message} />
+
+												{/* <Entypo name="forward" size={27} style={styles.forward} /> */}
+											</TouchableOpacity>
+										)}
+
+										{item.isadd == true && (
 											<TouchableOpacity
 												onPress={() => {
 													//global.replyID = item.sender_ID;
@@ -748,44 +876,102 @@ class messages extends Component {
 													//global.replyID_title = item.title;
 
 													const { navigate } = this.props.navigation;
-													navigate('messageAdd', {
-														replyID: item.sender_ID,
-														replyID_lastname: item.senderName,
-														replyID_title: item.title
-													});
+													//	const { navigate } = this.props.navigation;
+													if (global.ttype == 'student') {
+														navigate('eforms', {
+															eformsID: 34,
+															instanseID: 0,
+															stdID: 0,
+															mode: 'view',
+															isAdminForms: 'true',
+															extra: item.id
+														});
+													} else {
+														navigate('eforms', {
+															eformsID: 34,
+															instanseID: 0,
+															stdID: 0,
+															mode: 'view',
+															isAdminForms: 'true',
+															extra: item.id
+														});
+													}
+
+													// navigate('messageAdd', {
+													// 	replyID: item.sender_ID,
+													// 	replyID_lastname: item.senderName,
+													// 	replyID_title: item.title
+													// });
 												}}
 											>
 												<AntDesign name="message1" size={25} style={styles.message} />
 											</TouchableOpacity>
+										)}
 
-											<Ionicons size={27} style={styles.space} />
+										<Ionicons size={27} style={styles.space} />
 
-											{/* <Ionicons name="md-attach" size={33} style={styles.attach} /> */}
+										{/* <Ionicons name="md-attach" size={33} style={styles.attach} /> */}
 
-											{item.files != '' && (
-												<View style={{ flexDirection: 'row' }}>
-													{item.files.split('|').map((data) => {
-														let ext = data
-															.split('.')
-															[data.split('.').length - 1].toLowerCase();
+										{item.files != '' && (
+											<View style={{ flexDirection: 'row' }}>
+												{item.files.split('|').map((data) => {
+													let ext = data.split('.')[data.split('.').length - 1].toLowerCase();
+													if (ext != '') {
+														return (
+															<TouchableOpacity
+																onPress={() => {
+																	Linking.openURL(getHttpAdress() + 'media/' + data);
 
-														if (ext == 'jpg')
-															return (
-																<TouchableOpacity
-																	onPress={() => {
-																		this.handleDownload(data);
-																	}}
-																>
-																	<Ionicons
-																		name="ios-image"
-																		size={32}
-																		color="#bbb"
-																		style={{ marginLeft: 10 }}
-																	/>
-																</TouchableOpacity>
-															);
-														else if (ext == 'pdf')
-															//return null;
+																	//this.handleDownload(data);
+																}}
+															>
+																{/* <Ionicons
+																name="ios-image"
+																size={32}
+																color="#bbb"
+																style={{ marginLeft: 10 }}
+															/> */}
+
+																<AntDesign
+																	name="paperclip"
+																	size={25}
+																	style={styles.message}
+																/>
+															</TouchableOpacity>
+															//}
+														);
+													}
+													if (ext == 'jpg')
+														return (
+															<TouchableOpacity
+																onPress={() => {
+																	this.handleDownload(data);
+																}}
+															>
+																<Ionicons
+																	name="ios-image"
+																	size={32}
+																	color="#bbb"
+																	style={{ marginLeft: 10 }}
+																/>
+															</TouchableOpacity>
+														);
+													else if (ext == 'pdf')
+														//return null;
+														<TouchableOpacity
+															onPress={() => {
+																this.handleDownload(data);
+															}}
+														>
+															<AntDesign
+																style={{ marginLeft: 10 }}
+																name="pdffile1"
+																size={30}
+																color="#bbb"
+															/>
+														</TouchableOpacity>;
+													else if (ext == 'xls' || ext == 'xlsx')
+														return (
 															<TouchableOpacity
 																onPress={() => {
 																	this.handleDownload(data);
@@ -793,48 +979,49 @@ class messages extends Component {
 															>
 																<AntDesign
 																	style={{ marginLeft: 10 }}
-																	name="pdffile1"
+																	name="exclefile1"
 																	size={30}
 																	color="#bbb"
 																/>
-															</TouchableOpacity>;
-														else if (ext == 'xls' || ext == 'xlsx')
-															return (
-																<TouchableOpacity
-																	onPress={() => {
-																		this.handleDownload(data);
-																	}}
-																>
-																	<AntDesign
-																		style={{ marginLeft: 10 }}
-																		name="exclefile1"
-																		size={30}
-																		color="#bbb"
-																	/>
-																</TouchableOpacity>
-															);
-														else if (ext != '')
-															return (
-																<TouchableOpacity
-																	onPress={() => {
-																		this.handleDownload(data);
-																	}}
-																>
-																	<Ionicons
-																		name="md-attach"
-																		size={35}
-																		style={{ marginLeft: 10 }}
-																		color="#bbb"
-																	/>
-																</TouchableOpacity>
-															);
-													})}
-												</View>
-											)}
-										</View>
-										<Text style={styles.name}>{item.title}</Text>
+															</TouchableOpacity>
+														);
+													else if (ext != '')
+														return (
+															<TouchableOpacity
+																onPress={() => {
+																	this.handleDownload(data);
+																}}
+															>
+																<Ionicons
+																	name="md-attach"
+																	size={35}
+																	style={{ marginLeft: 10 }}
+																	color="#bbb"
+																/>
+															</TouchableOpacity>
+														);
+												})}
+											</View>
+										)}
 									</View>
+									<TouchableOpacity
+										activeOpacity={0.5}
+										style={{ flex: 1 }}
+										onPress={() => {
+											const { navigate } = this.props.navigation;
+
+											navigate('comment', {
+												messageid: item.id,
+												tab: this.state.selectedItem
+											});
+										}}
+									>
+										{/* <View style={{ flex: 1 }}> */}
+										<Text style={styles.name}>{item.title}</Text>
+										{/* </View> */}
+									</TouchableOpacity>
 								</View>
+								{/* </TouchableOpacity> */}
 							</View>
 						);
 					}}
@@ -848,10 +1035,33 @@ class messages extends Component {
 							title="ارسال پیام"
 							onPress={() => {
 								const { navigate } = this.props.navigation;
-								navigate('messageAdd', { mode: 'add' });
+
+								//const { navigate } = this.props.navigation;
+								//	const { navigate } = this.props.navigation;
+								if (global.ttype == 'student') {
+									navigate('eforms', {
+										eformsID: 33,
+										instanseID: 0,
+										stdID: 0,
+										mode: 'view',
+										isAdminForms: 'true'
+										//extra: this.state.extra
+									});
+								} else {
+									navigate('eforms', {
+										eformsID: 31,
+										instanseID: 0,
+										stdID: 0,
+										mode: 'view',
+										isAdminForms: 'true'
+										//extra: this.state.extra
+									});
+								}
+
+								//navigate('messageAdd', { mode: 'add' });
 							}}
 						>
-							<Icon name="ios-mail" style={styles.actionButtonIcon} />
+							<Iconan name="edit" style={styles.actionButtonIcon} />
 						</ActionButton.Item>
 					</ActionButton>
 				) : null}
@@ -865,13 +1075,36 @@ class messages extends Component {
 							onPress={() => {
 								global.messageEditID = '';
 								const { navigate } = this.props.navigation;
-								navigate('messageAdd');
+
+								//	const { navigate } = this.props.navigation;
+								//	const { navigate } = this.props.navigation;
+								if (global.ttype == 'student') {
+									navigate('eforms', {
+										eformsID: 33,
+										instanseID: 0,
+										stdID: 0,
+										mode: 'view',
+										isAdminForms: 'true'
+										//extra: this.state.extra
+									});
+								} else {
+									navigate('eforms', {
+										eformsID: 31,
+										instanseID: 0,
+										stdID: 0,
+										mode: 'view',
+										isAdminForms: 'true'
+										//extra: this.state.extra
+									});
+								}
+
+								//navigate('messageAdd');
 							}}
 						>
-							<Icon name="md-create" style={styles.actionButtonIcon} />
+							<Iconan name="edit" style={styles.actionButtonIcon} />
 						</ActionButton.Item>
 
-						<Icon name="md-notifications-off" style={styles.actionButtonIcon} />
+						{/* <Icon name="md-notifications-off" style={styles.actionButtonIcon} /> */}
 					</ActionButton>
 				) : null}
 
@@ -906,6 +1139,28 @@ class messages extends Component {
 						<SelectContact style={{}} />
 					</View>
 				</Modalm>
+
+				<Snackbar
+					visible={this.state.issnackin}
+					onDismiss={() => this.setState({ issnackin: false })}
+					style={{ backgroundColor: 'red', fontFamily: 'iransans' }}
+					wrapperStyle={{ fontFamily: 'iransans' }}
+					action={{
+						label: 'بستن',
+						onPress: () => {
+							this.setState({ issnackin: false });
+							this.setState(
+								{
+									//  loading: false,
+									//  save_loading: false
+								}
+							);
+							//this.props.navigation.goBack(null);
+						}
+					}}
+				>
+					{'لطفا دسترسی به اینترنت را چک کنید'}
+				</Snackbar>
 			</View>
 		);
 	}
@@ -959,7 +1214,8 @@ const styles = StyleSheet.create({
 	},
 	message: {
 		flex: 1,
-		marginStart: 13,
+		marginStart: 0,
+		marginEnd: 5,
 		color: '#aaa',
 		alignSelf: 'center',
 		paddingStart: 10
@@ -1038,8 +1294,10 @@ const styles = StyleSheet.create({
 		textAlign: 'left',
 		alignSelf: 'stretch',
 		paddingEnd: 10,
-		paddingStart: 10,
-		color: '#48bdfe'
+		paddingStart: 15,
+		color: '#48bdfe',
+		marginTop: 5,
+		marginBottom: 15
 	},
 	count: {
 		fontSize: 14,

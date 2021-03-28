@@ -1,15 +1,16 @@
 import React, { Component } from 'react';
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet, Dimensions, Alert } from 'react-native';
 import { REAL_WINDOW_HEIGHT } from 'react-native-extra-dimensions-android';
 import defaultStyles from '../config/styles';
 import Loading from '../components/loading';
-
+import { SearchBar } from 'react-native-elements';
+import { Snackbar } from 'react-native-paper';
 import ActionButton from 'react-native-action-button';
 import Modalm from 'react-native-modal';
 
 import { withNavigation } from 'react-navigation';
 import { FlatGrid } from 'react-native-super-grid';
-import Icon from 'react-native-vector-icons/Ionicons';
+import Icon from 'react-native-vector-icons/AntDesign';
 import Mstyles from '../components/styles';
 import FormButton from '../component/FormButton';
 import ExamAdd from '../screen/examAdd';
@@ -45,6 +46,8 @@ class vclass extends Component {
 		super(props);
 		(this.page = 1),
 			(this.state = {
+				issnack: false,
+				searchText: '',
 				bottomModalAndTitle: false,
 				refreshing: false,
 				isModalVisible: false,
@@ -83,6 +86,119 @@ class vclass extends Component {
 			]
 		});
 	}
+
+	loadAPIrebuild = async (eid, type) => {
+		if (global.adress == 'undefined') {
+			GLOBAL.main.setState({ isModalVisible: true });
+		}
+		/* #region  check internet */
+		let state = await NetInfo.fetch();
+		if (!state.isConnected) {
+			this.setState({ issnackin: true });
+			return;
+		}
+		/* #endregion */
+
+		let param = userInfo();
+		let uurl = global.adress + '/pApi.asmx/rebuildExam?eid=' + eid + '&p=' + param; //+
+
+		console.log(uurl);
+
+		try {
+			const response = await fetch(uurl);
+			if (response.ok) {
+				let retJson = await response.json();
+				if (Object.keys(retJson).length == 0) {
+					this.setState({
+						loading: false,
+						dataLoading: false,
+						isRefreshing: false
+					});
+					return;
+				}
+
+				this.setState({ issnack: true, msg: retJson.msg });
+
+				//console.log(retJson);
+				// this.setState({
+				// 	data: page === 1 ? retJson : [ ...this.state.data, ...retJson ],
+
+				// 	loading: false,
+				// 	dataLoading: false,
+				// 	isRefreshing: false
+				// });
+			}
+		} catch (e) {
+			console.log('err');
+			this.dropDownAlertRef.alertWithType('error', 'پیام', 'خطادر دستیابی به اطلاعات');
+			this.setState({
+				loading: false,
+				dataLoading: false,
+				isRefreshing: false
+			});
+			return;
+		}
+	};
+
+	loadAPIDel = async (eid, index) => {
+		if (global.adress == 'undefined') {
+			GLOBAL.main.setState({ isModalVisible: true });
+		}
+		/* #region  check internet */
+		let state = await NetInfo.fetch();
+		if (!state.isConnected) {
+			this.setState({ issnackin: true });
+			return;
+		}
+		/* #endregion */
+
+		let param = userInfo();
+		let uurl = global.adress + '/pApi.asmx/delExam?eid=' + eid + '&p=' + param; //+
+
+		console.log(uurl);
+
+		try {
+			const response = await fetch(uurl);
+			if (response.ok) {
+				let retJson = await response.json();
+				if (Object.keys(retJson).length == 0) {
+					this.setState({
+						loading: false,
+						dataLoading: false,
+						isRefreshing: false
+					});
+					return;
+				}
+
+				this.setState({ issnack: true, msg: retJson.msg });
+
+				let newimagesAddFile = this.state.data;
+				//alert(index);
+				newimagesAddFile.splice(index, 1); //to remove a single item starting at index
+				this.setState({ data: newimagesAddFile });
+
+				//console.log(retJson);
+				// this.setState(
+				// 	{
+				// 		// data: page === 1 ? retJson : [ ...this.state.data, ...retJson ],
+				// 		// loading: false,
+				// 		// dataLoading: false,
+				// 		// isRefreshing: false
+				// 	}
+				// );
+			}
+		} catch (e) {
+			console.log('err');
+			this.dropDownAlertRef.alertWithType('error', 'پیام', 'خطادر دستیابی به اطلاعات');
+			this.setState({
+				loading: false,
+				dataLoading: false,
+				isRefreshing: false
+			});
+			return;
+		}
+	};
+
 	loadAPI = async (page, type) => {
 		if (global.adress == 'undefined') {
 			GLOBAL.main.setState({ isModalVisible: true });
@@ -90,7 +206,7 @@ class vclass extends Component {
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
+			this.setState({ issnackin: true });
 			return;
 		}
 		/* #endregion */
@@ -104,7 +220,9 @@ class vclass extends Component {
 			'&p=' +
 			param +
 			'&type=' +
-			this.state.selectedItem;
+			this.state.selectedItem +
+			'&q=' +
+			this.state.searchText;
 		console.log(uurl);
 		if (page == 1) this.setState({ data: [] });
 		try {
@@ -145,9 +263,15 @@ class vclass extends Component {
 			GLOBAL.main.setState({ isModalVisible: true });
 		}
 		/* #region  check internet */
+		// let state = await NetInfo.fetch();
+		// if (!state.isConnected) {
+		// 	this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
+		// 	return;
+		// }
+
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
+			this.setState({ issnackin: true });
 			return;
 		}
 		/* #endregion */
@@ -206,6 +330,23 @@ class vclass extends Component {
 			this.loadAPI(this.page, 'more');
 		}
 	};
+
+	searchFilterFunction = (text) => {
+		//alert();
+		this.setState({ searchText: text });
+		if (text == '' || text == undefined) {
+			this.page = 1;
+			this.loadAPI(1, '');
+			//this.flatListRef.scrollToOffset({ animated: true, offset: 0 });
+		}
+		if (text.length < 2) return;
+		this.page = 1;
+		this.loadAPI(1, text);
+		this.flatListRef.scrollToOffset({ animated: true, offset: 0 });
+
+		return;
+	};
+
 	clickEventListener = (item) => {
 		const { navigate } = this.props.navigation;
 		//navigate('test');
@@ -215,12 +356,32 @@ class vclass extends Component {
 
 				bottomModalAndTitle: false
 			});
-			navigate('examAdd');
+
+			navigate('eforms', {
+				eformsID: 1,
+				instanseID: global.examEditID,
+				stdID: 0,
+				mode: 'view',
+				isAdminForms: 'true'
+			});
+
+			//navigate('examAdd');
 		} else if (item.name == 'افزودن سئوال') {
 			this.setState({
 				barom_Visible: false
 			});
-			navigate('qbank', { examID: global.examID });
+
+			if (global.examEditIDSpeed == 'pdf') {
+				navigate('eforms', {
+					eformsID: 2,
+					instanseID: global.examID,
+					stdID: 0,
+					mode: 'view',
+					isAdminForms: 'true'
+				});
+			} else {
+				navigate('qbank', { examID: global.examID });
+			}
 		} else if (item.name == ' شرکت کنندگان') {
 			this.setState({
 				barom_Visible: false
@@ -231,7 +392,126 @@ class vclass extends Component {
 				barom_Visible: false
 			});
 
-			navigate('Exam', { examID: global.examID, mode: 'test' });
+			navigate('Exam', { examID: global.examID, mode: 'test', name: 'تست آزمون' });
+		} else if (item.name == 'نتیجه و تحلیل') {
+			this.setState({
+				barom_Visible: false
+			});
+			//const { navigate } = this.props.navigation;
+			navigate('tahlil', { examID: global.examID, mode: 'tahlil' });
+			//navigate('Exam', { examID: global.examID, mode: 'test' });
+		} else if (item.name == 'کپی از آزمون') {
+			this.setState({
+				barom_Visible: false
+			});
+
+			navigate('eforms', {
+				eformsID: 32,
+				instanseID: '',
+				stdID: 0,
+				mode: 'view',
+				isAdminForms: 'true',
+				extra: global.examID
+			});
+		} else if (item.name == 'محاسبه مجدد ') {
+			Alert.alert(
+				' توجه',
+				'آیا مایل به محاسبه مجدد نمرات آزمون هستید؟',
+				[
+					{
+						text: 'خیر',
+						// onPress: () => {
+						// 	this.setState({
+						// 		barom_Visible: false
+						// 	});
+						// },
+						style: 'cancel'
+					},
+					{
+						text: 'بله',
+						onPress: () => {
+							Alert.alert(
+								'اخطار',
+								'با زدن دکمه تایید همه نمرات آزمون مجددا محاسیه خواهد شد',
+								[
+									{
+										text: 'تایید',
+										onPress: () => {
+											this.loadAPIrebuild(global.examID, 'pull');
+
+											this.setState({
+												barom_Visible: false
+											});
+										},
+										style: 'cancel'
+									},
+									{
+										text: 'انصراف',
+
+										style: 'cancel'
+									}
+								],
+								{
+									cancelable: false
+								}
+							);
+
+							//this.loadAPI(item.StudentCode, '');
+						}
+					}
+				],
+				{ cancelable: false }
+			);
+		} else if (item.name == 'حذف') {
+			Alert.alert(
+				' اخطار',
+				'آیا مایل به حذف آزمون   هستید؟',
+				[
+					{
+						text: 'خیر',
+						// onPress: () => {
+						// 	this.setState({
+						// 		barom_Visible: false
+						// 	});
+						// },
+						style: 'cancel'
+					},
+					{
+						text: 'بله',
+						onPress: () => {
+							Alert.alert(
+								'اخطار',
+								'با زدن دکمه تایید کلیه اطلاعات آزمون از بین می رود',
+								[
+									{
+										text: 'تایید',
+										onPress: () => {
+											this.loadAPIDel(global.examID, global.iindex);
+											this.setState({
+												barom_Visible: false
+											});
+										},
+										style: 'cancel'
+									},
+									{
+										text: 'انصراف',
+
+										style: 'cancel'
+									}
+								],
+								{
+									cancelable: false
+								}
+							);
+
+							//this.loadAPI(item.StudentCode, '');
+						}
+					}
+				],
+				{ cancelable: false }
+			);
+
+			//navigate('Exam', { examID: global.examID, mode: 'test' });
 		}
 
 		//console.log(item);
@@ -281,13 +561,20 @@ class vclass extends Component {
 		return (
 			<View style={{ backgroundColor: 'white' }}>
 				<FlatList
-					inverted={Platform.OS === 'ios' ? false : true}
+					//inverted={Platform.OS === 'ios' ? false : true}
 					extraData={this.state.selectedItem}
 					data={this.state.cat}
 					keyExtractor={(item, index) => index.toString()}
 					//keyExtractor={(item) => item.id.toString()}
 					horizontal
-					style={{ paddingBottom: 4, borderWidth: 0, marginTop: 4, marginRight: 4, marginLeft: 4 }}
+					style={{
+						flexDirection: 'column-reverse',
+						paddingBottom: 4,
+						borderWidth: 0,
+						marginTop: 4,
+						marginRight: 4,
+						marginLeft: 4
+					}}
 					renderItem={({ item, index }) => {
 						return (
 							<TouchableOpacity
@@ -305,10 +592,10 @@ class vclass extends Component {
 												fontFamily: 'iransans',
 												borderWidth: 1,
 												borderColor: '#a976fb',
-												borderRadius: 15,
+												borderRadius: 10,
 												flexDirection: 'row',
 												margin: 3,
-												paddingTop: 8,
+												paddingTop: 4,
 												paddingRight: 8,
 												paddingLeft: 8,
 												paddingBottom: 3
@@ -319,10 +606,10 @@ class vclass extends Component {
 												fontFamily: 'iransans',
 												borderWidth: 1,
 												borderColor: '#a976fb',
-												borderRadius: 15,
+												borderRadius: 10,
 												margin: 3,
 												flexDirection: 'row',
-												paddingTop: 8,
+												paddingTop: 4,
 												paddingRight: 8,
 												paddingLeft: 8,
 												paddingBottom: 3
@@ -356,6 +643,32 @@ class vclass extends Component {
 						);
 					}}
 				/>
+
+				<SearchBar
+					inputContainerStyle={{ backgroundColor: '#eee' }}
+					containerStyle={{
+						flex: 2,
+						marginStart: 8,
+						marginEnd: 8,
+						height: 30,
+						marginBottom: 5,
+						padding: 0,
+						borderBottomWidth: 0,
+						backgroundColor: 'white',
+						borderTopRightRadius: 24,
+						borderTopLeftRadius: 24
+					}}
+					placeholder="جستجو"
+					lightTheme
+					showLoading={this.state.loading}
+					//round
+					inputContainerStyle={{ borderRadius: 10, height: 15, backgroundColor: '#eee' }}
+					inputStyle={{ textAlign: 'center', fontSize: 13, fontFamily: 'iransans' }}
+					//showLoading={this.state.loading}
+					onChangeText={(text) => this.searchFilterFunction(text)}
+					autoCorrect={false}
+					value={this.state.searchText}
+				/>
 			</View>
 		);
 	};
@@ -364,12 +677,31 @@ class vclass extends Component {
 		const deviceHeight = Platform.OS === 'ios' ? Dimensions.get('window').height : REAL_WINDOW_HEIGHT;
 
 		let test = [
-			{ name: ' شرکت کنندگان', code: 'white', icon: 'ios-list', bkcolor: '#e091ca' },
-			//{ name: 'افزودن سئوال', code: 'white', icon: 'ios-add-circle-outline', bkcolor: '#fbb97c' },
-			{ name: 'ویرایش', code: 'white', icon: 'ios-settings', bkcolor: '#f79383' },
-			{ name: 'تست آزمون', code: 'white', icon: 'md-checkmark-circle-outline', bkcolor: '#34ace0' },
+			{ name: ' شرکت کنندگان', code: 'white', icon: 'team', bkcolor: '#62ddbd' },
+			{ name: 'افزودن سئوال', code: 'white', icon: 'pluscircleo', bkcolor: '#fecd57' },
+			{ name: 'ویرایش', code: 'white', icon: 'edit', bkcolor: '#9ed36a' },
+			{ name: 'تست آزمون', code: 'white', icon: 'tool', bkcolor: '#46cead' },
+			{ name: 'نتیجه و تحلیل', code: 'white', icon: 'barschart', bkcolor: '#5e9cea' },
+			{ name: 'کپی از آزمون', code: 'white', icon: 'copy1', bkcolor: '#eb87bf' },
+			{ name: 'محاسبه مجدد ', code: 'white', icon: 'reload1', bkcolor: '#ac92ea' },
+			//{ name: 'تصحیح آزمون', code: 'white', icon: 'md-checkmark-circle-outline', bkcolor: '#34ace0' },
+
 			//	{ name: ' غایبین', code: 'white', icon: 'md-people', bkcolor: '#34ace0' },
-			{ name: 'حذف', code: 'white', icon: 'ios-trash', bkcolor: '#f79383' }
+			{ name: 'حذف', code: 'white', icon: 'delete', bkcolor: '#ec5564' }
+		];
+
+		let test1 = [
+			{ name: ' شرکت کنندگان', code: 'white', icon: 'team', bkcolor: '#62ddbd' },
+			{ name: 'افزودن سئوال', code: 'white', icon: 'pluscircleo', bkcolor: '#fecd57' },
+			//{ name: 'ویرایش', code: 'white', icon: 'edit', bkcolor: '#9ed36a' },
+			{ name: 'تست آزمون', code: 'white', icon: 'tool', bkcolor: '#46cead' },
+			{ name: 'نتیجه و تحلیل', code: 'white', icon: 'barschart', bkcolor: '#5e9cea' }
+			//{ name: 'کپی از آزمون', code: 'white', icon: 'copy1', bkcolor: '#eb87bf' }
+			//{ name: 'محاسبه مجدد ', code: 'white', icon: 'reload1', bkcolor: '#ac92ea' },
+			//{ name: 'تصحیح آزمون', code: 'white', icon: 'md-checkmark-circle-outline', bkcolor: '#34ace0' },
+
+			//	{ name: ' غایبین', code: 'white', icon: 'md-people', bkcolor: '#34ace0' },
+			//{ name: 'حذف', code: 'white', icon: 'delete', bkcolor: '#ec5564' }
 		];
 
 		GLOBAL.vclass = this;
@@ -390,6 +722,9 @@ class vclass extends Component {
 		return (
 			<View style={Mstyles.container}>
 				<FlatList
+					ref={(ref) => {
+						this.flatListRef = ref;
+					}}
 					ListHeaderComponent={this.renderHeader}
 					stickyHeaderIndices={[ 0 ]}
 					ListFooterComponent={this._renderFooter}
@@ -434,12 +769,12 @@ class vclass extends Component {
 					columnWrapperStyle={styles.listContainer}
 					data={this.state.data}
 					keyExtractor={(item, index) => index.toString()}
-					renderItem={({ item }) => {
+					renderItem={({ item, index }) => {
 						return (
 							<View
 								style={{
-									height: 260,
-									borderRadius: 13,
+									height: 240,
+									borderRadius: 10,
 									margin: 15
 								}}
 							>
@@ -477,9 +812,13 @@ class vclass extends Component {
 													</View>
 													<View style={{ justifyContent: 'center', flex: 2 }}>
 														<Text style={styles.aztitle}>{item.name}</Text>
-														{item.FirstName ? (
+														{/* <Text style={[ styles.aztitle, { fontSize: 12 } ]}>
+															{'تعداد شرکت کننده:' + item.parti}
+														</Text> */}
+
+														{item.teachername ? (
 															<Text style={styles.aztitlet}>
-																{item.FirstName + ' ' + item.LastName}
+																{item.teachername}-{toFarsi(item.id)}
 															</Text>
 														) : null}
 													</View>
@@ -493,7 +832,12 @@ class vclass extends Component {
 														</View>
 														<View style={styles.textpart}>
 															<Text style={styles.rtlText}>
-																{toFarsi(`ساعت:` + item.t_shoro_namayesh)}
+																{toFarsi(
+																	` ورود از` +
+																		item.t_shoro_namayesh +
+																		' تا' +
+																		item.t_payan_namayesh
+																)}
 															</Text>
 														</View>
 													</View>
@@ -505,7 +849,15 @@ class vclass extends Component {
 														</View>
 														<View style={styles.textpart}>
 															<Text style={styles.rtlText}>
-																{toFarsi(item.time_pasokh + `‍‍‍‍‍دقیقه`)}
+																{toFarsi(
+																	item.speed != 'speed'
+																		? 'زمان پاسخگویی:' +
+																			item.time_pasokh +
+																			`‍‍‍‍‍دقیقه`
+																		: 'زمان برای هرسوال:' +
+																			item.time_pasokh +
+																			`‍‍‍‍‍دقیقه`
+																)}
 															</Text>
 														</View>
 													</View>
@@ -559,7 +911,12 @@ class vclass extends Component {
 													buttonType="outline"
 													onPress={() => {
 														const { navigate } = this.props.navigation;
-														navigate('Exam', { examID: item.id, mode: 'pasokhname' });
+														navigate('Exam', {
+															examID: item.id,
+															mode: 'pasokhname',
+															name: global.firstname + ' ' + global.lastname,
+															std: global.username
+														});
 													}}
 													//disabled={!isValid }
 													loading={this.state.isSubmitting}
@@ -567,7 +924,9 @@ class vclass extends Component {
 												/>
 											</View>
 										) : null}
-										{(item.show_nomre || global.ttype == 'administrator') && (
+										{(item.show_nomre ||
+											global.ttype == 'administrator' ||
+											global.ttype == 'teacher') && (
 											<View style={styles.textpart} style={{ paddingTop: 20 }}>
 												<FormButton
 													buttonColor="#1f9efd"
@@ -595,6 +954,10 @@ class vclass extends Component {
 												<FormButton
 													onPress={() => {
 														global.examEditID = item.id;
+														global.examEditIDSpeed = item.speed;
+														global.iindex = index;
+														this.accesstype = item.accesstype;
+
 														//alert(global.examEditID);
 														global.examID = item.id;
 
@@ -632,7 +995,9 @@ class vclass extends Component {
 															navigate('Exam', {
 																examID: item.id,
 																examName: item.name,
-																mode: 'start'
+																mode: 'start',
+																name: global.firstname + ' ' + global.lastname,
+																std: global.username
 															});
 														else alert(res.message);
 													}}
@@ -659,22 +1024,53 @@ class vclass extends Component {
 					}}
 				/>
 
-				{(false && global.ttype == 'administrator') || global.ttype == 'teacher' ? (
-					<ActionButton position="left" buttonColor="rgba(231,76,60,1)">
+				{(true && global.ttype == 'administrator') || global.ttype == 'teacher' ? (
+					<ActionButton useNativeDriver position="left" buttonColor="rgba(231,76,60,1)">
 						<ActionButton.Item
 							buttonColor="#9b59b6"
-							title="تعریف آزمون"
+							title="تعریف آزمون "
+							textStyle={{ fontFamily: 'iransans' }}
 							onPress={() => {
 								global.examEditID = '';
+
 								const { navigate } = this.props.navigation;
-								navigate('examAdd');
+								//27429
+								navigate('eforms', {
+									eformsID: 1,
+									instanseID: '',
+									stdID: 0,
+									mode: 'view',
+									isAdminForms: 'true'
+								});
+							}}
+						>
+							<Icon name="upcircle" style={styles.actionButtonIcon} />
+						</ActionButton.Item>
+
+						{/* <ActionButton.Item
+							buttonColor="#9b59b6"
+							title="تعریف آزمون با فایل عکس"
+							textStyle={{ fontFamily: 'iransans' }}
+							onPress={() => {
+								global.examEditID = '';
+
+								const { navigate } = this.props.navigation;
+								//27429
+								navigate('eforms', {
+									eformsID: 2,
+									instanseID: '',
+									stdID: 0,
+									mode: 'view',
+									isAdminForms: 'true'
+								});
 							}}
 						>
 							<Icon name="md-create" style={styles.actionButtonIcon} />
-						</ActionButton.Item>
-						<ActionButton.Item buttonColor="#3498db" title="بانک سئوالات" onPress={() => {}}>
+						</ActionButton.Item> */}
+
+						{/* <ActionButton.Item buttonColor="#3498db" title="بانک سئوالات" onPress={() => {}}>
 							<Icon name="md-notifications-off" style={styles.actionButtonIcon} />
-						</ActionButton.Item>
+						</ActionButton.Item> */}
 						{/* <ActionButton.Item buttonColor='#1abc9c' title="All Tasks" onPress={() => {}}>
             <Icon name="md-done-all" style={styles.actionButtonIcon} />
           </ActionButton.Item> */}
@@ -690,7 +1086,7 @@ class vclass extends Component {
 					animationIn="fadeIn"
 					animationOut="swing"
 					transparent={true}
-					style={{ borderRadius: 25 }}
+					style={{ borderRadius: 10 }}
 					hideModalContentWhileAnimating={true}
 					deviceWidth={deviceWidth}
 					deviceHeight={deviceHeight}
@@ -710,7 +1106,7 @@ class vclass extends Component {
 					<View
 						style={{
 							borderRadius: 30,
-							height: 300,
+							height: 320,
 							padding: 10,
 							marginLeft: 20,
 							marginRight: 20,
@@ -719,22 +1115,24 @@ class vclass extends Component {
 					>
 						<FlatGrid
 							itemDimension={80}
-							items={test}
+							items={this.accesstype == 'mine' ? test : test1}
+							//items={test}
 							style={styles.gridView}
 							// staticDimension={300}
 							// fixed
 							spacing={10}
 							renderItem={({ item }) => (
-								<View style={[ styles.itemContainer, { backgroundColor: item.bkcolor } ]}>
-									{item.badge > 0 && <Text style={styles.badge}> 2 </Text>}
+								<TouchableOpacity
+									activeOpacity={0.8}
+									onPress={() => {
+										this.clickEventListener(item);
+									}}
+									style={{ flex: 1 }}
+								>
+									<View style={[ styles.itemContainer, { backgroundColor: item.bkcolor } ]}>
+										{item.badge > 0 && <Text style={styles.badge}> 2 </Text>}
 
-									<TouchableOpacity
-										onPress={() => {
-											this.clickEventListener(item);
-										}}
-										style={{ flex: 1 }}
-									>
-										<Ionicons
+										<Icon
 											name={item.icon}
 											size={37}
 											color={item.code}
@@ -753,14 +1151,51 @@ class vclass extends Component {
 												elevation: 3
 											}}
 										/>
-									</TouchableOpacity>
 
-									<Text style={styles.itemName}>{item.name}</Text>
-								</View>
+										<Text style={styles.itemName}>{item.name}</Text>
+									</View>
+								</TouchableOpacity>
 							)}
 						/>
 					</View>
 				</Modalm>
+
+				<Snackbar
+					visible={this.state.issnack}
+					onDismiss={() => this.setState({ issnack: false })}
+					style={{ fontFamily: 'iransans' }}
+					wrapperStyle={{ fontFamily: 'iransans' }}
+					action={{
+						label: 'بستن',
+						onPress: () => {
+							this.setState({ issnack: false });
+						}
+					}}
+				>
+					{this.state.msg}
+				</Snackbar>
+
+				<Snackbar
+					visible={this.state.issnackin}
+					onDismiss={() => this.setState({ issnackin: false })}
+					style={{ backgroundColor: 'red', fontFamily: 'iransans' }}
+					wrapperStyle={{ fontFamily: 'iransans' }}
+					action={{
+						label: 'بستن',
+						onPress: () => {
+							this.setState({ issnackin: false });
+							this.setState(
+								{
+									//	loading: false,
+									//	save_loading: false
+								}
+							);
+							//this.props.navigation.goBack(null);
+						}
+					}}
+				>
+					{'لطفا دسترسی به اینترنت را چک کنید'}
+				</Snackbar>
 			</View>
 		);
 	}
@@ -776,7 +1211,7 @@ const styles = StyleSheet.create({
 		shadowOpacity: 0.37,
 		shadowRadius: 2.49,
 		elevation: 1,
-		borderRadius: 13,
+		borderRadius: 10,
 		zIndex: 0,
 		//elevate: 0,
 		marginTop: -10,
@@ -811,15 +1246,16 @@ const styles = StyleSheet.create({
 		alignSelf: 'center',
 		fontFamily: 'iransans',
 		textAlign: 'center',
-		fontSize: 18,
+		fontSize: 15,
+		//fontWeight: 'bold',
 		color: 'white'
 	},
 	aztitlet: {
 		alignSelf: 'center',
 		fontFamily: 'iransans',
 		textAlign: 'center',
-		fontSize: 13,
-		borderWidth: 1,
+		fontSize: 12,
+		borderWidth: 0.5,
 		padding: 1,
 		borderColor: 'white',
 		borderRadius: 5,
@@ -852,7 +1288,7 @@ const styles = StyleSheet.create({
 		alignSelf: 'center',
 		fontFamily: 'iransans',
 		color: 'white',
-		fontSize: 15
+		fontSize: 13
 	},
 	image2: {
 		width: 50,

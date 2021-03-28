@@ -271,7 +271,7 @@ class reportView extends React.PureComponent {
 
 		return {
 			headerTitle: this.reportName,
-			headerRight: null,
+			headerRight: () => null,
 			headerBackTitle: 'بازگشت',
 			navigationOptions: {
 				headerBackTitle: 'Home'
@@ -535,6 +535,9 @@ class reportView extends React.PureComponent {
 	componentDidMount() {
 		const { navigation } = this.props;
 		this.examID = navigation.getParam('reportID');
+		this.coursecode = navigation.getParam('coursecode');
+		this.groupcode = navigation.getParam('groupcode');
+
 		//const mode = navigation.getParam('mode');
 
 		this.listener = this.scrollPosition.addListener((position) => {
@@ -643,7 +646,17 @@ class reportView extends React.PureComponent {
 		this.setState({ loading: true });
 		let param = userInfo();
 		let uurl =
-			global.adress + '/pApi.asmx/getReportResult?id=' + idaz + '&p=' + param + '&g=' + this.state.selectedItem;
+			global.adress +
+			'/pApi.asmx/getReportResult?id=' +
+			idaz +
+			'&p=' +
+			param +
+			'&g=' +
+			this.state.selectedItem +
+			'&courcecode=' +
+			this.coursecode +
+			'&classcode=' +
+			this.groupcode;
 		console.log(uurl);
 		try {
 			const response = await fetch(uurl);

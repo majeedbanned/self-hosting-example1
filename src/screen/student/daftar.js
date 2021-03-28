@@ -65,7 +65,7 @@ class daftar extends Component {
 
 		return {
 			headerTitle: 'ارزشیابی کلاسی',
-			headerRight: null,
+			headerRight: () => null,
 			headerBackTitle: 'بازگشت',
 			navigationOptions: {
 				headerBackTitle: 'Home'
@@ -220,6 +220,29 @@ class daftar extends Component {
 		this.setState({ selectedItem: id, data: [], dataLoading: true });
 		this.loadAPI(1, 'pull');
 	}
+	imageload(teacherCode) {
+		return <Image style={styles.imageavatar} source={{ uri: getHttpAdress() + 'child/' + teacherCode + '.jpg' }} />;
+		//return <Image style={styles.imageavatar} source={require('./../../../assets/images/logo.png')} />;
+		var url = getHttpAdress() + 'child/' + teacherCode + '.jpg';
+		//console.log(url);
+		fetch(url)
+			.then((res) => {
+				if (res.status == 404) {
+					console.log('not found');
+					return <Image style={styles.imageavatar} source={require('./../../../assets/images/logo.png')} />;
+				} else {
+					//console.log('found');
+					return <Text style={{ width: 14, height: 15 }}>salam</Text>;
+					// return  <Image style={styles.imageavatar} source={{ uri: url }} />;
+				}
+			})
+			.catch((err) => {
+				console.log('erer');
+				return <Image style={styles.imageavatar} source={require('./../../../assets/images/logo.png')} />;
+			});
+
+		//		return <Image style={styles.imageavatar} source={{ uri: getHttpAdress() + 'child/' + teacherCode + '.jpg' }} />;
+	}
 	renderHeader = () => {
 		//console.log(this.state.cat);
 		return (
@@ -273,10 +296,8 @@ class daftar extends Component {
 										)
 									}
 								>
-									<Image
-										style={styles.imageavatar}
-										source={{ uri: getHttpAdress() + 'child/' + item.TeacherCode + '.jpg' }}
-									/>
+									{this.imageload(item.TeacherCode)}
+
 									{item.d != '0' && <Text style={styles.badge}>{item.d}</Text>}
 									<View>
 										<Text
@@ -498,7 +519,7 @@ class daftar extends Component {
 								navigate('examAdd');
 							}}
 						>
-							<Icon name="md-create" style={styles.actionButtonIcon} />
+							<Icon name="edit" style={styles.actionButtonIcon} />
 						</ActionButton.Item>
 						<ActionButton.Item buttonColor="#3498db" title="بانک سئوالات" onPress={() => {}}>
 							<Icon name="md-notifications-off" style={styles.actionButtonIcon} />
@@ -609,9 +630,9 @@ const styles = StyleSheet.create({
 	},
 
 	imageavatar: {
-		width: 40,
-		height: 40,
-		borderRadius: 40,
+		width: 42,
+		height: 42,
+		borderRadius: 42,
 		borderWidth: 1,
 		borderColor: colorlight
 	},

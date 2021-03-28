@@ -1,20 +1,24 @@
 import React, { Component } from 'react';
-import { StyleSheet, Linking, ActivityIndicator, SafeAreaView } from 'react-native';
+import { StyleSheet, Linking, ActivityIndicator, SafeAreaView, Alert } from 'react-native';
 import ActionButton from 'react-native-action-button';
-import defaultStyles from '../config/styles';
-import Loading from '../components/loading';
+import defaultStyles from '../../config/styles';
+import Loading from '../../components/loading';
 import DropdownAlert from 'react-native-dropdownalert';
+import { Menu, MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu';
+
 import { withNavigation } from 'react-navigation';
 import { FlatGrid } from 'react-native-super-grid';
+import { SearchBar } from 'react-native-elements';
+
 import Icon from 'react-native-vector-icons/Ionicons';
 import IconAnt from 'react-native-vector-icons/AntDesign';
 
-import Mstyles from '../components/styles';
-import FormButton from '../component/FormButton';
-import ExamAdd from './examAdd';
+import Mstyles from '../../components/styles';
+import FormButton from '../../component/FormButton';
+import ExamAdd from '../examAdd';
 import { AntDesign, Entypo } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
-import SelectUser from './selectUser';
+//import SelectUser from './../../selectUser';
 import NetInfo from '@react-native-community/netinfo';
 import Modal, {
 	ModalTitle,
@@ -24,21 +28,48 @@ import Modal, {
 	SlideAnimation,
 	ScaleAnimation
 } from 'react-native-modals';
-import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+import { userInfo, toFarsi, getHttpAdress } from '../../components/DB';
 import { FlatList, ScrollView, Image, View, Text, RefreshControl, TouchableOpacity } from 'react-native';
-import GLOBAL from './global';
+import GLOBAL from '../global';
 import { LinearGradient } from 'expo-linear-gradient';
 import { NavigationEvents } from 'react-navigation';
 
-const colorhead = '#5dc4d8';
-const colorlight = '#5dc4d8';
-const iconname_ = 'videocamera';
+const colorhead = '#9b59b6';
+const colorlight = '#9b59b6';
+const iconname_ = 'dotchart';
+const optionsStyles = {
+	optionsContainer: {
+		///backgroundColor: 'green',
+		padding: 5,
+		margin: 25,
+		borderRadius: 10
+	},
+	optionsWrapper: {
+		//backgroundColor: 'purple'
+	},
+	optionWrapper: {
+		//backgroundColor: 'yellow',
+		margin: 5,
+		padding: 5
+	},
+	optionTouchable: {
+		//underlayColor: 'gold',
+		activeOpacity: 70
+	},
+	optionText: {
+		color: 'brown',
+		fontFamily: 'iransans',
+		textAlign: 'left'
+	}
+};
 
-class absentList extends Component {
+class menuList extends Component {
 	constructor(props) {
 		super(props);
+		this.onEndReachedCalledDuringMomentum = true;
 		(this.page = 1),
 			(this.state = {
+				searchText: '',
 				bottomModalAndTitle: false,
 				refreshing: false,
 				isModalVisible: false,
@@ -56,16 +87,31 @@ class absentList extends Component {
 			});
 
 		this.props.navigation.addListener('willFocus', () => {
-			//this.loadAPI(1, 'pull');
-			//	this.loadAPI_grp(1, 'pull');
+			const { navigation } = this.props;
+
+			this.menuId = navigation.getParam('reportID');
+			this.repid = navigation.getParam('repid');
+			this.extra = navigation.getParam('extra');
+
+			this.loadAPI(1, 'pull');
+			this.loadAPI_grp(1, 'pull');
 		});
 	}
 	static navigationOptions = ({ navigation }) => {
 		const { params } = navigation.state;
 
 		return {
-			headerTitle: 'آرشیو ضبط جلسات',
+			// headerLeft: (
+			// 	<Icon
+			// 		name={'arrow-left'}
+			// 		onPress={() => {
+			// 			navigation.goBack();
+			// 		}}
+			// 	/>
+			// ),
+			headerTitle: '',
 			headerRight: () => null,
+
 			headerBackTitle: 'بازگشت',
 			navigationOptions: {
 				headerBackTitle: 'Home'
@@ -77,10 +123,6 @@ class absentList extends Component {
 		};
 	};
 	async componentDidMount() {
-		const { navigation } = this.props;
-		const webinarID = navigation.getParam('webinarID');
-		this.loadAPI(webinarID, 'pull');
-
 		//this.loadAPI_grp(this.page, 'pull');
 		//this.loadAPI(this.page, 'pull');
 	}
@@ -104,14 +146,14 @@ class absentList extends Component {
 		let param = userInfo();
 		let uurl =
 			global.adress +
-			'/pApi.asmx/getFormCat?id=' +
+			'/pApi.asmx/getmenuListCat?id=' +
 			page +
 			'&p=' +
 			param +
 			'&g=' +
 			this.state.selectedItem +
 			'&mode=list';
-		//console.log(uurl);
+		console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -138,7 +180,7 @@ class absentList extends Component {
 		}
 	};
 
-	loadAPI = async (webinarID, type) => {
+	loadAPI = async (page, type) => {
 		if (global.adress == 'undefined') {
 			GLOBAL.main.setState({ isModalVisible: true });
 		}
@@ -153,7 +195,22 @@ class absentList extends Component {
 		this.setState({ loading: true });
 		let param = userInfo();
 		let uurl =
-			global.adress + '/pApi.asmx/getAdobeRec?id=' + webinarID + '&p=' + param + '&g=' + this.state.selectedItem;
+			global.adress +
+			'/pApi.asmx/getmenuList?id=' +
+			page +
+			'&p=' +
+			param +
+			'&g=' +
+			this.state.selectedItem +
+			'&menuid=' +
+			this.menuId +
+			'&q=' +
+			this.state.searchText +
+			'&extra=' +
+			this.extra;
+
+		if (page == 1) this.setState({ data: [] });
+
 		console.log(uurl);
 		try {
 			const response = await fetch(uurl);
@@ -161,7 +218,7 @@ class absentList extends Component {
 				let retJson = await response.json();
 				if (Object.keys(retJson).length == 0) {
 					this.setState({
-						data: [],
+						//data: [],
 						loading: false,
 						dataLoading: false,
 						isRefreshing: false
@@ -169,12 +226,12 @@ class absentList extends Component {
 					return;
 				}
 				//console.log('ret:' + retJson);
+				// this.setState({
+				// 	data: []
+				// });
 				this.setState({
-					data: []
-				});
-				this.setState({
-					//data: page === 1 ? retJson : [ ...this.state.data, ...retJson ],
-					data: retJson,
+					data: page === 1 ? retJson : [ ...this.state.data, ...retJson ],
+					//	data: retJson,
 					dataLoading: false,
 
 					isRefreshing: false,
@@ -192,16 +249,113 @@ class absentList extends Component {
 			return;
 		}
 	};
+
+	delAPI = async (iddel, index) => {
+		if (global.adress == 'undefined') {
+			GLOBAL.main.setState({ isModalVisible: true });
+		}
+		/* #region  check internet */
+		let state = await NetInfo.fetch();
+		if (!state.isConnected) {
+			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
+			//return;
+		}
+		/* #endregion */
+
+		this.setState({ loading: true });
+		let param = userInfo();
+		let uurl =
+			global.adress +
+			'/pApi.asmx/delmenuList?p=' +
+			param +
+			'&g=' +
+			this.state.selectedItem +
+			'&menuid=' +
+			this.menuId +
+			'&q=' +
+			iddel;
+
+		//if (page == 1) this.setState({ data: [] });
+
+		console.log(uurl);
+		try {
+			const response = await fetch(uurl);
+			if (response.ok) {
+				let retJson = await response.json();
+				if (Object.keys(retJson).length == 0) {
+					this.setState({
+						data: [],
+						loading: false,
+						dataLoading: false,
+						isRefreshing: false
+					});
+					return;
+				}
+				//console.log('ret:' + retJson);
+				// this.setState({
+				// 	data: []
+				// });
+
+				this.setState({
+					//data: page === 1 ? retJson : [ ...this.state.data, ...retJson ],
+					//	data: retJson,
+					dataLoading: false,
+
+					isRefreshing: false,
+					loading: false
+				});
+
+				if (retJson.id == '0') {
+					alert(retJson.msg);
+					return;
+				}
+				let newimagesAddFile = this.state.data;
+				//alert(index);
+				newimagesAddFile.splice(index, 1); //to remove a single item starting at index
+				this.setState({ data: newimagesAddFile });
+			}
+		} catch (e) {
+			console.log('err');
+			this.dropDownAlertRef.alertWithType('error', 'پیام', 'خطادر دستیابی به اطلاعات');
+			this.setState({
+				loading: false,
+				dataLoading: false,
+				isRefreshing: false
+			});
+			return;
+		}
+	};
+
 	_renderFooter = () => {
 		if (!this.state.isLoading) return null;
 		return <ActivityIndicator style={{ color: 'red' }} size="large" />;
 	};
 	_handleLoadMore = () => {
-		if (!this.state.isLoading) {
-			this.page = this.page + 1;
-			this.loadAPI(this.page, 'more');
+		if (!this.onEndReachedCalledDuringMomentum) {
+			if (!this.state.isLoading) {
+				this.page = this.page + 1;
+				this.loadAPI(this.page, 'more');
+				this.onEndReachedCalledDuringMomentum = true;
+			}
 		}
 	};
+
+	searchFilterFunction = (text) => {
+		//alert();
+		this.setState({ searchText: text });
+		if (text == '' || text == undefined) {
+			this.page = 1;
+			this.loadAPI(1, '');
+			//this.flatListRef.scrollToOffset({ animated: true, offset: 0 });
+		}
+		if (text.length < 2) return;
+		this.page = 1;
+		this.loadAPI(1, text);
+		this.flatListRef.scrollToOffset({ animated: true, offset: 0 });
+
+		return;
+	};
+
 	clickEventListener = (item) => {
 		const { navigate } = this.props.navigation;
 
@@ -296,6 +450,32 @@ class absentList extends Component {
 						);
 					}}
 				/>
+
+				<SearchBar
+					inputContainerStyle={{ backgroundColor: '#eee' }}
+					containerStyle={{
+						flex: 2,
+						marginStart: 8,
+						marginEnd: 8,
+						height: 30,
+						marginBottom: 5,
+						padding: 0,
+						borderBottomWidth: 0,
+						backgroundColor: 'white',
+						borderTopRightRadius: 24,
+						borderTopLeftRadius: 24
+					}}
+					placeholder="جستجو"
+					lightTheme
+					showLoading={this.state.loading}
+					//round
+					inputContainerStyle={{ borderRadius: 10, height: 15, backgroundColor: '#eee' }}
+					inputStyle={{ textAlign: 'center', fontSize: 13, fontFamily: 'iransans' }}
+					//showLoading={this.state.loading}
+					onChangeText={(text) => this.searchFilterFunction(text)}
+					autoCorrect={false}
+					value={this.state.searchText}
+				/>
 			</View>
 		);
 	};
@@ -331,7 +511,14 @@ class absentList extends Component {
 					stickyHeaderIndices={[ 0 ]}
 					ListFooterComponent={this._renderFooter}
 					onScroll={this.onScroll}
+					keyExtractor={(item) => item.id.toString()}
 					initialNumToRender={10}
+					onMomentumScrollBegin={() => {
+						this.onEndReachedCalledDuringMomentum = false;
+					}}
+					ref={(ref) => {
+						this.flatListRef = ref;
+					}}
 					ListEmptyComponent={
 						<View style={{ borderWidth: 0, height: 450 }}>
 							<View
@@ -348,24 +535,25 @@ class absentList extends Component {
 							</View>
 						</View>
 					}
-					//onEndReachedThreshold={0.4}
-					//	onEndReached={this._handleLoadMore.bind(this)}
+					onEndReachedThreshold={0.5}
+					onEndReached={this._handleLoadMore.bind(this)}
 					refreshControl={
 						<RefreshControl refreshing={this.state.isRefreshing} onRefresh={this.onRefresh.bind(this)} />
 					}
 					style={Mstyles.contentList}
 					columnWrapperStyle={styles.listContainer}
 					data={this.state.data}
-					keyExtractor={(item) => {
-						return item.id;
-					}}
-					renderItem={({ item }) => {
+					// keyExtractor={(item) => {
+					// 	return item.id;
+					// }}
+					renderItem={({ item, index }) => {
 						return (
 							<TouchableOpacity
 								onPress={() => {
 									const { navigate } = this.props.navigation;
-									//global.eformsID = item.id;
-									//navigate('eforms', { eformsID: item.id, mode: 'add' });
+									navigate.headerBackTitle = 'shah';
+									global.eformsID = item.id;
+									//	navigate('reportView', { reportID: item.id, reportName: item.title });
 								}}
 								activeOpacity={0.8}
 								style={{
@@ -388,25 +576,86 @@ class absentList extends Component {
 												</View>
 												<View style={styles.view4}>
 													<Text style={[ styles.aztitle, { color: 'black' } ]}>
-														{item.name}
+														{item.title}
 													</Text>
-													{item.description ? (
+													{item.enddate ? (
 														<Text style={[ styles.aztitlet, { paddingTop: 4 } ]}>
-															{toFarsi(item.description)}
+															{' مهلت تا: ' + toFarsi(item.enddate)}
 														</Text>
 													) : null}
 												</View>
 
+												{true && (
+													<Menu>
+														<MenuTrigger>
+															<Ionicons
+																name="ios-menu"
+																size={32}
+																color="#000"
+																style={{ marginRight: 15, marginTop: 15 }}
+															/>
+
+															{/* <Text style={{ fontSize: 40, fontWeight: 'bold' }}>⋮</Text> */}
+														</MenuTrigger>
+														<MenuOptions customStyles={optionsStyles}>
+															{true && (
+																<MenuOption
+																	customStyles={this.optionStyles}
+																	onSelect={() => {
+																		const { navigate } = this.props.navigation;
+																		//27429
+																		navigate('eforms', {
+																			eformsID: this.repid,
+																			instanseID: item.id,
+																			stdID: 0,
+																			mode: 'view',
+																			isAdminForms: 'true'
+																		});
+																	}}
+																	text="ویرایش "
+																/>
+															)}
+
+															{true && (
+																<MenuOption
+																	customStyles={this.optionStyles}
+																	onSelect={() => {
+																		Alert.alert(
+																			' اخطار',
+																			'آیا مایل به حذف این ردیف هستید؟',
+																			[
+																				{
+																					text: 'خیر',
+																					//onPress: () => console.log('Cancel Pressed'),
+																					style: 'cancel'
+																				},
+																				{
+																					text: 'بله',
+																					onPress: () => {
+																						this.delAPI(item.id, index);
+																					}
+																				}
+																			],
+																			{ cancelable: false }
+																		);
+																	}}
+																	text="حذف "
+																/>
+															)}
+														</MenuOptions>
+													</Menu>
+												)}
+
 												{/* {global.ttype == 'administrator' ||
 														(item.access.indexOf(global.username) > -1 && ( */}
-												<TouchableOpacity
+												{/* <TouchableOpacity
 													onPress={() => {
 														const { navigate } = this.props.navigation;
 														//global.eformsID = item.id;
-														// navigate('studentlist', {
-														// 	eformsID: item.id,
-														// 	mode: 'list'
-														// });
+														navigate('studentlist', {
+															eformsID: item.id,
+															mode: 'list'
+														});
 													}}
 													style={{
 														alignItems: 'center',
@@ -414,28 +663,23 @@ class absentList extends Component {
 														flex: 0.5
 													}}
 												>
-													{/* <IconAnt
+													<IconAnt
 														name="solution1"
 														style={styles.image}
 														size={34}
 														color="#ccc"
-													/> */}
+													/>
 
-													{/* <AntDesign
-														style={styles.image}
-														name="profile"
-														size={34}
-														color="#ccc"
-													/> */}
-													{/* <Text
+													
+													<Text
 														style={[
 															defaultStyles.lbl14,
 															{ fontSize: 14, color: 'black' }
 														]}
 													>
 														لیست
-													</Text> */}
-												</TouchableOpacity>
+													</Text>
+												</TouchableOpacity> */}
 												{/* ))} */}
 											</View>
 										</View>
@@ -524,6 +768,32 @@ class absentList extends Component {
 						/>
 					</ModalContent>
 				</Modal.BottomModal>
+
+				<ActionButton useNativeDriver position="left" buttonColor="rgba(231,76,60,1)">
+					<ActionButton.Item
+						buttonColor="#9b59b6"
+						title=" افزودن  "
+						textStyle={{ fontFamily: 'iransans' }}
+						onPress={() => {
+							global.examEditID = '';
+
+							const { navigate } = this.props.navigation;
+							//27429
+							navigate('eforms', {
+								eformsID: this.repid,
+								instanseID: '',
+								stdID: 0,
+								mode: 'view',
+								isAdminForms: 'true',
+								extra: this.extra
+							});
+						}}
+					>
+						{/* <Icon name="edit" style={styles.actionButtonIcon} /> */}
+
+						<IconAnt name="edit" style={styles.actionButtonIcon} />
+					</ActionButton.Item>
+				</ActionButton>
 			</View>
 		);
 	}
@@ -711,4 +981,4 @@ const styles = StyleSheet.create({
 		color: '#fff'
 	}
 });
-export default withNavigation(absentList);
+export default withNavigation(menuList);

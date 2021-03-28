@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Linking, ActivityIndicator, SafeAreaView } from 'react-native';
+import { StyleSheet, Linking, ActivityIndicator, SafeAreaView, Alert } from 'react-native';
 import ActionButton from 'react-native-action-button';
 import defaultStyles from '../config/styles';
 import Loading from '../components/loading';
@@ -8,7 +8,7 @@ import { withNavigation } from 'react-navigation';
 import { FlatGrid } from 'react-native-super-grid';
 import Icon from 'react-native-vector-icons/Ionicons';
 import IconAnt from 'react-native-vector-icons/AntDesign';
-
+import { Snackbar } from 'react-native-paper';
 import Mstyles from '../components/styles';
 import FormButton from '../component/FormButton';
 import ExamAdd from './examAdd';
@@ -65,7 +65,7 @@ class recordList extends Component {
 
 		return {
 			headerTitle: 'آرشیو ضبط جلسات',
-			headerRight: null,
+			headerRight: () => null,
 			headerBackTitle: 'بازگشت',
 			navigationOptions: {
 				headerBackTitle: 'Home'
@@ -85,6 +85,66 @@ class recordList extends Component {
 		//this.loadAPI(this.page, 'pull');
 	}
 
+	deleteapi = async (id, yn, sco_id) => {
+		//alert(id);
+
+		if (global.adress == 'undefined') {
+			GLOBAL.main.setState({ isModalVisible: true });
+		}
+		/* #region  check internet */
+		let state = await NetInfo.fetch();
+		if (!state.isConnected) {
+			this.setState({ issnackin: true });
+			return;
+		}
+
+		let param = userInfo();
+		let uurl =
+			global.adress + '/pApi.asmx/perVclassID?p=' + param + '&id=' + id + '&yn=' + yn + '&sco_id=' + sco_id;
+		console.log(uurl);
+		try {
+			const response = await fetch(uurl);
+			if (response.ok) {
+				let retJson = await response.json();
+				if (Object.keys(retJson).length == 0) {
+					this.setState({
+						loading: false,
+						dataLoading: false,
+						isRefreshing: false
+					});
+					return;
+				}
+
+				this.setState({ issnack: true, msg: retJson.msg });
+
+				//console.log(retJson);
+				this.setState({
+					//data: page === 1 ? retJson : [ ...this.state.data, ...retJson ],
+					//data: retJson,
+
+					loading: false,
+					dataLoading: false,
+					isRefreshing: false
+				});
+
+				// let newimagesAddFile = this.state.data;
+				// //alert(index);
+				// newimagesAddFile.splice(index, 1); //to remove a single item starting at index
+				// this.setState({ data: newimagesAddFile });
+				//this.loadAPI();
+			}
+		} catch (e) {
+			console.log('err');
+			this.dropDownAlertRef.alertWithType('error', 'پیام', 'خطادر دستیابی به اطلاعات');
+			this.setState({
+				loading: false,
+				dataLoading: false,
+				isRefreshing: false
+			});
+			return;
+		}
+	};
+
 	loadAPI_grp = async (page, type) => {
 		if (global.adress == 'undefined') {
 			GLOBAL.main.setState({ isModalVisible: true });
@@ -92,11 +152,9 @@ class recordList extends Component {
 
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
-
 		if (!state.isConnected) {
-			//alert(state.isConnected);
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
 		/* #endregion */
 
@@ -145,8 +203,8 @@ class recordList extends Component {
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
 		/* #endregion */
 
@@ -356,14 +414,19 @@ class recordList extends Component {
 					style={Mstyles.contentList}
 					columnWrapperStyle={styles.listContainer}
 					data={this.state.data}
-					keyExtractor={(item) => {
-						return item.id;
-					}}
-					renderItem={({ item }) => {
+					// keyExtractor={(item) => {
+					// 	return item.id;
+					// }}
+
+					keyExtractor={(item, index) => index.toString()}
+					renderItem={({ item, index }) => {
 						return (
 							<TouchableOpacity
+								key={item.id}
 								onPress={() => {
 									const { navigate } = this.props.navigation;
+									Linking.openURL(item.url_path);
+
 									//global.eformsID = item.id;
 									//navigate('eforms', { eformsID: item.id, mode: 'add' });
 								}}
@@ -387,17 +450,26 @@ class recordList extends Component {
 													/>
 												</View>
 												<View style={styles.view4}>
-													<Text style={[ styles.aztitle, { color: 'black' } ]}>
+													<Text
+														numberOfLines={1}
+														style={[ styles.aztitle, { color: 'black' } ]}
+													>
 														{item.name}
 													</Text>
 													{item.description ? (
-														<Text style={[ styles.aztitlet, { paddingTop: 4 } ]}>
+														<Text
+															numberOfLines={1}
+															style={[ styles.aztitlet, { paddingTop: 4 } ]}
+														>
 															{toFarsi(item.description)}
 														</Text>
 													) : null}
 													{item.duration ? (
-														<Text style={[ styles.aztitlet, { paddingTop: 0 } ]}>
-															{item.duration + ' ' + 'دقیقه'}
+														<Text
+															numberOfLines={1}
+															style={[ styles.aztitlet, { paddingTop: 0 } ]}
+														>
+															{item.duration + ' ' + 'دقیقه' + '   ' + item.date_begin}
 														</Text>
 													) : null}
 												</View>
@@ -406,6 +478,30 @@ class recordList extends Component {
 													<TouchableOpacity
 														onPress={() => {
 															const { navigate } = this.props.navigation;
+															Alert.alert(
+																'دسترسی',
+																' دسترسی به مشاهده ضبط فعال شود؟',
+																[
+																	// {
+																	// 	text: 'Ask me later',
+																	// 	onPress: () => console.log('Ask me later pressed')
+																	// },
+																	{
+																		text: 'خیر',
+																		onPress: () => {
+																			this.deleteapi(1, 'no', item.sco_id);
+																		},
+																		style: 'cancel'
+																	},
+																	{
+																		text: 'بله',
+																		onPress: () => {
+																			this.deleteapi(1, 'yes', item.sco_id);
+																		}
+																	}
+																],
+																{ cancelable: false }
+															);
 															//global.eformsID = item.id;
 															// navigate('studentlist', {
 															// 	eformsID: item.id,
@@ -461,7 +557,7 @@ class recordList extends Component {
 								navigate('examAdd');
 							}}
 						>
-							<Icon name="md-create" style={styles.actionButtonIcon} />
+							<Icon name="edit" style={styles.actionButtonIcon} />
 						</ActionButton.Item>
 						<ActionButton.Item buttonColor="#3498db" title="بانک سئوالات" onPress={() => {}}>
 							<Icon name="md-notifications-off" style={styles.actionButtonIcon} />
@@ -528,6 +624,42 @@ class recordList extends Component {
 						/>
 					</ModalContent>
 				</Modal.BottomModal>
+
+				<Snackbar
+					visible={this.state.issnack}
+					onDismiss={() => this.setState({ issnack: false })}
+					style={{ backgroundColor: '#ffcc00', fontFamily: 'iransans' }}
+					wrapperStyle={{ fontFamily: 'iransans' }}
+					action={{
+						label: 'بستن',
+						onPress: () => {
+							this.setState({ issnack: false });
+						}
+					}}
+				>
+					{this.state.msg}
+				</Snackbar>
+				<Snackbar
+					visible={this.state.issnackin}
+					onDismiss={() => this.setState({ issnackin: false })}
+					style={{ backgroundColor: 'red', fontFamily: 'iransans' }}
+					wrapperStyle={{ fontFamily: 'iransans' }}
+					action={{
+						label: 'بستن',
+						onPress: () => {
+							this.setState({ issnackin: false });
+							this.setState(
+								{
+									//  loading: false,
+									//  save_loading: false
+								}
+							);
+							//this.props.navigation.goBack(null);
+						}
+					}}
+				>
+					{'لطفا دسترسی به اینترنت را چک کنید'}
+				</Snackbar>
 			</View>
 		);
 	}

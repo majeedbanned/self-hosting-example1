@@ -32,7 +32,7 @@ const colorhead = '#06a9ba';
 const colorlight = '#06a9ba';
 
 const styles = StyleSheet.create({
-	container: { backgroundColor: white, marginVertical: 0, marginBottom: 80 },
+	container: { backgroundColor: white, marginVertical: 0, marginBottom: 80, alignItems: 'flex-start' },
 	header: { flexDirection: 'row', borderTopWidth: 0, borderColor: black },
 	identity: { position: 'absolute', width: CELL_WIDTH },
 	body: {
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
 	cell: {
 		width: CELL_WIDTH,
 		height: CELL_HEIGHT,
-
+		//direction: 'ltr',
 		borderWidth: 0,
 		borderBottomWidth: 0,
 		//	borderRadius: 10,
@@ -619,10 +619,10 @@ class Sheet extends React.PureComponent {
 
 	formatCellHeader(key, value) {
 		return (
-			<View key={key} style={styles.cell}>
+			<View key={key} style={[ styles.cell, { backgroundColor: 'green' } ]}>
 				<TouchableOpacity
 					activeOpacity={0.5}
-					style={styles.cell}
+					style={[ styles.cell, {} ]}
 					onPress={() => {
 						//var someProperty = { ...this.state.maindata[0] };
 						//someProperty.days[0].disc = [ { cap: 'sex' } ];
@@ -734,7 +734,7 @@ class Sheet extends React.PureComponent {
 					horizontal={true}
 					data={data}
 					renderItem={this.formatColumn}
-					stickyHeaderIndices={[ 0 ]}
+					// stickyHeaderIndices={[ 0 ]}
 					onScroll={this.scrollEvent}
 					scrollEventThrottle={16}
 					extraData={this.state}
@@ -764,6 +764,155 @@ class Sheet extends React.PureComponent {
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/getBarname?g=&Id=' + '0' + '&p=' + param;
 		console.log(uurl);
+
+		if (global.lang == 'en') {
+			this.setState({
+				maindata: [
+					{
+						name: 'Saturday',
+						days: [
+							{
+								zang: '1',
+								day: 'Part 1',
+								course: 'Math 2',
+								teachername: ' Josef Bill',
+								teachercode: '3010'
+							},
+							{
+								zang: '2',
+								day: 'Part 2',
+								course: '',
+								teachername: '',
+								teachercode: ''
+							},
+							{
+								zang: '4',
+								day: 'Part 3',
+								course: 'زبان خارجی 1',
+								teachername: 'علي پور محمد',
+								teachercode: '3010'
+							},
+							{
+								zang: '8',
+								day: 'Part 4',
+								course: '',
+								teachername: '',
+								teachercode: ''
+							},
+							{
+								zang: '16',
+								day: 'Part 5',
+								course: 'زبان خارجي1',
+								teachername: 'علي پور محمد',
+								teachercode: '3010'
+							},
+							{
+								zang: '32',
+								day: 'Part 6',
+								course: '',
+								teachername: '',
+								teachercode: ''
+							},
+							{
+								zang: '64',
+								day: 'Part 7',
+								course: '',
+								teachername: '',
+								teachercode: ''
+							},
+							{
+								zang: '128',
+								day: 'Part 8',
+								course: '',
+								teachername: '',
+								teachercode: ''
+							},
+							{
+								zang: '256',
+								day: 'Part 9',
+								course: '',
+								teachername: '',
+								teachercode: ''
+							}
+						]
+					},
+					{
+						name: 'Sunday ',
+						days: [
+							{
+								zang: '1',
+								day: 'زنگ اول',
+								course: 'زبان خارجي2',
+								teachername: 'علي پور محمد',
+								teachercode: '3010'
+							},
+							{
+								zang: '2',
+								day: 'زنگ دوم',
+								course: '',
+								teachername: '',
+								teachercode: ''
+							},
+							{
+								zang: '4',
+								day: 'زنگ سوم',
+								course: 'زبان خارجي1',
+								teachername: 'علي پور محمد',
+								teachercode: '3010'
+							},
+							{
+								zang: '8',
+								day: 'زنگ چهارم',
+								course: '',
+								teachername: '',
+								teachercode: ''
+							},
+							{
+								zang: '16',
+								day: 'زنگ پنجم',
+								course: 'زبان خارجي1',
+								teachername: 'علي پور محمد',
+								teachercode: '3010'
+							},
+							{
+								zang: '32',
+								day: 'زنگ ششم',
+								course: '',
+								teachername: '',
+								teachercode: ''
+							},
+							{
+								zang: '64',
+								day: 'زنگ هفتم',
+								course: '',
+								teachername: '',
+								teachercode: ''
+							},
+							{
+								zang: '128',
+								day: 'زنگ هشتم',
+								course: '',
+								teachername: '',
+								teachercode: ''
+							},
+							{
+								zang: '256',
+								day: 'زنگ نهم',
+								course: '',
+								teachername: '',
+								teachercode: ''
+							}
+						]
+					}
+				]
+			});
+			this.setState({
+				count: this.state.maindata.length,
+				NUM_COLS: this.state.maindata[0].days.length
+			});
+			return;
+		}
+
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -808,7 +957,7 @@ class Sheet extends React.PureComponent {
 
 		return {
 			headerTitle: 'برنامه هفتگی',
-			headerRight: null,
+			headerRight: () => null,
 			headerBackTitle: 'بازگشت',
 			navigationOptions: {
 				headerBackTitle: 'Home'
@@ -927,7 +1076,7 @@ class Sheet extends React.PureComponent {
 		return (
 			<View style={styles.container}>
 				{/* <Button title="Basic modal" onPress={() => this.refs.modal1.open()} style={styles.btn} /> */}
-				{this.formatHeader()}
+				<View>{this.formatHeader()}</View>
 				<FlatList
 					data={data}
 					renderItem={this.formatRowForSheet}

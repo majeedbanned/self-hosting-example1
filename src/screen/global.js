@@ -8,5 +8,8 @@ module.exports = {
 	examAdd: null,
 	page1: null,
 	messageAdd: null,
-	dynamic: null
+	dynamic: null,
+	events: null,
+	fixedtable: null,
+	monthgrade: null
 };

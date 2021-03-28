@@ -27,12 +27,19 @@ import Modal, {
 	SlideAnimation,
 	ScaleAnimation
 } from 'react-native-modals';
-import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+import { userInfo, toFarsi, getHttpAdress, toEng } from '../components/DB';
 import { FlatList, ScrollView, Image, View, Text, RefreshControl, TouchableOpacity } from 'react-native';
 import GLOBAL from './global';
 import { LinearGradient } from 'expo-linear-gradient';
 import { NavigationEvents } from 'react-navigation';
 import selectUser from './selectUser';
+
+import * as SQLite from 'expo-sqlite';
+const database_name = 'Reactoffline.db';
+const database_version = '1.0';
+const database_displayname = 'SQLite React Offline Database';
+const database_size = 200000;
+const db = SQLite.openDatabase(database_name, database_version, database_displayname, database_size);
 
 const colorhead = '#37a3ab';
 const colorlight = '#37a3ab';
@@ -43,6 +50,9 @@ class settings extends Component {
 		super(props);
 		(this.page = 1),
 			(this.state = {
+				oldpass: '',
+				pass1: '',
+				pass: '',
 				bottomModalAndTitle: false,
 				refreshing: false,
 				isModalVisible: false,
@@ -64,22 +74,24 @@ class settings extends Component {
 			//this.loadAPI_grp(1, 'pull');
 		});
 	}
-	static navigationOptions = ({ navigation }) => {
-		const { params } = navigation.state;
+	// static navigationOptions = ({ navigation }) => {
+	// 	const { params } = navigation.state;
 
-		return {
-			headerTitle: 'تنظیمات',
-			headerRight: null,
-			headerBackTitle: 'بازگشت',
-			navigationOptions: {
-				headerBackTitle: 'Home'
-			},
-			headerTitleStyle: {
-				fontFamily: 'iransansbold',
-				color: colorhead
-			}
-		};
-	};
+	// 	return {
+	// 		headerTitle: 'تنظیمات',
+	// 		headerRight: () => null,
+	// 		//headerLeft: () => null,
+
+	// 		headerBackTitle: 'بازگشت',
+	// 		navigationOptions: {
+	// 			headerBackTitle: 'Home'
+	// 		},
+	// 		headerTitleStyle: {
+	// 			fontFamily: 'iransansbold',
+	// 			color: colorhead
+	// 		}
+	// 	};
+	// };
 	async componentDidMount() {
 		//this.loadAPI_grp(this.page, 'pull');
 		//this.loadAPI(this.page, 'pull');
@@ -168,14 +180,8 @@ class settings extends Component {
 		this.setState({ loading: true });
 		let param = userInfo();
 		let uurl =
-			global.adress +
-			'/pApi.asmx/getFormsList?currentPage=' +
-			page +
-			'&p=' +
-			param +
-			'&g=' +
-			this.state.selectedItem;
-		//console.log(uurl);
+			global.adress + '/pApi.asmx/chpass?cu=' + this.state.oldpass + '&p=' + param + '&pass=' + this.state.pass;
+		console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -190,17 +196,39 @@ class settings extends Component {
 					return;
 				}
 				//console.log('ret:' + retJson);
-				this.setState({
-					data: []
-				});
+				// this.setState({
+				// 	data: []
+				// });
 				this.setState({
 					//data: page === 1 ? retJson : [ ...this.state.data, ...retJson ],
-					data: retJson,
-					dataLoading: false,
+					// data: retJson,
+					// dataLoading: false,
 
-					isRefreshing: false,
+					// isRefreshing: false,
 					loading: false
 				});
+
+				//change in db
+
+				if (retJson.result != 'ok') {
+					alert(retJson.msg);
+					return;
+				}
+
+				db.transaction((tx) => {
+					tx.executeSql(
+						'update  users set password=? where username=? and schoolcode=? ',
+						[ toEng(this.state.pass), global.username, global.schoolcode ],
+						(tx, rs) => {},
+						(tx, err) => {
+							console.log(err);
+						}
+					);
+				});
+				//alert(adress);
+				//global.username = username;
+				global.password = toEng(this.state.pass);
+				alert(retJson.msg);
 			}
 		} catch (e) {
 			console.log('err');
@@ -236,6 +264,19 @@ class settings extends Component {
 	async onRefresh() {
 		this.loadAPI(1, 'pull');
 	}
+
+	handleSubmit = async () => {
+		if (this.state.pass == '' || this.state.pass1 == '' || this.state.oldpass == '') {
+			alert('لطفا اطلاعات را کامل وارد کنید ');
+			return;
+		}
+		if (this.state.pass != this.state.pass1) {
+			alert('تکرار کلمه عبور اشتباه است');
+			return;
+		}
+
+		this.loadAPI();
+	};
 	onPressHandler(id) {
 		this.setState({ selectedItem: id, data: [] });
 		//this.loadAPI(1, 'pull');
@@ -430,6 +471,7 @@ class settings extends Component {
 							//value={values.password}
 							//value={this.state.shoro_namayesh}
 							//onChangeText={handleChange('password')}
+							onChangeText={(value) => this.setState({ oldpass: value })}
 							leftIcon={<Icon name="key" size={23} color="black" />}
 							leftIconContainerStyle={defaultStyles.leftIconContainerStyle}
 							labelStyle={defaultStyles.labelStyle}
@@ -446,6 +488,7 @@ class settings extends Component {
 							//value={values.password}
 							//value={this.state.shoro_namayesh}
 							//onChangeText={handleChange('password')}
+							onChangeText={(value) => this.setState({ pass: value })}
 							leftIcon={<Icon name="key" size={23} color="black" />}
 							leftIconContainerStyle={defaultStyles.leftIconContainerStyle}
 							labelStyle={defaultStyles.labelStyle}
@@ -461,7 +504,7 @@ class settings extends Component {
 						<Input
 							//value={values.password}
 							//value={this.state.shoro_namayesh}
-							//onChangeText={handleChange('password')}
+							onChangeText={(value) => this.setState({ pass1: value })}
 							leftIcon={<Icon name="key" size={23} color="black" />}
 							leftIconContainerStyle={defaultStyles.leftIconContainerStyle}
 							labelStyle={defaultStyles.labelStyle}
@@ -479,7 +522,7 @@ class settings extends Component {
 							borderColor="white"
 							backgroundColor="#e3f1fc"
 							buttonType="outline"
-							//onPress={handleSubmit}
+							onPress={this.handleSubmit}
 							widthb={'100%'}
 							heightb={55}
 							borderRadiusb={45}

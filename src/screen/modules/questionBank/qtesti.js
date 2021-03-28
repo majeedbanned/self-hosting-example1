@@ -2,6 +2,8 @@ import React, { Component, useRef } from 'react';
 import { Input, ButtonGroup } from 'react-native-elements';
 import { RadioButton } from 'react-native-paper';
 import ProgressCircle from 'react-native-progress-circle';
+import { actions, getContentCSS, RichEditor, RichToolbar } from 'react-native-pell-rich-editor';
+import MultiSelect from 'react-native-multiple-select';
 import RNPickerSelect from 'react-native-picker-select';
 import RadioItem from '../../../components/radioItem';
 import { userInfo, getHttpAdress } from '../../../components/DB';
@@ -116,10 +118,50 @@ class qtesti extends Component {
 		super(props);
 		this.state = {
 			courses: [],
+			selectedItems: [ '92iijs7yta', '667atsas' ],
+			items: [
+				{
+					id: '92iijs7yta',
+					name: 'Ondo'
+				},
+				{
+					id: 'a0s0a8ssbsd',
+					name: 'Ogun'
+				},
+				{
+					id: '16hbajsabsd',
+					name: 'Calabar'
+				},
+				{
+					id: 'nahs75a5sg',
+					name: 'Lagos'
+				},
+				{
+					id: '667atsas',
+					name: 'Maiduguri'
+				},
+				{
+					id: 'hsyasajs',
+					name: 'Anambra'
+				},
+				{
+					id: 'djsjudksjd',
+					name: 'Benue'
+				},
+				{
+					id: 'sdhyaysdj',
+					name: 'Kaduna'
+				},
+				{
+					id: 'suudydjsjd',
+					name: 'Abuja'
+				}
+			],
 			//formikDefault: {},
 			formikDefault: {
 				title: '',
-
+				classlist: [ '1' ],
+				teacherlist: [ '2' ],
 				image1: '',
 				image1multipart: '',
 				image1pgvisible: false,
@@ -132,7 +174,10 @@ class qtesti extends Component {
 			isModalpikerVisible: false
 		};
 	}
-
+	onSelectedItemsChange = (selectedItems) => {
+		this.setState({ selectedItems });
+		console.log(selectedItems);
+	};
 	async componentDidMount() {
 		const { navigation } = this.props;
 		const eformsID = navigation.getParam('eformsID');
@@ -274,6 +319,34 @@ class qtesti extends Component {
 								{ label: '24', value: '24' }
 							]
 						},
+
+						{
+							id: 'classlist',
+							placeholder: 'فامیل را وارد کنید',
+							caption: 'نام درس',
+							type: 'combobox1',
+							keyboardType: 'numberic',
+							options: [
+								{ id: '1', name: 'ریاضی' },
+								{ id: '2', name: 'فارسی' },
+								{ id: '3', name: 'علوم' },
+								{ id: '4', name: 'honar' },
+								{ id: '5', name: 'jaban' }
+							]
+						},
+						{
+							id: 'teacherlist',
+							placeholder: 'فامیل را وارد کنید',
+							caption: 'نام درس',
+							type: 'combobox1',
+							keyboardType: 'numberic',
+							options: [
+								{ id: '1', name: 'ghasemi' },
+								{ id: '2', name: 'shabani' },
+								{ id: '3', name: 'ali dad' }
+							]
+						},
+
 						{
 							id: 'fasl',
 							placeholder: 'فامیل را وارد کنید',
@@ -659,6 +732,7 @@ class qtesti extends Component {
 	};
 
 	render() {
+		const { selectedItems } = this.state;
 		if (!this.state.formstruct) return <Loading />;
 		//const { otherParam } = route.params;
 		// if (this.props.formstruct.length == undefined || !this.state.formikDefault)
@@ -707,6 +781,29 @@ class qtesti extends Component {
 
 		return (
 			<View style={{ backgroundColor: '#f6fbff' }}>
+				{/* <RichEditor
+					ref={(r) => (this.richtext = r)}
+					initialContentHTML={
+						'Hello <b>World</b> <p>this is a new paragraph</p> <p>this is another new paragraph</p>'
+					}
+					//editorInitializedCallback={() => this.onEditorInitialized()}
+				/>
+				<RichToolbar
+					editor={that.richtext}
+					actions={[
+						actions.setBold,
+						actions.setItalic,
+						actions.insertBulletsList,
+						actions.insertOrderedList,
+						actions.insertImage,
+						'customAction'
+					]}
+					// iconMap={{
+					// 	customAction: customIcon
+					// }}
+					// customAction={this.handleCustomAction}
+				/> */}
+
 				<ScrollView>
 					<Formik
 						// innerRef={formRef}
@@ -796,6 +893,101 @@ class qtesti extends Component {
 													errorMessage={errors[item.id]}
 													containerStyle={{ borderWidth: 0 }}
 												/>
+											);
+										else if (item.type == 'combobox1')
+											return (
+												<View style={{ flex: 1 }}>
+													<MultiSelect
+														//hideTags
+														items={item.options}
+														uniqueKey="id"
+														ref={(component) => {
+															this.multiSelect = component;
+														}}
+														//onSelectedItemsChange={this.onSelectedItemsChange}
+														onSelectedItemsChange={(e) => {
+															this.setState((prevState) => ({
+																formikDefault: {
+																	...prevState.formikDefault,
+																	[item.id]: e
+																}
+															}));
+
+															// this.setState((prevState) => ({
+															// 	formstruct: {
+															// 		...prevState.formstruct,
+															// 		[item.selected]: e
+															// 	}
+															// }));
+														}}
+														selectedItems={values[item.id]}
+														selectText="انتخاب کنید"
+														searchInputPlaceholderText="جستجو"
+														onChangeInput={(text) => console.log(text)}
+														altFontFamily="iransans"
+														tagRemoveIconColor="red"
+														tagBorderColor="#CCC"
+														tagTextColor="#aaa"
+														selectedItemTextColor="green"
+														selectedItemIconColor="green"
+														itemTextColor="#000"
+														displayKey="name"
+														searchInputStyle={{ color: '#aaa' }}
+														submitButtonColor="#aaa"
+														submitButtonText="تایید"
+														onChangeInput={(e) => {
+															// if (e.length > 2) {
+															// 	const elementsIndex = this.state.formstruct[0].fields.findIndex(
+															// 		(element) => element.id == 'classlist'
+															// 	);
+															// 	let newArray = [ ...this.state.formstruct ];
+															// 	console.log(newArray[0].fields);
+															// 	newArray[0].fields[elementsIndex] = {
+															// 		...newArray[0].fields[elementsIndex],
+															// 		options: [ { id: '10', name: '1234' } ]
+															// 	};
+															// 	this.setState({
+															// 		formstruct: newArray
+															// 	});
+															// 	console.log(newArray);
+															// }
+														}}
+														fontFamily="iransans"
+														itemFontFamily="iransans"
+														selectedItemFontFamily="iransans"
+														styleMainWrapper={{
+															marginRight: 15,
+															marginLeft: 15,
+															borderWidth: 1,
+															borderRadius: 15,
+															borderColor: '#ccc'
+															//backgroundColor: 'red'
+														}}
+														styleSelectorContainer={{ borderRadius: 15 }}
+														searchInputStyle={{
+															textAlign: 'center',
+															height: 30,
+															fontFamily: 'iransans'
+														}}
+														styleInputGroup={{
+															//backgroundColor: 'red',
+															borderTopLeftRadius: 15,
+															borderTopRightRadius: 15
+														}}
+														styleDropdownMenuSubsection={{
+															//backgroundColor: 'red',
+															fontFamily: 'iransans',
+															borderTopLeftRadius: 15,
+															borderTopRightRadius: 15,
+															borderWidth: 1
+														}}
+													/>
+													<View>
+														{this.multiselect ? (
+															this.multiselect.getSelectedItemsExt()
+														) : null}
+													</View>
+												</View>
 											);
 										else if (item.type == 'combobox')
 											return (

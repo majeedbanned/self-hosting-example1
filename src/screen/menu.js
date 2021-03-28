@@ -19,7 +19,7 @@ YellowBox.ignoreWarnings([
 ]);
 class menu extends Component {
 	state = {
-		isLoading: true,
+		isLoading: false,
 		items: []
 	};
 
@@ -28,24 +28,21 @@ class menu extends Component {
 		// 	iransans: require('./../../assets/IRANSansMobile.ttf'),
 		// 	iransansbold: require('./../../assets/IRANSansMobile_Bold.ttf')
 		// });
-
 		// useFonts.loadAsync({
 		// 	'iransans': require('./../../assets/IRANSansMobile.ttf'),
 		//   });
-
 		// let [fontsLoaded] = useFonts({
 		// 	'iransans': require('./../../assets/IRANSansMobile.ttf'),
 		//   });
-
 		// this.getSurfaces();
-		this.loadAPI();
+		//this.loadAPI();
 	}
 	_handleRefresh = () => {
 		//this.loadAPI();
 	};
 	loadAPI = () => {
 		this.setState({ isLoading: true });
-		//console.log('fsafsfsafsfsdfs');
+		console.log('fsafsfsafsfsdfs');
 		fetch('http://192.168.1.15:8080/papi.asmx/mobileMainScreen?test=d')
 			.then((response) => response.json())
 			.then((responseText) => {
@@ -90,11 +87,15 @@ class menu extends Component {
 		} else if (item.id == 9) {
 			navigate('reports');
 		} else if (item.id == 10) {
-			navigate('qbank');
+			navigate('qbank', { mode1: 'start' });
 		} else if (item.id == 13) {
 			navigate('stdSearch');
 		} else if (item.id == 14) {
 			navigate('Settings');
+		} else if (item.id == 15) {
+			navigate('bankfile');
+		} else if (item.id == 17) {
+			navigate('formEntry');
 		}
 
 		//navigate('test');

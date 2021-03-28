@@ -9,8 +9,6 @@ import { withNavigation } from 'react-navigation';
 import { AppLoading } from 'expo';
 import { Ionicons, AntDesign, Entypo } from '@expo/vector-icons';
 import defaultStyles from '../../../config/styles';
-import i18n from 'i18n-js';
-
 import {
 	AppRegistry,
 	StyleSheet,
@@ -21,12 +19,10 @@ import {
 	Dimensions,
 	Button,
 	TouchableWithoutFeedback,
-	Linking,
 	FlatList,
 	TextInput,
 	ActivityIndicator,
-	Alert,
-	I18nManager
+	Alert
 } from 'react-native';
 import { userInfo, toFarsi, getHttpAdress } from '../../../components/DB';
 
@@ -36,10 +32,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { List, ListItem } from 'react-native-elements';
 import { red, green } from 'ansi-colors';
 let formid = 0;
-
-//I18nManager.allowRTL(false);
-//I18nManager.forceRTL(false);
-export default class studentList extends Component {
+export default class studentlistforms extends Component {
 	constructor(props) {
 		super(props);
 		(this.arch = ''), (this.page = 1);
@@ -59,7 +52,7 @@ export default class studentList extends Component {
 		const { params } = navigation.state;
 
 		return {
-			headerTitle: i18n.t('frmPtcCaption'),
+			headerTitle: 'فرم های ثبت شده',
 			headerRight: () => null,
 
 			headerBackTitle: 'بازگشت',
@@ -83,9 +76,10 @@ export default class studentList extends Component {
 	}
 	press = (item) => {
 		const { navigate } = this.props.navigation;
-		navigate('studentlistforms', {
+		navigate('eforms', {
 			eformsID: item.formId,
-			userID: item.username,
+			instanseID: item.id,
+			stdID: item.username,
 			mode: 'view'
 		});
 	};
@@ -144,89 +138,14 @@ export default class studentList extends Component {
 				}
 	};
 
-	loadAPIxls = (page, formID) => {
-		//alert();
-		if (global.adress != 'undefined') {
-		}
-		const { navigation } = this.props;
-
-		const formID1 = navigation.getParam('eformsID');
-		/* #region  check internet */
-
-		// let state = await NetInfo.fetch();
-		// if (!state.isConnected) {
-		// 	this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-
-		// 	return;
-		// }
-		/* #endregion */
-		this.setState({ loading: true });
-		let param = userInfo();
-
-		let uurl =
-			global.adress +
-			'/pApi.asmx/getFilledFormXls?currentPage=' +
-			this.page +
-			'&p=' +
-			param +
-			'&q=' +
-			this.arch +
-			'&formid=' +
-			formID1;
-
-		console.log(uurl);
-		//let page = 1;
-		//alert();
-		fetch(uurl) //+ this.arch
-			.then((response) => response.json())
-			.then((responseText) => {
-				//alert(responseText.length);
-				this.setState({ loading: false });
-
-				if (responseText.path) {
-					Alert.alert(
-						'خروجی اکسل',
-						'آیا مایل به مشاهده هستید؟',
-						[
-							{
-								text: 'خیر',
-								//onPress: () => console.log('Cancel Pressed'),
-								style: 'cancel'
-							},
-							{
-								text: 'بله',
-								onPress: () => {
-									//alert(global.adress + '/upload/xls/' + responseText.path);
-									Linking.openURL(global.adress + '/upload/xls/' + responseText.path);
-								}
-							}
-						],
-						{ cancelable: false }
-					);
-					// this.setState({
-					// 	fakeContact: this.page === 1 ? responseText : [ ...this.state.fakeContact, ...responseText ],
-
-					// 	loading: false
-					// });
-				} else {
-					this.setState({
-						fakeContact: [],
-						loading: false
-					});
-				}
-			})
-			.catch((err) => {
-				this.setState({ loading: false });
-				console.log('1Error fetching the feed: ', err);
-			});
-	};
-
 	loadAPI = (page, formID) => {
 		if (global.adress != 'undefined') {
 		}
 		const { navigation } = this.props;
 
 		const formID1 = navigation.getParam('eformsID');
+
+		const userID = navigation.getParam('userID');
 		/* #region  check internet */
 
 		// let state = await NetInfo.fetch();
@@ -241,15 +160,16 @@ export default class studentList extends Component {
 
 		let uurl =
 			global.adress +
-			'/pApi.asmx/getFilledFormStd?currentPage=' +
+			'/pApi.asmx/getFilledFormStdList?currentPage=' +
 			this.page +
 			'&p=' +
 			param +
 			'&q=' +
 			this.arch +
 			'&formid=' +
-			formID1;
-
+			formID1 +
+			'&userID=' +
+			userID;
 		console.log(uurl);
 		//let page = 1;
 
@@ -320,19 +240,9 @@ export default class studentList extends Component {
 						alignContent: 'center'
 					}}
 				>
-					<TouchableOpacity activeOpacity={0.5}>
-						<AntDesign
-							name="exclefile1"
-							size={36}
-							onPress={() => {
-								this.loadAPIxls();
-							}}
-							style={{ color: '#bbb', marginTop: 13, marginStart: 8 }}
-						/>
-					</TouchableOpacity>
 					<SearchBar
-						inputContainerStyle={{ backgroundColor: '#eee', height: 15 }}
-						inputStyle={{ fontSize: 5, height: 15 }}
+						inputContainerStyle={{ backgroundColor: '#eee' }}
+						inputStyle={{ fontSize: 5 }}
 						containerStyle={{
 							flex: 1,
 							// color: 'green',
@@ -342,7 +252,7 @@ export default class studentList extends Component {
 							// borderTopRightRadius: 24,
 							// borderTopLeftRadius: 24
 						}}
-						placeholder={i18n.t('frmsrchCaption')}
+						placeholder="جستجو"
 						fontSize={9}
 						fontWeight="normal"
 						lightTheme
@@ -376,8 +286,8 @@ export default class studentList extends Component {
 							onEndReached={this._handleLoadMore.bind(this)}
 							style={{ flex: 0.9 }}
 							data={this.state.fakeContact}
-							keyExtractor={(item) => item.username + '-' + item.coursename}
-							//keyExtractor={(item) => item.id.toString()}
+							// keyExtractor={(item) => item.id}
+							keyExtractor={(item) => item.id.toString()}
 							extraData={this.state}
 							ListEmptyComponent={() => (
 								<View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -388,7 +298,7 @@ export default class studentList extends Component {
 							renderItem={({ item }) => {
 								return (
 									<TouchableOpacity
-										key={item.username}
+										key={item.id}
 										activeOpacity={0.5}
 										style={{
 											flexDirection: 'row',
@@ -428,11 +338,11 @@ export default class studentList extends Component {
 														fontFamily: 'iransans',
 														fontWeight: 'bold'
 													}}
-												>{`${item.FirstName} ${item.LastName}`}</Text>
+												>{`${item.date_} ${item.time_}`}</Text>
 											) : (
 												<View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
 													<View>
-														{true ? (
+														{false ? (
 															<Image
 																style={Mstyles.imageavatar}
 																source={{
@@ -444,11 +354,11 @@ export default class studentList extends Component {
 																}}
 															/>
 														) : (
-															<Ionicons
-																name="ios-person"
+															<AntDesign
+																name="form"
 																size={32}
 																style={Mstyles.icon}
-																style={{ color: '#18b504' }}
+																style={{ color: '#bbb' }}
 															/>
 														)}
 													</View>
@@ -460,15 +370,15 @@ export default class studentList extends Component {
 															alignItems: 'stretch'
 														}}
 													>
-														<Text
-															style={{ fontFamily: 'iransans' }}
-														>{`${item.FirstName} ${item.LastName}  `}</Text>
 														<Text style={{ fontFamily: 'iransans' }}>
+															{toFarsi(`${item.date_}     ${item.time_}  `)}
+														</Text>
+														{/* <Text style={{ fontFamily: 'iransans' }}>
 															{toFarsi(`    ${item.username}  `)}
 														</Text>
 														<Text style={{ fontFamily: 'iransans' }}>
 															{'تعداد ثبت:' + toFarsi(`${item.ccc}  `)}
-														</Text>
+														</Text> */}
 													</View>
 												</View>
 											)}

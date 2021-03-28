@@ -1,8 +1,3 @@
-
-
-
-
-
 import React, { Component } from 'react';
 import { withNavigationFocus } from 'react-navigation';
 //import SwiperFlatList from 'react-native-swiper-flatlist';
@@ -32,18 +27,17 @@ import DropdownAlert from 'react-native-dropdownalert';
 import { SearchBar } from 'react-native-elements';
 
 import axios from 'axios';
-I18nManager.allowRTL(true);
-I18nManager.forceRTL(true);
+// I18nManager.allowRTL(true);
+// I18nManager.forceRTL(true);
 import Modal from 'react-native-modal';
 import SelectUser from '../screen/selectUser';
 import { fromBinary } from 'uuid-js';
-
 
 import Swiper from '../components/swiper';
 import InViewPort from '../components/inViewport';
 import VideoPlayer from '../components/VideoPlayer';
 
-const screenWidth = Dimensions.get('window').width ;
+const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
 
 let hasScrolled = false;
@@ -52,13 +46,11 @@ class messages extends Component {
 		super(props);
 		this.page = 1;
 		this.state = {
-
 			images: {},
-			muted : false,
+			muted: false,
 			paused: true,
-			currentIndex: 0
+			currentIndex: 0,
 
-			,
 			refreshing: false,
 			isModalVisible: false,
 			value: '',
@@ -76,9 +68,9 @@ class messages extends Component {
 		let arch = '';
 	}
 	onChangeImage = (index) => {
-		console.log('currentIndex ', index)
-		this.setState({ currentIndex: index});
-	  }
+		console.log('currentIndex ', index);
+		this.setState({ currentIndex: index });
+	};
 	componentDidUpdate() {
 		console.log('update');
 	}
@@ -353,49 +345,41 @@ class messages extends Component {
 						return item.id;
 					}}
 					renderItem={({ item }) => {
-
 						let items = Array.apply(null, Array()).map((v, i) => {
 							return {
-							  id: i,
-							  caption: i + 1,
-							  source: { uri: 'http://placehold.it/200x200?text=' + (i + 1) },
-							  dimension: '{ width: 150, height: 150 }',
+								id: i,
+								caption: i + 1,
+								source: { uri: 'http://placehold.it/200x200?text=' + (i + 1) },
+								dimension: '{ width: 150, height: 150 }'
 							};
-						  });
+						});
 
-						  return(
+						return (
 							<View style={styles.DefaultView}>
-							  <Swiper
-							  showsPagination={true}
-							  onIndexChanged={this.onChangeImage}
-							  index={0}
-							  >
-							   {items.map((item, key) => {
-								 if(key==1 || key ==5){
-									
-
-								   return (
-
-									   <VideoPlayer key={key} index={key} currentIndex={this.state.currentIndex}/>
-								   )
-								 }else{
-								   return(
-									 <Image
-									   resizeMode='contain'
-									   style={{width:screenWidth, height: screenHeight}}
-									   source={item.source}
-									   key={key}
-								   />
-								  )
-								 }
-							   })}
-							  </Swiper>
-							 </View>
-						  )
-
-
-
-
+								<Swiper showsPagination={true} onIndexChanged={this.onChangeImage} index={0}>
+									{items.map((item, key) => {
+										if (key == 1 || key == 5) {
+											return (
+												<VideoPlayer
+													key={key}
+													index={key}
+													currentIndex={this.state.currentIndex}
+												/>
+											);
+										} else {
+											return (
+												<Image
+													resizeMode="contain"
+													style={{ width: screenWidth, height: screenHeight }}
+													source={item.source}
+													key={key}
+												/>
+											);
+										}
+									})}
+								</Swiper>
+							</View>
+						);
 
 						return (
 							<View style={styles.card}>
@@ -473,7 +457,6 @@ class messages extends Component {
 										<Swiper
 											onIndexChanged={(index) => {
 												console.log(item.elsaghi.split('|')[index]);
-
 											}}
 											paginationStyle={{
 												flexDirection: Platform.OS === 'ios' ? 'row' : 'row-reverse'

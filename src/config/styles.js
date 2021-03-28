@@ -38,7 +38,7 @@ export default {
 		marginLeft: 6,
 		//color: '#f6fbff',
 		paddingLeft: 3,
-		paddingTop: 3
+		paddingTop: 1
 		//color: colors.medium
 	},
 	text: {
@@ -107,8 +107,9 @@ export default {
 	// 	fontSize: 12
 	// },
 	lbl14: {
+		marginTop: 3,
 		fontFamily: 'iransans',
-		color: '#a976fb',
+		color: '#36D1DC',
 		fontSize: 14
 	}
 };

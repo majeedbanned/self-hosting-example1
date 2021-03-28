@@ -1,20 +1,20 @@
 import React, { Component } from 'react';
 import { StyleSheet, Linking, ActivityIndicator, SafeAreaView } from 'react-native';
 import ActionButton from 'react-native-action-button';
-import defaultStyles from '../config/styles';
-import Loading from '../components/loading';
+import defaultStyles from '../../config/styles';
+import Loading from '../../components/loading';
 import DropdownAlert from 'react-native-dropdownalert';
 import { withNavigation } from 'react-navigation';
 import { FlatGrid } from 'react-native-super-grid';
 import Icon from 'react-native-vector-icons/Ionicons';
 import IconAnt from 'react-native-vector-icons/AntDesign';
 
-import Mstyles from '../components/styles';
-import FormButton from '../component/FormButton';
-import ExamAdd from './examAdd';
+import Mstyles from '../../components/styles';
+import FormButton from '../../component/FormButton';
+import ExamAdd from '../examAdd';
 import { AntDesign, Entypo } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
-import SelectUser from './selectUser';
+//import SelectUser from './../../selectUser';
 import NetInfo from '@react-native-community/netinfo';
 import Modal, {
 	ModalTitle,
@@ -24,17 +24,17 @@ import Modal, {
 	SlideAnimation,
 	ScaleAnimation
 } from 'react-native-modals';
-import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+import { userInfo, toFarsi, getHttpAdress } from '../../components/DB';
 import { FlatList, ScrollView, Image, View, Text, RefreshControl, TouchableOpacity } from 'react-native';
-import GLOBAL from './global';
+import GLOBAL from '../global';
 import { LinearGradient } from 'expo-linear-gradient';
 import { NavigationEvents } from 'react-navigation';
 
-const colorhead = '#5dc4d8';
-const colorlight = '#5dc4d8';
-const iconname_ = 'videocamera';
+const colorhead = '#9b59b6';
+const colorlight = '#9b59b6';
+const iconname_ = 'dotchart';
 
-class absentList extends Component {
+class formEntry extends Component {
 	constructor(props) {
 		super(props);
 		(this.page = 1),
@@ -56,16 +56,25 @@ class absentList extends Component {
 			});
 
 		this.props.navigation.addListener('willFocus', () => {
-			//this.loadAPI(1, 'pull');
-			//	this.loadAPI_grp(1, 'pull');
+			this.loadAPI(1, 'pull');
+			this.loadAPI_grp(1, 'pull');
 		});
 	}
 	static navigationOptions = ({ navigation }) => {
 		const { params } = navigation.state;
 
 		return {
-			headerTitle: 'آرشیو ضبط جلسات',
+			// headerLeft: (
+			// 	<Icon
+			// 		name={'arrow-left'}
+			// 		onPress={() => {
+			// 			navigation.goBack();
+			// 		}}
+			// 	/>
+			// ),
+			headerTitle: 'ورود اطلاعات',
 			headerRight: () => null,
+
 			headerBackTitle: 'بازگشت',
 			navigationOptions: {
 				headerBackTitle: 'Home'
@@ -77,10 +86,6 @@ class absentList extends Component {
 		};
 	};
 	async componentDidMount() {
-		const { navigation } = this.props;
-		const webinarID = navigation.getParam('webinarID');
-		this.loadAPI(webinarID, 'pull');
-
 		//this.loadAPI_grp(this.page, 'pull');
 		//this.loadAPI(this.page, 'pull');
 	}
@@ -104,14 +109,14 @@ class absentList extends Component {
 		let param = userInfo();
 		let uurl =
 			global.adress +
-			'/pApi.asmx/getFormCat?id=' +
+			'/pApi.asmx/getformEntryCat?id=' +
 			page +
 			'&p=' +
 			param +
 			'&g=' +
 			this.state.selectedItem +
 			'&mode=list';
-		//console.log(uurl);
+		console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -138,7 +143,7 @@ class absentList extends Component {
 		}
 	};
 
-	loadAPI = async (webinarID, type) => {
+	loadAPI = async (page, type) => {
 		if (global.adress == 'undefined') {
 			GLOBAL.main.setState({ isModalVisible: true });
 		}
@@ -153,7 +158,7 @@ class absentList extends Component {
 		this.setState({ loading: true });
 		let param = userInfo();
 		let uurl =
-			global.adress + '/pApi.asmx/getAdobeRec?id=' + webinarID + '&p=' + param + '&g=' + this.state.selectedItem;
+			global.adress + '/pApi.asmx/getformEntry?id=' + page + '&p=' + param + '&g=' + this.state.selectedItem;
 		console.log(uurl);
 		try {
 			const response = await fetch(uurl);
@@ -364,8 +369,13 @@ class absentList extends Component {
 							<TouchableOpacity
 								onPress={() => {
 									const { navigate } = this.props.navigation;
-									//global.eformsID = item.id;
-									//navigate('eforms', { eformsID: item.id, mode: 'add' });
+									navigate.headerBackTitle = 'shah';
+									global.eformsID = item.id;
+									navigate('menuList', {
+										reportID: item.id,
+										reportName: item.title,
+										repid: item.repid
+									});
 								}}
 								activeOpacity={0.8}
 								style={{
@@ -388,25 +398,25 @@ class absentList extends Component {
 												</View>
 												<View style={styles.view4}>
 													<Text style={[ styles.aztitle, { color: 'black' } ]}>
-														{item.name}
+														{item.title}
 													</Text>
-													{item.description ? (
+													{item.disc ? (
 														<Text style={[ styles.aztitlet, { paddingTop: 4 } ]}>
-															{toFarsi(item.description)}
+															{toFarsi(item.disc)}
 														</Text>
 													) : null}
 												</View>
 
 												{/* {global.ttype == 'administrator' ||
 														(item.access.indexOf(global.username) > -1 && ( */}
-												<TouchableOpacity
+												{/* <TouchableOpacity
 													onPress={() => {
 														const { navigate } = this.props.navigation;
 														//global.eformsID = item.id;
-														// navigate('studentlist', {
-														// 	eformsID: item.id,
-														// 	mode: 'list'
-														// });
+														navigate('studentlist', {
+															eformsID: item.id,
+															mode: 'list'
+														});
 													}}
 													style={{
 														alignItems: 'center',
@@ -414,28 +424,23 @@ class absentList extends Component {
 														flex: 0.5
 													}}
 												>
-													{/* <IconAnt
+													<IconAnt
 														name="solution1"
 														style={styles.image}
 														size={34}
 														color="#ccc"
-													/> */}
+													/>
 
-													{/* <AntDesign
-														style={styles.image}
-														name="profile"
-														size={34}
-														color="#ccc"
-													/> */}
-													{/* <Text
+													
+													<Text
 														style={[
 															defaultStyles.lbl14,
 															{ fontSize: 14, color: 'black' }
 														]}
 													>
 														لیست
-													</Text> */}
-												</TouchableOpacity>
+													</Text>
+												</TouchableOpacity> */}
 												{/* ))} */}
 											</View>
 										</View>
@@ -711,4 +716,4 @@ const styles = StyleSheet.create({
 		color: '#fff'
 	}
 });
-export default withNavigation(absentList);
+export default withNavigation(formEntry);

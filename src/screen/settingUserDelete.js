@@ -29,12 +29,20 @@ import ActionBarImage from '../components/ActionBarImage';
 import NetInfo from '@react-native-community/netinfo';
 import DropdownAlert from 'react-native-dropdownalert';
 import { SearchBar } from 'react-native-elements';
-import * as SQLite from 'expo-sqlite';
+//import * as SQLite from 'expo-sqlite';
 import GLOBAL from './global';
 import axios from 'axios';
+
+import * as SQLite from 'expo-sqlite';
+const database_name = 'Reactoffline.db';
+const database_version = '1.0';
+const database_displayname = 'SQLite React Offline Database';
+const database_size = 200000;
+const db = SQLite.openDatabase(database_name, database_version, database_displayname, database_size);
+
 //import { getAvailableLocationProviders } from 'react-native-device-info';
-I18nManager.allowRTL(true);
-I18nManager.forceRTL(true);
+// I18nManager.allowRTL(true);
+// I18nManager.forceRTL(true);
 class settingUserDelete extends Component {
 	constructor(props) {
 		super(props);
@@ -82,8 +90,9 @@ class settingUserDelete extends Component {
 		// 	iransans: require('./../../assets/IRANSansMobile.ttf')
 		// });
 		//this.getSurfaces();
+		const db = SQLite.openDatabase(database_name, database_version, database_displayname, database_size);
 
-		const db = SQLite.openDatabase('db');
+		//const db = SQLite.openDatabase('db');
 		db.transaction((tx) => {
 			tx.executeSql('SELECT * FROM users', [], (tx, results) => {
 				var temp = [];
@@ -205,7 +214,9 @@ class settingUserDelete extends Component {
 		// });
 	};
 	deleteapi = async (username, schoolcode) => {
-		const db = SQLite.openDatabase('db');
+		const db = SQLite.openDatabase(database_name, database_version, database_displayname, database_size);
+
+		//	const db = SQLite.openDatabase('db');
 		db.transaction((tx) => {
 			tx.executeSql(
 				'delete from users  where username=? and schoolcode=?',
@@ -221,7 +232,9 @@ class settingUserDelete extends Component {
 	};
 
 	loadfromdb = async () => {
-		const db = SQLite.openDatabase('db');
+		const db = SQLite.openDatabase(database_name, database_version, database_displayname, database_size);
+
+		//const db = SQLite.openDatabase('db');
 		db.transaction((tx) => {
 			tx.executeSql('SELECT * FROM users', [], (tx, results) => {
 				var temp = [];
