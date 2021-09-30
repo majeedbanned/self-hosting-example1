@@ -1,0 +1,6 @@
+{
+	"CLOUD_FUNCTION_URL": "https://example.com",
+	"ALGOLIA_APP_ID": "DXY0SG4VD5",
+	"ALGOLIA_API_KEY": "57c9686eb0cc9704f0c62bf5f4d6ab22",
+	"ALGOLIA_INDEX": "instant_search"
+}
