@@ -276,6 +276,7 @@ global.backgroundColor = '#f6fbff';
 // 			};
 // 	});
 // });
+// its a sample change
 
 db.transaction(function(txn) {
 	//alert();
