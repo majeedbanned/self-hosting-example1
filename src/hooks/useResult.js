@@ -8,7 +8,7 @@ export default () => {
 
 	const pApi = async (searchTerm) => {
 		try {
-			console.log('sd');
+		//	console.log('sd');
 			let uurl="ath?p=50`123456`50`357611123qwe!@$"
 		//+username+"`"+password+"`"+schoolcode+"`357611123qwe!@$";
 			const resoponse = await yelp.get(uurl, {

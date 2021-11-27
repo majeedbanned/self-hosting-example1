@@ -322,7 +322,7 @@ class examAdd extends Component {
 											dateSelected: this.state.dateSelected_shoro_namayesh
 										});
 
-										console.log('ddddd:' + this.state.dateSelected_shoro_namayesh);
+										//console.log('ddddd:' + this.state.dateSelected_shoro_namayesh);
 									}}
 									keyboardType="numeric"
 									//value={this.state.shoro_namayesh}

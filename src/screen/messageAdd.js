@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { createAppContainer } from 'react-navigation';
 import { Input, ButtonGroup } from 'react-native-elements';
-import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+import { userInfo, toFarsi, encrypt, getHttpAdress } from '../components/DB';
 import Loading from '../components/loading';
 
 import RNPickerSelect from 'react-native-picker-select';
@@ -64,7 +64,7 @@ import fa from '../translations/fa';
 import reactNativeExtraDimensionsAndroid from 'react-native-extra-dimensions-android';
 import { HelloChandu, _getcount, getQuery, _query, _fetch, _connected } from '../components/DB';
 import { region } from 'expo-localization';
-import { red } from 'colorette';
+//import { red } from 'colorette';
 import { ScrollView } from 'react-native-gesture-handler';
 import { CallModal, CallModalUtil, connectCallModal } from '@fugood/react-native-call-modal';
 
@@ -206,7 +206,7 @@ class Appaa extends Component {
 			'&g=' +
 			this.state.selectedItem +
 			'&mode=add';
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -245,7 +245,7 @@ class Appaa extends Component {
 		this.setState({ loading: true });
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/getLimiteUpload?id=' + '1' + '&p=' + param + '&g=' + '1';
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -366,7 +366,7 @@ class Appaa extends Component {
 		//this.setState({ loading: true });
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/getMessage?id=' + global.messageEditID + '&p=' + param;
-		console.log(uurl);
+		////////console.log(uurl);
 
 		try {
 			const response = await fetch(uurl);
@@ -476,7 +476,7 @@ class Appaa extends Component {
 
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/setMessage?p=' + param + '&json=' + jsonstr + '&dmn=' + global.adress;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -572,6 +572,13 @@ class Appaa extends Component {
 				type: '*/*',
 				copyToCacheDirectory: true
 			});
+
+			const uri = FileSystem.documentDirectory + picked.name;
+			await FileSystem.copyAsync({
+				from: picked.uri,
+				to: uri
+			});
+
 			if (picked.type === 'cancel') {
 				return;
 			} else if (picked.type === 'success') {
@@ -991,7 +998,7 @@ class Appaa extends Component {
 
 		let openImage1PickerAsync = async (tt) => {
 			//console.log(tt);
-			let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
+			let permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 			if (permissionResult.granted === false) {
 				alert('Permission to access camera roll is required!');
 				return;
@@ -1607,5 +1614,5 @@ const styles = StyleSheet.create({
 	}
 });
 
-console.disableYellowBox = true;
+//console.disableYellowBox = true;
 export default withNavigation(Appaa);

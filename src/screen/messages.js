@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Snackbar } from 'react-native-paper';
 import ActionButton from 'react-native-action-button';
 import defaultStyles from '../config/styles';
+import { RFPercentage, RFValue } from 'react-native-responsive-fontsize';
 import Loading from '../components/loading';
 //import FastImage from 'react-native-fast-image';
 //import FastImage from 'react-native-fast-image';
@@ -22,8 +23,8 @@ import GLOBAL from './global';
 import * as FileSystem from 'expo-file-system';
 import { Video } from 'expo-av';
 import { Ionicons, AntDesign, Entypo } from '@expo/vector-icons';
-import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
-import { Menu, MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu';
+import { userInfo, toFarsi, encrypt, getHttpAdress } from '../components/DB';
+// import { Menu, MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu';
 import {
 	ActivityIndicator,
 	StyleSheet,
@@ -38,15 +39,15 @@ import {
 	RefreshControl
 } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
-import DropdownAlert from 'react-native-dropdownalert';
+// import DropdownAlert from 'react-native-dropdownalert';
 import { SearchBar } from 'react-native-elements';
 
-import MessageAdd from '../screen/messageAdd';
-import axios from 'axios';
+// import MessageAdd from '../screen/messageAdd';
+// import axios from 'axios';
 // I18nManager.allowRTL(true);
 // I18nManager.forceRTL(true);
-import Modal from 'react-native-modal';
-import SelectUser from '../screen/selectUser';
+// import Modal from 'react-native-modal';
+// import SelectUser from '../screen/selectUser';
 //import { fromBinary } from 'uuid-js';
 let hasScrolled = false;
 class messages extends Component {
@@ -140,7 +141,7 @@ class messages extends Component {
 		// 	param +
 		// 	'&g=' +
 		// 	this.state.selectedItem;
-		// console.log(uurl);
+		// ////////console.log(uurl);
 		// try {
 		// 	const response = await fetch(uurl);
 		// 	if (response.ok) {
@@ -264,7 +265,7 @@ class messages extends Component {
 
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/delMessageID?p=' + param + '&id=' + id;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -327,7 +328,7 @@ class messages extends Component {
 			'&g=' +
 			this.state.selectedItem +
 			'&mode=list';
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -369,12 +370,20 @@ class messages extends Component {
 					extraData={this.state.selectedItem}
 					data={this.state.cat}
 					keyExtractor={(item) => item.value.toString()}
+					contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-start' }}
 					// keyExtractor={(item) => {
 					// 	return item.id;
 					// }}
 					//key={item.id}
 					horizontal
-					style={{ paddingBottom: 4, borderWidth: 0, marginTop: 4, marginRight: 4, marginLeft: 4 }}
+					style={{
+						flexDirection: 'row-reverse',
+						paddingBottom: 4,
+						borderWidth: 0,
+						marginTop: 4,
+						marginRight: 4,
+						marginLeft: 4
+					}}
 					renderItem={({ item, index }) => {
 						return (
 							<TouchableOpacity
@@ -426,11 +435,15 @@ class messages extends Component {
 										style={
 											this.state.selectedItem === item.value ? (
 												{
+													fontSize: 12.2,
+
 													color: 'white',
 													fontFamily: 'iransans'
 												}
 											) : (
 												{
+													fontSize: 12.2,
+
 													color: '#48bdfe',
 													fontFamily: 'iransans'
 												}
@@ -440,7 +453,7 @@ class messages extends Component {
 										{item.label}
 									</Text>
 									{this.state.selectedItem !== item.value ||
-										(this.state.dataLoading && <ActivityIndicator />)}
+										(this.state.dataLoading && <ActivityIndicator size="small" color="#000" />)}
 								</View>
 							</TouchableOpacity>
 						);
@@ -478,7 +491,7 @@ class messages extends Component {
 
 	_renderFooter = () => {
 		if (!this.state.isLoading) return null;
-		return <ActivityIndicator style={{ color: 'red' }} size="large" />;
+		return <ActivityIndicator size="small" color="#000" />;
 	};
 	handleselect = () => {
 		// const { navigate } = this.props.navigation;
@@ -647,7 +660,7 @@ class messages extends Component {
 												onPress={() => {
 													Alert.alert(
 														'حذف پیام',
-														'آیا مایل به حدف پیام هستید؟',
+														'آیا مایل به حذف پیام هستید؟',
 														[
 															// {
 															// 	text: 'Ask me later',
@@ -1032,6 +1045,22 @@ class messages extends Component {
 						<ActionButton.Item
 							buttonColor="#58bef5"
 							textStyle={{ fontFamily: 'iransans' }}
+							title="راهنما"
+							onPress={() => {
+								Linking.openURL('http://farsamooz.ir/apphlp/3.mp4');
+							}}
+						>
+							<Icon
+								name="md-play-circle"
+								size={35}
+								color="#fff"
+								style={{ marginRight: 0, marginTop: 0 }}
+							/>
+						</ActionButton.Item>
+
+						<ActionButton.Item
+							buttonColor="#58bef5"
+							textStyle={{ fontFamily: 'iransans' }}
 							title="ارسال پیام"
 							onPress={() => {
 								const { navigate } = this.props.navigation;
@@ -1067,10 +1096,10 @@ class messages extends Component {
 				) : null}
 
 				{global.ttype == 'student' || global.ttype == 'teacher' ? (
-					<ActionButton position="left" buttonColor="rgba(231,76,60,1)">
+					<ActionButton position="left" buttonColor="#32a8ed">
 						<ActionButton.Item
-							buttonColor="#9b59b6"
-							style={{ fontFamily: 'iransans' }}
+							buttonColor="#32a8ed"
+							textStyle={{ fontFamily: 'iransans' }}
 							title="ارسال پیام"
 							onPress={() => {
 								global.messageEditID = '';

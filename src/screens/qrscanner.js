@@ -2,6 +2,8 @@ import React, { Component, State, useState, useEffect } from 'react';
 import { Text, View, StyleSheet, Button, Dimensions, Image } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import defaultStyles from '../config/styles';
+import { Restart } from 'fiction-expo-restart';
+
 import { REAL_WINDOW_HEIGHT } from 'react-native-extra-dimensions-android';
 
 import Modalm from 'react-native-modal';
@@ -15,12 +17,12 @@ const database_version = '1.0';
 const database_displayname = 'SQLite React Offline Database';
 const database_size = 200000;
 
-//import { userInfo, toFarsi, getHttpAdress, decrypt, encrypt, toEng } from '../components/DB';
+//import { userInfo, toFarsi,encrypt, getHttpAdress, decrypt, encrypt, toEng } from '../components/DB';
 
 const db = SQLite.openDatabase(database_name, database_version, database_displayname, database_size);
 
 import { height } from '../screen/settingUserDelete';
-import { last } from 'rxjs/operator/last';
+//import { last } from 'rxjs/operator/last';
 
 export default function App() {
 	const [ hasPermission, setHasPermission ] = useState(null);
@@ -31,10 +33,20 @@ export default function App() {
 	const [ schoolname, setschoolname ] = useState('مدرسه علوی');
 	const [ ttype, settype ] = useState('دانش آموز');
 
+	// useEffect(() => {
+	// 	(async () => {
+	// 		//	this.setState({ newuser: true });
+	// 		//
+	// 		const { status } = await BarCodeScanner.requestPermissionsAsync();
+	// 	//	alert(status);
+	// 		setHasPermission(status === 'granted');
+	// 	})();
+	// }, []);
+
 	useEffect(() => {
 		(async () => {
-			//	this.setState({ newuser: true });
 			const { status } = await BarCodeScanner.requestPermissionsAsync();
+			//	alert(status);
 			setHasPermission(status === 'granted');
 		})();
 	}, []);
@@ -44,12 +56,12 @@ export default function App() {
 		return {
 			//headerTitle: this.reportName,
 			headerRight: () => null,
-			headerBackTitle: 'بازگشت',
+			//headerBackTitle: 'بازگشت',
 			navigationOptions: {
 				headerBackTitle: 'Home'
 			},
 			headerTitleStyle: {
-				fontFamily: 'iransansbold'
+				fontFamily: 'iransans'
 				//color: this.state.colorhead
 			}
 		};
@@ -109,6 +121,12 @@ export default function App() {
 		global.lastname = lastname;
 		global.schoolname = schoolname;
 		global.ttype = ttype;
+
+		let resultsr = await Database.executeSql('select * from users ', []);
+
+		if (resultsr.rows.length == 1) {
+			Restart();
+		}
 	};
 
 	if (hasPermission === null) {
@@ -135,7 +153,11 @@ export default function App() {
 			/>
 
 			{scanned && (
-				<Button style={{ fontFamily: 'iransans' }} title={'اسکن مجدد'} onPress={() => setScanned(false)} />
+				<Button
+					style={{ fontFamily: 'iransans' }}
+					title={global.lang == 'fa' ? 'اسکن مجدد' : 'Scan'}
+					onPress={() => setScanned(false)}
+				/>
 			)}
 
 			<Modalm

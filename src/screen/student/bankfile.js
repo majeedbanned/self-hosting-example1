@@ -1,43 +1,46 @@
 import React, { Component } from 'react';
-import { StyleSheet, Linking, ActivityIndicator, SafeAreaView, Alert } from 'react-native';
+import { StyleSheet, Linking, ActivityIndicator, SafeAreaView, Alert, Platform } from 'react-native';
 import ActionButton from 'react-native-action-button';
 import defaultStyles from '../../config/styles';
 import Loading from '../../components/loading';
 //import ActionButton from 'react-native-action-button';
+import i18n from 'i18n-js';
 import { SearchBar } from 'react-native-elements';
+import { Snackbar } from 'react-native-paper';
 import Iconw from 'react-native-vector-icons/FontAwesome';
 
-import DropdownAlert from 'react-native-dropdownalert';
+// import DropdownAlert from 'react-native-dropdownalert';
 import { withNavigation } from 'react-navigation';
-import { FlatGrid } from 'react-native-super-grid';
+// import { FlatGrid } from 'react-native-super-grid';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Menu, MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu';
 
 import IconAnt from 'react-native-vector-icons/AntDesign';
 
 import Mstyles from '../../components/styles';
-import FormButton from '../../component/FormButton';
+// import FormButton from '../../component/FormButton';
 //import ExamAdd from '../../examAdd';
-import { AntDesign, Entypo } from '@expo/vector-icons';
+// import { AntDesign, Entypo } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
 //import SelectUser from '../../selectUser';
 import NetInfo from '@react-native-community/netinfo';
-import Modal, {
-	ModalTitle,
-	ModalContent,
-	ModalFooter,
-	ModalButton,
-	SlideAnimation,
-	ScaleAnimation
-} from 'react-native-modals';
-import { userInfo, toFarsi, getHttpAdress } from '../../components/DB';
+// import Modal, {
+// 	ModalTitle,
+// 	ModalContent,
+// 	ModalFooter,
+// 	ModalButton,
+// 	SlideAnimation,
+// 	ScaleAnimation
+// } from 'react-native-modals';
+import { userInfo, toFarsi, encrypt, getHttpAdress } from '../../components/DB';
 import { FlatList, ScrollView, Image, View, Text, RefreshControl, TouchableOpacity } from 'react-native';
 import GLOBAL from '../global';
-import { LinearGradient } from 'expo-linear-gradient';
-import { NavigationEvents } from 'react-navigation';
+// import { LinearGradient } from 'expo-linear-gradient';
+// import { NavigationEvents } from 'react-navigation';
+//import { networkInterfaces } from 'os';
 
-const colorhead = '#2e95d8';
-const colorlight = '#2e95d8';
+const colorhead = '#f2ac14';
+const colorlight = '#f2ac14';
 const iconname_ = 'form';
 
 const optionsStyles = {
@@ -97,14 +100,14 @@ class bankfile extends Component {
 		const { params } = navigation.state;
 
 		return {
-			headerTitle: ' بانک فایل',
+			headerTitle: i18n.t('fileListCaption'),
 			headerRight: () => null,
 			headerBackTitle: 'بازگشت',
 			navigationOptions: {
 				headerBackTitle: 'Home'
 			},
 			headerTitleStyle: {
-				fontFamily: 'iransansbold',
+				fontFamily: 'iransans',
 				color: colorhead
 			}
 		};
@@ -115,17 +118,41 @@ class bankfile extends Component {
 	}
 
 	loadAPI_grp = async (page, type) => {
+		if (global.lang == 'en') {
+			this.setState({
+				cat: [
+					{
+						name: 'Writing',
+						id: 23508,
+						ClassCode: 1484792,
+						classname: 'Class B',
+						teachname: 'carla mardani',
+						TeacherCode: 20
+					},
+					{
+						name: 'Speaking',
+						id: 23508,
+						ClassCode: 1486742,
+						classname: 'Class B',
+						teachname: 'Mr Boss',
+						TeacherCode: 20
+					}
+				]
+			});
+
+			return;
+		}
+
 		if (global.adress == 'undefined') {
 			GLOBAL.main.setState({ isModalVisible: true });
 		}
 
 		/* #region  check internet */
-		let state = await NetInfo.fetch();
 
+		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			//alert(state.isConnected);
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
 		/* #endregion */
 
@@ -140,8 +167,10 @@ class bankfile extends Component {
 			'&g=' +
 			this.state.selectedItem +
 			'&mode=list';
-		console.log(uurl);
+		//
 		try {
+			uurl = encrypt(uurl);
+			console.log(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -160,7 +189,7 @@ class bankfile extends Component {
 			}
 			if (this.state.cat.length != 0) {
 				this.setState({
-					selectedItem: this.state.cat[0].id
+					selectedItem: this.state.cat[0].id + '-' + this.state.cat[0].ClassCode
 				});
 				this.loadAPI(1, 'pull');
 			}
@@ -175,14 +204,87 @@ class bankfile extends Component {
 	};
 
 	loadAPI = async (page, type) => {
+		if (global.lang == 'en') {
+			this.setState({
+				data: [
+					{
+						visible: true,
+						name: 'Writing New Tips',
+						disc: '',
+						id: 10,
+						owner: 20,
+						date_: 'Full pages',
+						time_: 'Sims',
+						size: 'Pdf',
+						type: 'pdf',
+						filename: 'http://ios.farsamooz.ir/2.pdf',
+						Expr1: 'course',
+						entity: 1484792,
+						schoolcode: 95100040,
+						RowNumber: 1
+					},
+					{
+						visible: true,
+						name: 'Task two questions',
+						disc: '',
+						id: 8,
+						owner: 20,
+						date_: 'Full pages',
+						time_: 'Sims',
+						size: 'Pdf',
+						type: 'pdf',
+						filename: 'http://ios.farsamooz.ir/1.pdf',
+						Expr1: 'course',
+						entity: 1484792,
+						schoolcode: 95100040,
+						RowNumber: 2
+					},
+					{
+						visible: true,
+						name: 'Best Discussion Titles in English',
+						disc: '',
+						id: 18,
+						owner: 20,
+						date_: 'Full pages',
+						time_: 'Sims',
+						size: 'Pdf',
+						type: 'pdf',
+						filename: 'http://ios.farsamooz.ir/3.pdf',
+						Expr1: 'course',
+						entity: 1484792,
+						schoolcode: 95100040,
+						RowNumber: 2
+					},
+					{
+						visible: true,
+						name: 'English Writing Practice',
+						disc: '',
+						id: 28,
+						owner: 20,
+						date_: 'Full pages',
+						time_: 'Sims',
+						size: 'Pdf',
+						type: 'pdf',
+						filename: 'http://ios.farsamooz.ir/4.pdf',
+						Expr1: 'course',
+						entity: 1484792,
+						schoolcode: 95100040,
+						RowNumber: 2
+					}
+				]
+			});
+
+			return;
+		}
+
 		if (global.adress == 'undefined') {
 			GLOBAL.main.setState({ isModalVisible: true });
 		}
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
 		/* #endregion */
 
@@ -202,6 +304,8 @@ class bankfile extends Component {
 			this.state.searchText;
 		console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
+			//////console.log(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -218,14 +322,16 @@ class bankfile extends Component {
 				// this.setState({
 				// 	data: []
 				// });
-				this.setState({
-					data: page === 1 ? retJson : [ ...this.state.data, ...retJson ],
-					//data: retJson,
-					dataLoading: false,
 
-					isRefreshing: false,
-					loading: false
-				});
+				if (global.lang == 'fa')
+					this.setState({
+						data: page === 1 ? retJson : [ ...this.state.data, ...retJson ],
+						//data: retJson,
+						dataLoading: false,
+
+						isRefreshing: false,
+						loading: false
+					});
 			}
 		} catch (e) {
 			console.log('err');
@@ -240,7 +346,7 @@ class bankfile extends Component {
 	};
 	_renderFooter = () => {
 		if (!this.state.isLoading) return null;
-		return <ActivityIndicator style={{ color: 'red' }} size="large" />;
+		return <ActivityIndicator size="small" color="#000" />;
 	};
 	_handleLoadMore = () => {
 		if (!this.state.isLoading) {
@@ -297,7 +403,7 @@ class bankfile extends Component {
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
+			this.setState({ issnackin: true });
 			return;
 		}
 		/* #endregion */
@@ -305,9 +411,10 @@ class bankfile extends Component {
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/delFile?fId=' + eid + '&p=' + param; //+
 
-		console.log(uurl);
+		////////console.log(uurl);
 
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -370,12 +477,21 @@ class bankfile extends Component {
 		return (
 			<View style={{ backgroundColor: 'white' }}>
 				<FlatList
+					//	inverted={false}
 					showsHorizontalScrollIndicator={false}
 					extraData={this.state.selectedItem}
 					data={this.state.cat}
-					keyExtractor={(item) => item.id.toString()}
+					keyExtractor={(item) => item.id.toString() + '-' + item.ClassCode}
 					horizontal
-					style={{ paddingBottom: 4, borderWidth: 0, marginTop: 4, marginRight: 4, marginLeft: 4 }}
+					contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-start' }}
+					style={{
+						flexDirection: 'row-reverse',
+						paddingBottom: 4,
+						borderWidth: 0,
+						marginTop: 4,
+						marginRight: 4,
+						marginLeft: 4
+					}}
 					renderItem={({ item, index }) => {
 						return (
 							<TouchableOpacity
@@ -383,12 +499,12 @@ class bankfile extends Component {
 								activeOpacity={0.6}
 								onPress={() => {
 									//console.log(item.id);
-									this.onPressHandler(item.id);
+									this.onPressHandler(item.id + '-' + item.ClassCode);
 								}}
 							>
 								<View
 									style={
-										this.state.selectedItem === item.id ? (
+										this.state.selectedItem === item.id + '-' + item.ClassCode.toString() ? (
 											{
 												flexDirection: 'row',
 												backgroundColor: colorhead,
@@ -424,7 +540,8 @@ class bankfile extends Component {
 									<View>
 										<Text
 											style={
-												this.state.selectedItem === item.id ? (
+												this.state.selectedItem ===
+												item.id + '-' + item.ClassCode.toString() ? (
 													{
 														color: 'white',
 														fontSize: 12,
@@ -451,7 +568,8 @@ class bankfile extends Component {
 										</Text>
 										<Text
 											style={
-												this.state.selectedItem === item.id ? (
+												this.state.selectedItem ===
+												item.id.toString() + '-' + item.ClassCode.toString() ? (
 													{
 														color: 'white',
 														fontSize: 10,
@@ -476,10 +594,10 @@ class bankfile extends Component {
 												)
 											}
 										>
-											{toFarsi(item.teachname)}
+											{toFarsi(item.classname)}
 										</Text>
 									</View>
-									{this.state.selectedItem !== item.id ||
+									{this.state.selectedItem !== item.id.toString() + '-' + item.ClassCode.toString() ||
 										(this.state.dataLoading && <ActivityIndicator color={'white'} />)}
 								</View>
 							</TouchableOpacity>
@@ -501,7 +619,7 @@ class bankfile extends Component {
 						borderTopRightRadius: 24,
 						borderTopLeftRadius: 24
 					}}
-					placeholder="جستجو"
+					placeholder={i18n.t('frmsrchCaption')}
 					lightTheme
 					showLoading={this.state.loading}
 					//round
@@ -566,7 +684,9 @@ class bankfile extends Component {
 								}}
 							>
 								{!this.state.dataLoading && (
-									<Text style={[ defaultStyles.lbl14, { color: colorhead } ]}> لیست خالی است</Text>
+									<Text style={[ defaultStyles.lbl14, { color: colorhead } ]}>
+										{global.lang == 'fa' ? 'لیست خالی است' : 'List is empty'}
+									</Text>
 								)}
 							</View>
 						</View>
@@ -604,7 +724,7 @@ class bankfile extends Component {
 									<View style={{ borderWidth: 0, flex: 1, flexDirection: 'row', marginStart: 0 }}>
 										<View style={styles.view1}>
 											<View style={styles.view2}>
-												<View style={[ styles.view3, { flex: 1 } ]}>
+												<View style={[ styles.view3, { width: 80 } ]}>
 													{/* <IconAnt
 														name={iconname_}
 														style={styles.image}
@@ -647,7 +767,7 @@ class bankfile extends Component {
 														/>
 													)}
 												</View>
-												<View style={[ styles.view4, { flex: 4 } ]}>
+												<View style={[ styles.view4, {} ]}>
 													<Text style={[ styles.aztitle, { color: 'black' } ]}>
 														{item.name}
 													</Text>
@@ -754,9 +874,9 @@ class bankfile extends Component {
 				/>
 
 				{(true && global.ttype == 'administrator') || global.ttype == 'teacher' ? (
-					<ActionButton useNativeDriver position="left" buttonColor="rgba(231,76,60,1)">
+					<ActionButton useNativeDriver position="left" buttonColor="#c48600">
 						<ActionButton.Item
-							buttonColor="#9b59b6"
+							buttonColor="#c48600"
 							title=" افزودن فایل "
 							textStyle={{ fontFamily: 'iransans' }}
 							onPress={() => {
@@ -780,7 +900,7 @@ class bankfile extends Component {
 					</ActionButton>
 				) : null}
 
-				<Modal.BottomModal
+				{/* <Modal.BottomModal
 					visible={this.state.bottomModalAndTitle}
 					onTouchOutside={() => this.setState({ bottomModalAndTitle: false })}
 					height={0.4}
@@ -839,7 +959,7 @@ class bankfile extends Component {
 						/>
 					</ModalContent>
 				</Modal.BottomModal>
-
+ */}
 				{global.ttype == 'administrator' && (global.ttype == 'teacher' && true) ? (
 					<ActionButton position="left" buttonColor="rgba(231,76,60,1)">
 						<ActionButton.Item
@@ -858,6 +978,28 @@ class bankfile extends Component {
 						</ActionButton.Item>
 					</ActionButton>
 				) : null}
+
+				<Snackbar
+					visible={this.state.issnackin}
+					onDismiss={() => this.setState({ issnackin: false })}
+					style={{ backgroundColor: 'red', fontFamily: 'iransans' }}
+					wrapperStyle={{ fontFamily: 'iransans' }}
+					action={{
+						label: 'بستن',
+						onPress: () => {
+							this.setState({ issnackin: false });
+							this.setState(
+								{
+									//  loading: false,
+									//  save_loading: false
+								}
+							);
+							//this.props.navigation.goBack(null);
+						}
+					}}
+				>
+					{'لطفا دسترسی به اینترنت را چک کنید'}
+				</Snackbar>
 			</View>
 		);
 	}
@@ -913,8 +1055,8 @@ const styles = StyleSheet.create({
 		borderTopStartRadius: 13,
 		borderBottomStartRadius: 13,
 
-		justifyContent: 'center',
-		flex: 0.6
+		justifyContent: 'center'
+		//flex: 0.6
 	},
 	view2: {
 		flexDirection: 'row',
@@ -973,7 +1115,7 @@ const styles = StyleSheet.create({
 		width: '100%',
 		alignSelf: 'center',
 		fontFamily: 'iransans',
-		textAlign: 'left',
+		textAlign: 'center',
 		borderWidth: 0,
 		fontSize: 14,
 		color: 'white'

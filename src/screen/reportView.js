@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+import { userInfo, toFarsi, encrypt, getHttpAdress } from '../components/DB';
 import Modal from 'react-native-modalbox';
 import Loading from '../components/loading';
 import NetInfo from '@react-native-community/netinfo';
@@ -277,7 +277,7 @@ class reportView extends React.PureComponent {
 				headerBackTitle: 'Home'
 			},
 			headerTitleStyle: {
-				fontFamily: 'iransansbold'
+				fontFamily: 'iransans'
 				//color: this.state.colorhead
 			}
 		};
@@ -593,8 +593,9 @@ class reportView extends React.PureComponent {
 			'&g=' +
 			this.state.selectedItem +
 			'&mode=list';
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -659,6 +660,7 @@ class reportView extends React.PureComponent {
 			this.groupcode;
 		console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -742,8 +744,9 @@ class reportView extends React.PureComponent {
 			this.state.selectedItem +
 			'&ext=' +
 			idaz;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -991,7 +994,9 @@ class reportView extends React.PureComponent {
 											</Text>
 
 											{this.state.selectedItem !== item.id ||
-												(this.state.dataLoading && <ActivityIndicator color="white" />)}
+												(this.state.dataLoading && (
+													<ActivityIndicator size="small" color="#000" color="white" />
+												))}
 										</View>
 									</TouchableOpacity>
 								);

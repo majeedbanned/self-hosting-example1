@@ -107,7 +107,7 @@ export default class App extends React.Component {
 
 	render() {
 		let openImagePickerAsync = async () => {
-			let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
+			let permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 
 			if (permissionResult.granted === false) {
 				alert('Permission to access camera roll is required!');

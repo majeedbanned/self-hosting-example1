@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { View, ScrollView, StyleSheet, Image, FlatList, TouchableOpacity, Text, RefreshControl } from 'react-native';
 import ActionBarImage from '../components/ActionBarImage';
-import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+import { userInfo, toFarsi,encrypt, getHttpAdress } from '../components/DB';
 import defaultStyles from '../config/styles';
 import Menu from '../screen/menu';
 import GLOBAL from './global';

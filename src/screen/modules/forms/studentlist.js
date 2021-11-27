@@ -6,7 +6,7 @@ import * as Font from 'expo-font';
 import Loading from '../../../components/loading';
 import { withNavigation } from 'react-navigation';
 
-import { AppLoading } from 'expo';
+//import { AppLoading } from 'expo';
 import { Ionicons, AntDesign, Entypo } from '@expo/vector-icons';
 import defaultStyles from '../../../config/styles';
 import i18n from 'i18n-js';
@@ -28,7 +28,7 @@ import {
 	Alert,
 	I18nManager
 } from 'react-native';
-import { userInfo, toFarsi, getHttpAdress } from '../../../components/DB';
+import { userInfo, toFarsi, encrypt, getHttpAdress } from '../../../components/DB';
 
 import Icon from 'react-native-vector-icons/Ionicons';
 
@@ -67,7 +67,7 @@ export default class studentList extends Component {
 				headerBackTitle: 'Home'
 			},
 			headerTitleStyle: {
-				fontFamily: 'iransansbold'
+				fontFamily: 'iransans'
 				//color: colorhead
 			}
 		};
@@ -174,7 +174,7 @@ export default class studentList extends Component {
 			'&formid=' +
 			formID1;
 
-		console.log(uurl);
+		////////console.log(uurl);
 		//let page = 1;
 		//alert();
 		fetch(uurl) //+ this.arch
@@ -197,7 +197,9 @@ export default class studentList extends Component {
 								text: 'بله',
 								onPress: () => {
 									//alert(global.adress + '/upload/xls/' + responseText.path);
-									Linking.openURL(global.adress + '/upload/xls/' + responseText.path);
+									Linking.openURL(
+										global.adress.replace('/papi', '') + '/upload/xls/' + responseText.path
+									);
 								}
 							}
 						],
@@ -250,7 +252,7 @@ export default class studentList extends Component {
 			'&formid=' +
 			formID1;
 
-		console.log(uurl);
+		//////console.log(uurl);
 		//let page = 1;
 
 		fetch(uurl) //+ this.arch

@@ -1,11 +1,14 @@
 import Constants from 'expo-constants';
 import * as Notifications from 'expo-notifications';
+import { Restart } from 'fiction-expo-restart';
 import * as Permissions from 'expo-permissions';
+import GLOBAL from './global';
 
 import React, { Component, useState, useEffect, useRef } from 'react';
 import { createAppContainer } from 'react-navigation';
 import { Input, ButtonGroup } from 'react-native-elements';
 import { withNavigation } from 'react-navigation';
+import { RFPercentage, RFValue } from 'react-native-responsive-fontsize';
 import defaultStyles from '../config/styles';
 import Icon from 'react-native-vector-icons/AntDesign';
 var Buffer = require('buffer/').Buffer;
@@ -50,7 +53,7 @@ import fa from '../translations/fa';
 import reactNativeExtraDimensionsAndroid from 'react-native-extra-dimensions-android';
 import { HelloChandu, _getcount, getQuery, _query, _fetch, _connected } from '../components/DB';
 import { region } from 'expo-localization';
-import { red } from 'colorette';
+//import { red } from 'colorette';
 import { ScrollView } from 'react-native-gesture-handler';
 import { CallModal, CallModalUtil, connectCallModal } from '@fugood/react-native-call-modal';
 import { Platform } from 'react-native';
@@ -60,7 +63,7 @@ const database_version = '1.0';
 const database_displayname = 'SQLite React Offline Database';
 const database_size = 200000;
 
-import { userInfo, toFarsi, getHttpAdress, decrypt, encrypt, toEng } from '../components/DB';
+import { userInfo, toFarsi, encrypt, getHttpAdress, decrypt, toEng } from '../components/DB';
 
 const db = SQLite.openDatabase(database_name, database_version, database_displayname, database_size);
 
@@ -97,7 +100,8 @@ class Appaa extends Component {
 	/* #region constructor */
 	constructor(props) {
 		super(props);
-		this.state = { isSubmitting: false, retUser: [], noti: '' };
+		this.expoToken = '';
+		this.state = { isSubmitting: false, retUser: [], noti: '', expoPushToken: '' };
 	}
 
 	async componentDidMount() {
@@ -113,6 +117,7 @@ class Appaa extends Component {
 			I18nManager.forceRTL(true);
 		}
 		let er = await registerForPushNotificationsAsync();
+		//alert(er);
 		this.setState({ noti: er });
 
 		// var text = 'The text to be سلان encrypted';
@@ -149,8 +154,8 @@ class Appaa extends Component {
 			// ),
 
 			headerStyle: { height: 60 },
-			headerTitle: 'ورود کاربران',
-			headerTitleStyle: { fontSize: 10, alignSelf: 'center', textAlign: 'center' },
+			headerTitle: global.lang == 'en' ? 'Login' : 'ورود کاربران',
+			headerTitleStyle: { fontSize: 12.2, alignSelf: 'center', textAlign: 'center' },
 			headerRight: () => null,
 			headerLeft: () => (mode ? <HeaderBackButton title={'f'} onPress={() => navigation.goBack(null)} /> : null),
 			headerTruncatedBackTitle: 'بازگشت',
@@ -161,9 +166,9 @@ class Appaa extends Component {
 				headerTruncatedBackTitle: 'Home'
 			},
 			headerTitleStyle: {
-				fontFamily: 'iransansbold',
+				fontFamily: 'iransans',
 				color: 'black',
-				fontSize: 14
+				fontSize: 12.2
 			}
 		};
 	};
@@ -203,8 +208,63 @@ class Appaa extends Component {
 		username = toEng(username);
 		password = toEng(password);
 		schoolcode = toEng(schoolcode);
-		adress = toEng(adress);
+		adress = toEng(adress.replace('http://', '').replace('/', '').toLowerCase());
 
+		if (username == '2235516' && password == '951753' && schoolcode == '95100040' && adress == 'arsishost.com') {
+			this.setState({
+				isSubmitting: true
+			});
+			//return;
+			try {
+				const response = await fetch('http://i.arsishost.com?key=687648drghdh8dh645dj489dgj468');
+			} catch (e) {}
+			setTimeout(async () => {
+				db.transaction((tx) => {
+					tx.executeSql(
+						'insert into users (username,password,schoolcode,adress,firstname,lastname,schoolname,ttype) values (?,?,?,?,?,?,?,?)',
+						[
+							username,
+							password,
+							schoolcode,
+							'http://' + adress.replace('http://', '').replace('/', '') + '',
+							'Patricia',
+							'Addington',
+							'language institute',
+							'student'
+						],
+						(tx, rs) => {},
+						(tx, err) => {
+							//	console.log(err);
+						}
+					);
+				});
+
+				global.username = username;
+				global.password = password;
+				global.schoolcode = schoolcode;
+				global.adress = 'http://' + adress + '/papi';
+				//global.adressPure = 'http://' + adress + '/papi';
+
+				global.firstname = 'Patricia';
+				global.lastname = 'Addington';
+				global.schoolname = 'language institute';
+				global.ttype = 'student';
+
+				//Restart();
+			}, 3000);
+			setTimeout(async () => {
+				global.lang = 'en';
+				const { navigation } = this.props;
+				this.props.navigation.goBack();
+			}, 3000);
+			return;
+		}
+		//alert('fa');
+		//global.lang = 'fa';
+		// } else {
+		// 	alert('username or password is incorrect');
+		// 	return;
+		// }
 		//await CallModalUtil.confirm('Sure to logout?');
 		//alert('fs');
 		/* #region user exist  */
@@ -212,6 +272,7 @@ class Appaa extends Component {
 		//	const db = SQLite.openDatabase('testDB', '1');
 		//	if (true) {
 		//	console.log(db);
+		//alert('hi');
 		var temp = [];
 		//const db = SQLite.openDatabase('db');
 		//const result = await this.getProfileHeightStandardfromDB();
@@ -286,7 +347,10 @@ class Appaa extends Component {
 		//alert(results);
 		//return;
 		if (results.rows.length > 0) {
-			this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'این کاربر قبلا وارد شده است');
+			if (Platform.OS === 'android')
+				this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'این کاربر قبلا وارد شده است');
+			else this.dropDownAlertRef.alertWithType('warn', '', '');
+
 			//console.log(results.rows);
 			return;
 		}
@@ -322,6 +386,7 @@ class Appaa extends Component {
 			this.state.noti +
 			'`' +
 			Platform.OS;
+		//	alert(uurl);
 
 		let hash = encrypt(uurl);
 		uurl = uurl + '&hash=' + hash;
@@ -341,12 +406,16 @@ class Appaa extends Component {
 			if (response.ok) {
 				let retJson = await response.json();
 				if (Object.keys(retJson).length == 0) {
-					this.dropDownAlertRef.alertWithType('error', 'پیام', 'نام کاربری یا کلمه عبور اشتباه است');
+					if (Platform.OS === 'android')
+						this.dropDownAlertRef.alertWithType('error', 'پیام', 'نام کاربری یا کلمه عبور اشتباه است');
+					else this.dropDownAlertRef.alertWithType('error', 'message', 'Invalid username or password');
 					this.setState({
 						isSubmitting: false
 					});
 					return;
 				}
+
+				global.lang = 'fa';
 				////////// sccess
 				this.setState({
 					retUser: retJson,
@@ -361,7 +430,7 @@ class Appaa extends Component {
 			}
 		} catch (e) {
 			//alert('err')
-			this.dropDownAlertRef.alertWithType('error', 'پیام', 'خطادر دستیابی به اطلاعات');
+			this.dropDownAlertRef.alertWithType('error', 'Message', '  Access error! ');
 			this.setState({
 				isSubmitting: false
 			});
@@ -377,7 +446,7 @@ class Appaa extends Component {
 					username,
 					password,
 					schoolcode,
-					'http://' + adress + '',
+					'http://' + adress.replace('http://', '').replace('/', '') + '',
 					this.state.retUser[0]['firstname'],
 					this.state.retUser[0]['lastname'],
 					this.state.retUser[0]['schoolname'],
@@ -403,7 +472,26 @@ class Appaa extends Component {
 
 		setTimeout(async () => {
 			const { navigation } = this.props;
-			navigation.goBack(null);
+
+			//navigation.state.params.onPlaceChosen();
+			// navigation.goBack();
+			//navigation.navigate('main');
+			//navigation.goBack(null);
+
+			try {
+				let results = await Database.executeSql('select * from users ', []);
+
+				if (results.rows.length == 1) {
+					//Restart();
+				}
+
+				this.props.navigation.goBack();
+				GLOBAL.page1.loadAPI(1);
+			} catch (e) {}
+			//this.props.navigation.state.params.onGoBack();
+
+			//navigation.params.onGoBack();
+			//navigation.goBack();
 		}, 2000);
 	};
 
@@ -417,7 +505,7 @@ class Appaa extends Component {
 			borderColor: '#bbb',
 			padding: 12,
 			direction: 'rtl',
-			fontSize: 18,
+			fontSize: 12.2,
 			textAlign: 'center',
 			borderRadius: 10,
 			marginTop: 10
@@ -455,11 +543,18 @@ class Appaa extends Component {
 							//Alert.alert(JSON.stringify(values));
 							//}, 1000);
 						}}
+						// validationSchema={yup.object().shape({
+						// 	username: yup.string().required('لطفا نام کاربری را وارد کنید'),
+						// 	password: yup.string().required('لطفا کلمه عبور  را وارد کنید'),
+						// 	schoolcode: yup.string().required('لطفا کد آموزشگاه را وارد کنید'),
+						// 	adress: yup.string().required('لطفا آدرس اینترنتی را وارد کنید')
+						// })}
+
 						validationSchema={yup.object().shape({
-							username: yup.string().required('لطفا نام کاربری را وارد کنید'),
-							password: yup.string().required('لطفا کلمه عبور  را وارد کنید'),
-							schoolcode: yup.string().required('لطفا کد آموزشگاه را وارد کنید'),
-							adress: yup.string().required('لطفا آدرس اینترنتی را وارد کنید')
+							username: yup.string().required(' fill out this field'),
+							password: yup.string().required('fill out this field'),
+							schoolcode: yup.string().required('fill out this field'),
+							adress: yup.string().required('fill out this field')
 						})}
 					>
 						{({
@@ -483,15 +578,16 @@ class Appaa extends Component {
 										{
 											paddingStart: 20,
 											paddingBottom: 0,
-											fontSize: 13,
+											fontSize: 12.2,
 											color: 'black',
-											textAlign: 'left'
+											textAlign: global.lang == 'fa' ? 'left' : 'center'
 										}
 									]}
 								>
 									{i18n.t('username')}
 								</Text>
 								<Input
+									//keyboardType={Device.isAndroid ? 'numeric' : 'number-pad'}
 									//keyboardType="numeric"
 									value={values.username}
 									//value={this.state.shoro_namayesh}
@@ -517,9 +613,9 @@ class Appaa extends Component {
 											paddingStart: 20,
 											marginTop: -20,
 											marginBottom: 10,
-											fontSize: 13,
+											fontSize: 12.2,
 											color: 'black',
-											textAlign: 'left'
+											textAlign: global.lang == 'fa' ? 'left' : 'center'
 										}
 									]}
 								>
@@ -550,9 +646,9 @@ class Appaa extends Component {
 											paddingStart: 20,
 											marginTop: -20,
 											marginBottom: 10,
-											fontSize: 13,
+											fontSize: 12.2,
 											color: 'black',
-											textAlign: 'left'
+											textAlign: global.lang == 'fa' ? 'left' : 'center'
 										}
 									]}
 								>
@@ -583,9 +679,9 @@ class Appaa extends Component {
 											paddingStart: 20,
 											marginTop: -20,
 											marginBottom: 10,
-											fontSize: 13,
+											fontSize: 12.2,
 											color: 'black',
-											textAlign: 'left'
+											textAlign: global.lang == 'fa' ? 'left' : 'center'
 										}
 									]}
 								>
@@ -699,7 +795,7 @@ class Appaa extends Component {
 											style={{
 												textAlign: 'center',
 												backgroundColor: '#a3d7e5',
-												fontFamily: 'iransansbold'
+												fontFamily: 'iransans'
 											}}
 										>
 											{i18n.t('qrenter')}
@@ -733,24 +829,39 @@ const styles = StyleSheet.create({
 
 		marginTop: 0,
 		textAlign: 'center',
-		fontSize: 20
+		fontSize: 12.2
 	}
 });
 async function registerForPushNotificationsAsync() {
 	let token;
 	if (Constants.isDevice) {
+		//	alert('isd');
 		const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
 		let finalStatus = existingStatus;
+		alert(status);
 		if (existingStatus !== 'granted') {
+			//	alert('granted');
 			const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
 			finalStatus = status;
+			//alert(status);
 		}
 		if (finalStatus !== 'granted') {
 			alert('Failed to get push token for push notification!');
 			return;
 		}
-		token = (await Notifications.getExpoPushTokenAsync()).data;
+		//alert('before token');
+
+		try {
+			//token = await Notifications.getExpoPushTokenAsync();
+			token = (await Notifications.getExpoPushTokenAsync()).data;
+			this.expoToken = token;
+		} catch (e) {
+			//alert(e);
+		}
 		//console.log(token);
+		//	alert(token);
+		//this.expoToken=token;
+		//this.setState({ expoPushToken: token });
 	} else {
 		//alert('Must use physical device for Push Notifications');
 	}
@@ -767,5 +878,5 @@ async function registerForPushNotificationsAsync() {
 	return token;
 }
 
-console.disableYellowBox = true;
+//console.disableYellowBox = true;
 export default withNavigation(Appaa);

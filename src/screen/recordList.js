@@ -24,7 +24,7 @@ import Modal, {
 	SlideAnimation,
 	ScaleAnimation
 } from 'react-native-modals';
-import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+import { userInfo, toFarsi, encrypt, getHttpAdress } from '../components/DB';
 import { FlatList, ScrollView, Image, View, Text, RefreshControl, TouchableOpacity } from 'react-native';
 import GLOBAL from './global';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -71,7 +71,7 @@ class recordList extends Component {
 				headerBackTitle: 'Home'
 			},
 			headerTitleStyle: {
-				fontFamily: 'iransansbold',
+				fontFamily: 'iransans',
 				color: colorhead
 			}
 		};
@@ -101,8 +101,9 @@ class recordList extends Component {
 		let param = userInfo();
 		let uurl =
 			global.adress + '/pApi.asmx/perVclassID?p=' + param + '&id=' + id + '&yn=' + yn + '&sco_id=' + sco_id;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -169,8 +170,9 @@ class recordList extends Component {
 			'&g=' +
 			this.state.selectedItem +
 			'&mode=list';
-		//console.log(uurl);
+		//////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -212,8 +214,9 @@ class recordList extends Component {
 		let param = userInfo();
 		let uurl =
 			global.adress + '/pApi.asmx/getAdobeRec?id=' + webinarID + '&p=' + param + '&g=' + this.state.selectedItem;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -565,7 +568,7 @@ class recordList extends Component {
 					</ActionButton>
 				) : null}
 
-				<Modal.BottomModal
+				{/* <Modal.BottomModal
 					visible={this.state.bottomModalAndTitle}
 					onTouchOutside={() => this.setState({ bottomModalAndTitle: false })}
 					height={0.4}
@@ -624,7 +627,7 @@ class recordList extends Component {
 						/>
 					</ModalContent>
 				</Modal.BottomModal>
-
+ */}
 				<Snackbar
 					visible={this.state.issnack}
 					onDismiss={() => this.setState({ issnack: false })}

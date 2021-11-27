@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+import { userInfo, toFarsi,encrypt, getHttpAdress } from '../components/DB';
 import Modal from 'react-native-modalbox';
 import Loading from '../components/loading';
 import NetInfo from '@react-native-community/netinfo';
@@ -278,7 +278,7 @@ class accounting extends React.PureComponent {
 				headerBackTitle: 'Home'
 			},
 			headerTitleStyle: {
-				fontFamily: 'iransansbold'
+				fontFamily: 'iransans'
 				//color: this.state.colorhead
 			}
 		};
@@ -584,7 +584,7 @@ class accounting extends React.PureComponent {
 		let param = userInfo();
 		let uurl =
 			global.adress + '/pApi.asmx/getAccountingCat?id=' + '1' + '&p=' + param + '&g=' + this.state.selectedItem;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -644,7 +644,7 @@ class accounting extends React.PureComponent {
 			param +
 			'&g=' +
 			this.state.selectedItem;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -729,7 +729,7 @@ class accounting extends React.PureComponent {
 			this.state.selectedItem +
 			'&ext=' +
 			idaz;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -859,15 +859,15 @@ class accounting extends React.PureComponent {
 		}
 	};
 	onClose() {
-		console.log('Modal just closed');
+		//console.log('Modal just closed');
 	}
 
 	onOpen() {
-		console.log('Modal just opened');
+	//	console.log('Modal just opened');
 	}
 
 	onClosingState(state) {
-		console.log('the open/close of the swipeToClose just changed');
+		//console.log('the open/close of the swipeToClose just changed');
 	}
 	onPressHandler(id) {
 		this.setState({ selectedItem: id, dataLoading: true });

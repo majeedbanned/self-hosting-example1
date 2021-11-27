@@ -377,7 +377,7 @@ class Sheet extends React.Component {
 					//onEndReached={this.handleScrollEndReached}
 					onEndReachedThreshold={0.005}
 				/>
-				{this.state.loading && <ActivityIndicator />}
+				{this.state.loading && <ActivityIndicator size="small" color="#000"/>}
 			</View>
 		);
 	}

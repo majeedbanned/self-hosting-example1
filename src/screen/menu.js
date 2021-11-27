@@ -2,8 +2,9 @@ import React, { Component } from 'react';
 import { ScrollView, StyleSheet, View, Text, ActivityIndicator, RefreshControl, TouchableOpacity } from 'react-native';
 import { FlatGrid } from 'react-native-super-grid';
 import { useFonts } from '@use-expo/font';
+import { RFPercentage, RFValue } from 'react-native-responsive-fontsize';
 import Loading from '../components/loading';
-import { YellowBox } from 'react-native';
+import { LogBox } from 'react-native';
 import * as Font from 'expo-font';
 import { withNavigation } from 'react-navigation';
 import Icon from 'react-native-vector-icons/AntDesign';
@@ -14,8 +15,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { toFarsi } from '../components/DB';
 //let items = [];
 
-YellowBox.ignoreWarnings([
-	'VirtualizedLists should never be nested inside plain' // TODO: Remove when fixed
+LogBox.ignoreLogs([
+	'VirtualizedLists should never be nested inside plain',
+	'Your project is accessing the following APIs from a deprecated global',
+	'Warning: componentWillReceiveProps has been renamed, and is not recommended',
+	'Warning: componentWillMount has been renamed, and is not recommended',
+	'Warning: Failed prop type: Invalid prop `items` of type `array` supplied ',
+	'Warning: Failed prop type: Invalid prop `reservations` of type `array`',
+	'eprecation in ' // TODO: Remove when fixed
 ]);
 class menu extends Component {
 	state = {
@@ -26,7 +33,7 @@ class menu extends Component {
 	async componentDidMount() {
 		// await Font.loadAsync({
 		// 	iransans: require('./../../assets/IRANSansMobile.ttf'),
-		// 	iransansbold: require('./../../assets/IRANSansMobile_Bold.ttf')
+		// 	iransans: require('./../../assets/IRANSansMobile_Bold.ttf')
 		// });
 		// useFonts.loadAsync({
 		// 	'iransans': require('./../../assets/IRANSansMobile.ttf'),
@@ -42,7 +49,7 @@ class menu extends Component {
 	};
 	loadAPI = () => {
 		this.setState({ isLoading: true });
-		console.log('fsafsfsafsfsdfs');
+		//console.log('fsafsfsafsfsdfs');
 		fetch('http://192.168.1.15:8080/papi.asmx/mobileMainScreen?test=d')
 			.then((response) => response.json())
 			.then((responseText) => {
@@ -96,8 +103,10 @@ class menu extends Component {
 			navigate('bankfile');
 		} else if (item.id == 17) {
 			navigate('formEntry');
+		} else if (item.id == 18) {
+			navigate('cal');
 		}
-
+		//alert(item.id);
 		//navigate('test');
 		//console.log(item.code);
 
@@ -148,7 +157,7 @@ class menu extends Component {
 									borderWidth: 0
 								}}
 							>
-								<ActivityIndicator color={'red'} style={{}} />
+								<ActivityIndicator size="small" color="#000" style={{}} />
 							</View>
 						)}
 
@@ -171,7 +180,8 @@ class menu extends Component {
 										style={[
 											styles.itemContainer,
 											{
-												backgroundColor: '#fff'
+												backgroundColor: '#fff',
+												width: global.lang == 'fa' ? 85 : 120
 											}
 										]}
 									>
@@ -266,14 +276,14 @@ const styles = StyleSheet.create({
 		padding: 0,
 		margin: 0,
 		height: 103,
-		width: 85,
+		// width: 85,
 		borderWidth: 0,
 		borderColor: 'red'
 	},
 	itemName: {
 		paddingTop: 0,
 		fontFamily: 'iransans',
-		fontSize: 13,
+		fontSize: 12.2,
 		color: '#000',
 		fontWeight: '400'
 	},

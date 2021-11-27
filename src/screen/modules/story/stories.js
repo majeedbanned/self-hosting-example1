@@ -2,19 +2,21 @@ import React, { Component } from 'react';
 import { withNavigation } from 'react-navigation';
 import recyclerViewList1 from './../../../screen/recyclerViewList1';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { YellowBox } from 'react-native';
+import i18n from 'i18n-js';
 
+//import { YellowBox } from 'react-native';
+import { RFPercentage, RFValue } from 'react-native-responsive-fontsize';
 import { View, ScrollView, StyleSheet, Image, FlatList, TouchableOpacity, Text, RefreshControl } from 'react-native';
 import ActionBarImage from '../../../components/ActionBarImage';
-import { userInfo, toFarsi, getHttpAdress } from '../../../components/DB';
+import { userInfo, toFarsi, encrypt, getHttpAdress } from '../../../components/DB';
 import defaultStyles from '../../../config/styles';
 import Menu from '../../menu';
 import GLOBAL from '../../global';
 import { I18nManager, AppRegistry } from 'react-native';
 
-YellowBox.ignoreWarnings([
-	'VirtualizedLists should never be nested inside plain' // TODO: Remove when fixed
-]);
+// YellowBox.ignoreWarnings([
+// 	'VirtualizedLists should never be nested inside plain' // TODO: Remove when fixed
+// ]);
 
 // I18nManager.allowRTL(true);
 // I18nManager.forceRTL(true);
@@ -60,16 +62,27 @@ const stories = ({ Navigation, Items, caption, ccolor, ...rest }) => (
 					</View>
 
 					<Text numberOfLines={1} style={[ styles.st3 ]}>
-						جدید
+						{global.lang == 'fa' ? 'جدید' : 'New'}
 					</Text>
 				</View>
 			</View>
 		)}
 		<FlatList
-			inverted={Platform.OS === 'ios' ? false : true}
+			contentContainerStyle={{ flexGrow: 1 }}
+			persistentScrollbar={false}
+			showsHorizontalScrollIndicator={false}
+			//	inverted={Platform.OS === 'ios' ? false : true}
 			keyExtractor={(item, index) => String(index)}
 			data={Items}
 			horizontal
+			style={{
+				//flexDirection: 'column',
+				paddingBottom: 4,
+				borderWidth: 0,
+				marginTop: 4,
+				marginRight: 4,
+				marginLeft: 4
+			}}
 			// keyExtractor={(item) => {
 			// 	return item.id;
 			// }}
@@ -79,6 +92,7 @@ const stories = ({ Navigation, Items, caption, ccolor, ...rest }) => (
 					<View
 						style={[
 							{
+								//flexDirection: 'row-reverse',
 								borderWidth: 0,
 								justifyContent: 'center',
 								alignItems: 'center',
@@ -95,7 +109,7 @@ const stories = ({ Navigation, Items, caption, ccolor, ...rest }) => (
 									borderRadius: 45,
 									marginRight: 0,
 
-									backgroundColor: ccolor
+									backgroundColor: item.image != '' ? ccolor : '#eee'
 								}
 							]}
 						>
@@ -104,8 +118,11 @@ const stories = ({ Navigation, Items, caption, ccolor, ...rest }) => (
 								onPress={() => {
 									global.storyID = item.id;
 									const { navigate } = Navigation;
-									if (item.image != '') navigate('recyclerViewList1', { storyID: item.id });
+									if (item.image != '') {
+										//	alert(item.image);
 
+										navigate('recyclerViewList1', { storyID: item.id });
+									}
 									//Navigation.navigate('recyclerViewList1');
 								}}
 							>
@@ -119,7 +136,12 @@ const stories = ({ Navigation, Items, caption, ccolor, ...rest }) => (
 											margin: 2
 										}
 									]}
-									source={{ uri: getHttpAdress() + 'media/' + item.image }}
+									source={{
+										uri:
+											global.lang == 'fa'
+												? getHttpAdress() + 'media/' + item.image
+												: 'http://ios.farsamooz.ir/' + item.image
+									}}
 								/>
 							</TouchableOpacity>
 						</View>
@@ -133,7 +155,7 @@ const stories = ({ Navigation, Items, caption, ccolor, ...rest }) => (
 									width: 80,
 									textAlign: 'center',
 									fontFamily: 'iransans',
-									fontSize: 12
+									fontSize: 11
 								}
 							]}
 						>

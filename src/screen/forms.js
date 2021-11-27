@@ -2,35 +2,39 @@ import React, { Component } from 'react';
 import { StyleSheet, Linking, ActivityIndicator, SafeAreaView, Alert } from 'react-native';
 import ActionButton from 'react-native-action-button';
 import defaultStyles from '../config/styles';
+import { RFPercentage, RFValue } from 'react-native-responsive-fontsize';
+import { Snackbar } from 'react-native-paper';
 import { Menu, MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu';
 
 import Loading from '../components/loading';
-import DropdownAlert from 'react-native-dropdownalert';
+// import DropdownAlert from 'react-native-dropdownalert';
 import { withNavigation } from 'react-navigation';
-import { FlatGrid } from 'react-native-super-grid';
+// import { FlatGrid } from 'react-native-super-grid';
 import Icon from 'react-native-vector-icons/Ionicons';
 import IconAnt from 'react-native-vector-icons/AntDesign';
+//import IconAnt from 'react-native-vector-icons/Ionicons';
+
 import i18n from 'i18n-js';
 import Mstyles from '../components/styles';
-import FormButton from '../component/FormButton';
-import ExamAdd from './examAdd';
-import { AntDesign, Entypo } from '@expo/vector-icons';
+// import FormButton from '../component/FormButton';
+// import ExamAdd from './examAdd';
+// import { AntDesign, Entypo } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
-import SelectUser from './selectUser';
+// import SelectUser from './selectUser';
 import NetInfo from '@react-native-community/netinfo';
-import Modal, {
-	ModalTitle,
-	ModalContent,
-	ModalFooter,
-	ModalButton,
-	SlideAnimation,
-	ScaleAnimation
-} from 'react-native-modals';
-import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+// import Modal, {
+// 	ModalTitle,
+// 	ModalContent,
+// 	ModalFooter,
+// 	ModalButton,
+// 	SlideAnimation,
+// 	ScaleAnimation
+// } from 'react-native-modals';
+import { userInfo, toFarsi, encrypt, getHttpAdress } from '../components/DB';
 import { FlatList, ScrollView, Image, View, Text, RefreshControl, TouchableOpacity } from 'react-native';
 import GLOBAL from './global';
-import { LinearGradient } from 'expo-linear-gradient';
-import { NavigationEvents } from 'react-navigation';
+// import { LinearGradient } from 'expo-linear-gradient';
+// import { NavigationEvents } from 'react-navigation';
 
 const colorhead = '#5dd891';
 const colorlight = '#7be8a9';
@@ -108,9 +112,10 @@ class webinar extends Component {
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
+
 		/* #endregion */
 
 		//this.setState({ loading: true });
@@ -125,10 +130,11 @@ class webinar extends Component {
 			this.isAdminForms +
 			'&instanceid=' +
 			eformsID;
-		console.log(uurl);
+		////////console.log(uurl);
 		//	console.log('sdsdsdsdsdsds');
 
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -162,13 +168,21 @@ class webinar extends Component {
 
 		return {
 			headerTitle: i18n.t('frmListCaption'),
-			headerRight: () => null,
+			headerRight: () => (
+				<TouchableOpacity
+					onPress={() => {
+						Linking.openURL('http://farsamooz.ir/apphlp/1.mp4');
+					}}
+				>
+					<Ionicons name="md-play-circle" size={36} color="#aaa" style={{ marginRight: 15, marginTop: 5 }} />
+				</TouchableOpacity>
+			),
 			headerBackTitle: 'بازگشت',
 			navigationOptions: {
 				headerBackTitle: 'Home'
 			},
 			headerTitleStyle: {
-				fontFamily: 'iransansbold',
+				fontFamily: 'iransans',
 				color: colorhead
 			}
 		};
@@ -179,18 +193,35 @@ class webinar extends Component {
 	}
 
 	loadAPI_grp = async (page, type) => {
+		if (global.lang == 'en') {
+			//	alert();
+			this.setState({
+				data: [],
+				dataLoading: false,
+
+				isRefreshing: false,
+				loading: false,
+				cat: [
+					// {
+					// 	id: '0',
+					// 	name: 'Show All'
+					// }
+				]
+			});
+			return;
+		}
+
 		if (global.adress == 'undefined') {
 			GLOBAL.main.setState({ isModalVisible: true });
 		}
 
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
-
 		if (!state.isConnected) {
-			//alert(state.isConnected);
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
+
 		/* #endregion */
 
 		this.setState({ loading: true });
@@ -204,8 +235,9 @@ class webinar extends Component {
 			'&g=' +
 			this.state.selectedItem +
 			'&mode=list';
-		//console.log(uurl);
+		console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -215,14 +247,26 @@ class webinar extends Component {
 					});
 					return;
 				}
-				this.setState({
-					cat: retJson,
+				if (global.lang == 'en')
+					this.setState({
+						cat: [
+							{
+								id: '0',
+								name: 'Show All'
+							}
+						],
 
-					loading: false
-				});
+						loading: false
+					});
+				else
+					this.setState({
+						cat: retJson,
+
+						loading: false
+					});
 			}
 		} catch (e) {
-			console.log('err');
+			console.log('err1');
 			this.dropDownAlertRef.alertWithType('error', 'پیام', 'خطادر دستیابی به اطلاعات');
 			this.setState({
 				loading: false
@@ -232,15 +276,18 @@ class webinar extends Component {
 	};
 
 	loadAPI = async (page, type) => {
+		if (global.lang == 'en') return;
+
 		if (global.adress == 'undefined') {
 			GLOBAL.main.setState({ isModalVisible: true });
 		}
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
+
 		/* #endregion */
 
 		this.setState({ loading: true });
@@ -254,8 +301,10 @@ class webinar extends Component {
 			'&g=' +
 			this.state.selectedItem +
 			'&stdid=&instanceid=';
-		console.log(uurl);
+		//
 		try {
+			uurl = encrypt(uurl);
+			//////console.log(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -294,7 +343,7 @@ class webinar extends Component {
 	};
 	_renderFooter = () => {
 		if (!this.state.isLoading) return null;
-		return <ActivityIndicator style={{ color: 'red' }} size="large" />;
+		return <ActivityIndicator style={{ color: 'red' }} size="small" color="#000" />;
 	};
 	_handleLoadMore = () => {
 		if (!this.state.isLoading) {
@@ -324,6 +373,7 @@ class webinar extends Component {
 		return (
 			<View style={{ backgroundColor: 'white' }}>
 				<FlatList
+					//inverted={true}
 					extraData={this.state.selectedItem}
 					showsHorizontalScrollIndicator={false}
 					data={this.state.cat}
@@ -331,9 +381,14 @@ class webinar extends Component {
 
 					keyExtractor={(item) => item.id.toString()}
 					horizontal
+					contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-start' }}
 					style={{
-						flexDirection: 'column-reverse',
+						//
+						//alignItems: 'flex-end',
+						//	backgroundColor: 'red',
+						borderWidth: 2,
 						paddingBottom: 4,
+						//alignItems: 'flex-end',
 						borderWidth: 0,
 						marginTop: 4,
 						marginRight: 4,
@@ -342,6 +397,7 @@ class webinar extends Component {
 					renderItem={({ item, index }) => {
 						return (
 							<TouchableOpacity
+								//style={{ alignSelf: 'center' }}
 								activeOpacity={0.7}
 								onPress={() => {
 									//console.log(item.id);
@@ -385,11 +441,14 @@ class webinar extends Component {
 										style={
 											this.state.selectedItem === item.id ? (
 												{
+													fontSize: 12.2,
 													color: 'white',
 													fontFamily: 'iransans'
 												}
 											) : (
 												{
+													fontSize: 12.2,
+
 													color: colorlight,
 
 													fontFamily: 'iransans'
@@ -456,7 +515,10 @@ class webinar extends Component {
 								}}
 							>
 								{!this.state.dataLoading && (
-									<Text style={[ defaultStyles.lbl14, { color: colorhead } ]}> لیست خالی است</Text>
+									<Text style={[ defaultStyles.lbl14, { color: colorhead } ]}>
+										{' '}
+										{global.lang == 'fa' ? 'لیست خالی است' : 'List is empty'}
+									</Text>
 								)}
 							</View>
 						</View>
@@ -502,7 +564,10 @@ class webinar extends Component {
 													/>
 												</View>
 												<View style={[ styles.view4, { marginTop: 15 } ]}>
-													<Text style={[ styles.aztitle, { color: 'black' } ]}>
+													<Text
+														numberOfLines={1}
+														style={[ styles.aztitle, { color: 'black' } ]}
+													>
 														{item.caption}
 													</Text>
 													{item.enddate ? (
@@ -640,7 +705,7 @@ class webinar extends Component {
 														<Text
 															style={[
 																defaultStyles.lbl14,
-																{ fontSize: 14, color: 'black' }
+																{ fontSize: 12.2, color: 'black' }
 															]}
 														>
 															لیست
@@ -658,7 +723,7 @@ class webinar extends Component {
 				/>
 
 				{global.ttype == 'administrator' && (global.ttype == 'teacher' && false) ? (
-					<ActionButton position="left" buttonColor="rgba(231,76,60,1)">
+					<ActionButton position="left" buttonColor={this.colorhead}>
 						<ActionButton.Item
 							buttonColor="#9b59b6"
 							title="تعریف آزمون"
@@ -677,7 +742,7 @@ class webinar extends Component {
 					</ActionButton>
 				) : null}
 
-				<Modal.BottomModal
+				{/* <Modal.BottomModal
 					visible={this.state.bottomModalAndTitle}
 					onTouchOutside={() => this.setState({ bottomModalAndTitle: false })}
 					height={0.4}
@@ -735,12 +800,12 @@ class webinar extends Component {
 							)}
 						/>
 					</ModalContent>
-				</Modal.BottomModal>
+				</Modal.BottomModal> */}
 
 				{(true && global.ttype == 'administrator') || global.ttype == 'teacher' ? (
-					<ActionButton useNativeDriver position="left" buttonColor="rgba(231,76,60,1)">
+					<ActionButton useNativeDriver position="left" buttonColor="#37a361">
 						<ActionButton.Item
-							buttonColor="#9b59b6"
+							buttonColor="#37a361"
 							title="تعریف فرم "
 							textStyle={{ fontFamily: 'iransans' }}
 							onPress={() => {
@@ -789,6 +854,28 @@ class webinar extends Component {
           </ActionButton.Item> */}
 					</ActionButton>
 				) : null}
+
+				<Snackbar
+					visible={this.state.issnackin}
+					onDismiss={() => this.setState({ issnackin: false })}
+					style={{ backgroundColor: 'red', fontFamily: 'iransans' }}
+					wrapperStyle={{ fontFamily: 'iransans' }}
+					action={{
+						label: 'بستن',
+						onPress: () => {
+							this.setState({ issnackin: false });
+							this.setState(
+								{
+									//  loading: false,
+									//  save_loading: false
+								}
+							);
+							//this.props.navigation.goBack(null);
+						}
+					}}
+				>
+					{'لطفا دسترسی به اینترنت را چک کنید'}
+				</Snackbar>
 			</View>
 		);
 	}
@@ -868,7 +955,7 @@ const styles = StyleSheet.create({
 		fontFamily: 'iransans',
 		textAlign: 'left',
 		borderWidth: 0,
-		fontSize: 14,
+		fontSize: 12.2,
 		color: 'white'
 	},
 	aztitlet: {
@@ -876,7 +963,7 @@ const styles = StyleSheet.create({
 		fontFamily: 'iransans',
 		textAlign: 'left',
 		//width: '100%',
-		fontSize: 13,
+		fontSize: 12.2,
 		borderWidth: 1,
 		padding: 1,
 		borderColor: 'white',
@@ -884,7 +971,7 @@ const styles = StyleSheet.create({
 		color: '#878787'
 	},
 	actionButtonIcon: {
-		fontSize: 20,
+		fontSize: 12.2,
 		height: 22,
 		color: 'white'
 	},
@@ -912,7 +999,7 @@ const styles = StyleSheet.create({
 		alignSelf: 'center',
 		fontFamily: 'iransans',
 		color: 'white',
-		fontSize: 15
+		fontSize: 12.2
 	},
 	image2: {
 		width: 50,
@@ -963,7 +1050,7 @@ const styles = StyleSheet.create({
 		height: 85
 	},
 	itemName: {
-		fontSize: 12,
+		fontSize: 12.2,
 		color: '#fff',
 		fontWeight: '600',
 		paddingBottom: 12,
@@ -972,7 +1059,7 @@ const styles = StyleSheet.create({
 	},
 	itemCode: {
 		fontWeight: '600',
-		fontSize: 12,
+		fontSize: 12.2,
 		color: '#fff'
 	}
 });

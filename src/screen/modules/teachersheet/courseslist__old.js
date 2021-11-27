@@ -22,7 +22,7 @@ import Modal, {
 	SlideAnimation,
 	ScaleAnimation
 } from 'react-native-modals';
-import { userInfo, toFarsi, getHttpAdress } from '../../../components/DB';
+import { userInfo, toFarsi,encrypt, getHttpAdress } from '../../../components/DB';
 import { FlatList, ScrollView, Image, View, Text, RefreshControl, TouchableOpacity } from 'react-native';
 import GLOBAL from '../../global';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -89,7 +89,7 @@ class courseslist22 extends Component {
 		this.setState({ loading: true });
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/getExamList?currentPage=' + page + '&p=' + param;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -118,7 +118,7 @@ class courseslist22 extends Component {
 	};
 	_renderFooter = () => {
 		if (!this.state.isLoading) return null;
-		return <ActivityIndicator style={{ color: 'red' }} size="large" />;
+		return <ActivityIndicator size="small" color="#000"/>;
 	};
 	_handleLoadMore = () => {
 		if (!this.state.isLoading) {
@@ -145,7 +145,7 @@ class courseslist22 extends Component {
 		this.setState({ isRefreshing: true });
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/getExamList?currentPage=' + '1' + '&p=' + param;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -301,7 +301,7 @@ class courseslist22 extends Component {
 										{item.name}
 									</Text>
 									{this.state.selectedItem !== item.id ||
-										(this.state.dataLoading && <ActivityIndicator />)}
+										(this.state.dataLoading && <ActivityIndicator size="small" color="#000"/>)}
 								</View>
 							</TouchableOpacity>
 						);

@@ -1,6 +1,6 @@
 import React, { Component, useEffect } from 'react';
 import { withNavigation } from 'react-navigation';
-import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+import { userInfo, toFarsi, encrypt, getHttpAdress } from '../components/DB';
 import { Ionicons } from '@expo/vector-icons';
 import Icon from 'react-native-vector-icons/AntDesign';
 
@@ -19,7 +19,7 @@ class ActionBarImage extends Component {
 		//  global.avatar= this.state.avatarSrc;
 
 		if (this.state.avatarSrc == '') {
-			console.log('fucks=' + this.state.avatarSrc);
+			//console.log('fucks=' + this.state.avatarSrc);
 			return <View />;
 		}
 
@@ -38,12 +38,22 @@ class ActionBarImage extends Component {
 					</View>
 				</TouchableOpacity>
 				<TouchableOpacity
+					style={{}}
 					activeOpacity={1}
 					onPress={() => {
 						GLOBAL.main.setState({ isModalVisible: true });
 					}}
 				>
-					<View style={{ flexDirection: 'row' }}>
+					<View
+						style={{
+							flexDirection: 'row',
+							borderWidth: 0.6,
+							marginRight: 15,
+							width: 33,
+							borderRadius: 10,
+							borderColor: '#ccc'
+						}}
+					>
 						{/* <Icon name="adduser" style={styles.actionButtonIcon} /> */}
 						<Image
 							style={styles.imageavatar}
@@ -60,16 +70,17 @@ class ActionBarImage extends Component {
 const styles = StyleSheet.create({
 	actionButtonIcon: {
 		marginRight: 10,
-		fontSize: 33,
+		fontSize: 32,
 		//height: 22,
-		color: 'black'
+		//borderWidth: 1,
+		color: 'gray'
 	},
 	imageavatar: {
 		width: 33,
 		height: 33,
 		marginEnd: 10,
 		borderRadius: 10,
-		borderWidth: 1,
+		//	borderWidth: 1,
 		borderColor: '#ccc'
 	}
 });

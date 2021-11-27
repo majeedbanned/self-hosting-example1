@@ -463,7 +463,7 @@ class dynamic extends Component {
 		//this.setState({ loading: true });
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/getMessage?id=' + global.messageEditID + '&p=' + param;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -575,8 +575,9 @@ class dynamic extends Component {
 		//global.examID = '26668';
 		//global.adress = 'http://192.168.1.12:8080/';
 		let uurl = global.adress + '/pApi.asmx/setMessage?p=' + param + '&json=' + jsonstr;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -1243,7 +1244,7 @@ class dynamic extends Component {
 
 		let openImage1PickerAsync = async (tt) => {
 			//console.log(tt);
-			let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
+			let permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 			if (permissionResult.granted === false) {
 				alert('Permission to access camera roll is required!');
 				return;
@@ -1564,7 +1565,7 @@ class dynamic extends Component {
 														}}
 														onimgPress={async () => {
 															//console.log(this.state.formikDefault[item.mobileurl]);
-															let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
+															let permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 															if (permissionResult.granted === false) {
 																alert('Permission to access camera roll is required!');
 																return;
@@ -2002,5 +2003,5 @@ const styles = StyleSheet.create({
 	}
 });
 
-console.disableYellowBox = true;
+//console.disableYellowBox = true;
 export default withNavigation(dynamic);

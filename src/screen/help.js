@@ -3,28 +3,29 @@ import { StyleSheet, Linking, ActivityIndicator, SafeAreaView } from 'react-nati
 import ActionButton from 'react-native-action-button';
 import defaultStyles from '../config/styles';
 import Loading from '../components/loading';
-import DropdownAlert from 'react-native-dropdownalert';
+// import { Snackbar } from 'react-native-paper';
+// import DropdownAlert from 'react-native-dropdownalert';
 import { withNavigation } from 'react-navigation';
-import { FlatGrid } from 'react-native-super-grid';
+// import { FlatGrid } from 'react-native-super-grid';
 import Icon from 'react-native-vector-icons/Ionicons';
 import IconAnt from 'react-native-vector-icons/AntDesign';
 
 import Mstyles from '../components/styles';
-import FormButton from '../component/FormButton';
-import ExamAdd from './examAdd';
-import { AntDesign, Entypo } from '@expo/vector-icons';
-import { Ionicons } from '@expo/vector-icons';
-import SelectUser from './selectUser';
+// import FormButton from '../component/FormButton';
+// import ExamAdd from './examAdd';
+// import { AntDesign, Entypo } from '@expo/vector-icons';
+// import { Ionicons } from '@expo/vector-icons';
+// import SelectUser from './selectUser';
 import NetInfo from '@react-native-community/netinfo';
-import Modal, {
-	ModalTitle,
-	ModalContent,
-	ModalFooter,
-	ModalButton,
-	SlideAnimation,
-	ScaleAnimation
-} from 'react-native-modals';
-import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+// import Modal, {
+// 	ModalTitle,
+// 	ModalContent,
+// 	ModalFooter,
+// 	ModalButton,
+// 	SlideAnimation,
+// 	ScaleAnimation
+// } from 'react-native-modals';
+import { userInfo, toFarsi, encrypt, getHttpAdress } from '../components/DB';
 import { FlatList, ScrollView, Image, View, Text, RefreshControl, TouchableOpacity } from 'react-native';
 import GLOBAL from './global';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -71,7 +72,7 @@ class help extends Component {
 				headerBackTitle: 'Home'
 			},
 			headerTitleStyle: {
-				fontFamily: 'iransansbold',
+				fontFamily: 'iransans',
 				color: colorhead
 			}
 		};
@@ -87,13 +88,13 @@ class help extends Component {
 		}
 
 		/* #region  check internet */
-		let state = await NetInfo.fetch();
 
+		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			//alert(state.isConnected);
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
+
 		/* #endregion */
 
 		this.setState({ loading: true });
@@ -107,7 +108,7 @@ class help extends Component {
 			'&g=' +
 			this.state.selectedItem +
 			'&mode=list';
-		//console.log(uurl);
+		//////////console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -148,18 +149,20 @@ class help extends Component {
 			GLOBAL.main.setState({ isModalVisible: true });
 		}
 		/* #region  check internet */
+
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
+
 		/* #endregion */
 
 		this.setState({ loading: true });
 		let param = userInfo();
 		let uurl =
 			global.adress + '/pApi.asmx/getHelpTitle?id=' + page + '&p=' + param + '&g=' + this.state.selectedItem;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -481,7 +484,7 @@ class help extends Component {
 					</ActionButton>
 				) : null}
 
-				<Modal.BottomModal
+				{/* <Modal.BottomModal
 					visible={this.state.bottomModalAndTitle}
 					onTouchOutside={() => this.setState({ bottomModalAndTitle: false })}
 					height={0.4}
@@ -539,7 +542,7 @@ class help extends Component {
 							)}
 						/>
 					</ModalContent>
-				</Modal.BottomModal>
+				</Modal.BottomModal> */}
 			</View>
 		);
 	}

@@ -6,7 +6,7 @@ import * as Font from 'expo-font';
 import Loading from '../../../components/loading';
 import { withNavigation } from 'react-navigation';
 
-import { AppLoading } from 'expo';
+//import { AppLoading } from 'expo';
 import { Ionicons, AntDesign, Entypo } from '@expo/vector-icons';
 import defaultStyles from '../../../config/styles';
 import {
@@ -24,7 +24,7 @@ import {
 	ActivityIndicator,
 	Alert
 } from 'react-native';
-import { userInfo, toFarsi, getHttpAdress } from '../../../components/DB';
+import { userInfo, toFarsi,encrypt, getHttpAdress } from '../../../components/DB';
 
 import Icon from 'react-native-vector-icons/Ionicons';
 
@@ -60,7 +60,7 @@ export default class studentlistforms extends Component {
 				headerBackTitle: 'Home'
 			},
 			headerTitleStyle: {
-				fontFamily: 'iransansbold'
+				fontFamily: 'iransans'
 				//color: colorhead
 			}
 		};
@@ -170,7 +170,7 @@ export default class studentlistforms extends Component {
 			formID1 +
 			'&userID=' +
 			userID;
-		console.log(uurl);
+		////////console.log(uurl);
 		//let page = 1;
 
 		fetch(uurl) //+ this.arch

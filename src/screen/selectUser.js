@@ -4,7 +4,7 @@ import * as Font from 'expo-font';
 import { withNavigation } from 'react-navigation';
 import { I18nManager, Platform } from 'react-native';
 import Swiper from 'react-native-swiper';
-import { AppLoading } from 'expo';
+//import { AppLoading } from 'expo';
 
 import { useFonts } from '@use-expo/font';
 import { Ionicons, AntDesign, Entypo } from '@expo/vector-icons';
@@ -36,6 +36,7 @@ const db = SQLite.openDatabase(database_name, database_version, database_display
 
 import GLOBAL from './global';
 import axios from 'axios';
+import { toFarsi } from '../components/DB';
 //import { getAvailableLocationProviders } from 'react-native-device-info';
 // I18nManager.allowRTL(true);
 // I18nManager.forceRTL(true);
@@ -112,7 +113,7 @@ class messages extends Component {
 		global.schoolcode = item.schoolcode;
 		//** */	global.adress = 'http://' + item.adress + ':8080';
 		global.adress = item.adress + '/papi';
-
+		//	alert(item.lastname);
 		global.firstname = item.firstname;
 		global.lastname = item.lastname;
 		(global.schoolname = item), schoolname;
@@ -230,8 +231,8 @@ class messages extends Component {
 		//     'Inter-Black': require('./../../assets/IRANSansMobile.ttf'),
 		//   });
 		if (!this.state.fontLoaded) {
-			return <AppLoading />;
-		} else if (!this.state.data) return <AppLoading />;
+			return <View />;
+		} else if (!this.state.data) return <View />;
 		else
 			// 	return (
 			// 		<View style={{ flex: 1, backgroundColor: 'white', justifyContent: 'center' }}>
@@ -243,12 +244,12 @@ class messages extends Component {
 				<View style={styles.container}>
 					<Text
 						style={{
-							fontFamily: 'iransansbold',
-							textAlign: 'left',
+							fontFamily: 'iransans',
+							textAlign: 'center',
 							paddingLeft: 10
 						}}
 					>
-						انتخاب کاربر
+						{global.lang == 'en' ? 'Users' : 'انتخاب کاربر'}
 					</Text>
 					<ScrollView>
 						<FlatList
@@ -282,27 +283,32 @@ class messages extends Component {
 												style={{
 													flexDirection: 'row',
 													height: 50
+													//borderWidth: 1
 												}}
 											>
-												<Image
-													style={styles.imageavatar}
-													source={{
-														uri:
-															item.adress +
-															'/upload/' +
-															item.schoolcode +
-															'/child/' +
-															item.username +
-															'.jpg'
-													}}
-												/>
+												<View style={styles.imageavatar}>
+													<Image
+														style={styles.imageavatar}
+														source={{
+															uri:
+																item.adress +
+																'/upload/' +
+																item.schoolcode +
+																'/child/' +
+																item.username +
+																'.jpg'
+														}}
+													/>
+												</View>
 												<View style={{ flexDirection: 'column', alignSelf: 'center' }}>
 													<Text
 														style={{
 															paddingTop: 10,
 															fontFamily: 'iransans',
 															alignSelf: 'center',
-															padding: 5
+															padding: 5,
+															fontSize: 13,
+															textAlign: 'left'
 														}}
 													>
 														{item.firstname + ' ' + item.lastname}
@@ -317,11 +323,21 @@ class messages extends Component {
 														}}
 													>
 														{/* {item.schoolname + ' - '} */}
-														{item.username + ' - '}
-														{item.ttype == 'student' && 'دانش آموز'}
-														{item.ttype == 'teacher' && 'معلم'}
-														{item.ttype == 'administrator' && 'مدیر'}
+														{toFarsi(item.username) + ' - '}
+														{item.ttype == 'student' &&
+															(global.lang == 'en' ? 'Student' : 'دانش آموز')}
+														{item.ttype == 'teacher' &&
+															(global.lang == 'en' ? 'Teacher' : 'معلم')}
+														{item.ttype == 'administrator' &&
+															(global.lang == 'en' ? 'Admin' : 'مدیر')}
 													</Text>
+													{item.adress && (
+														<Text
+															style={{ fontSize: 9, textAlign: 'left', paddingLeft: 5 }}
+														>
+															{item.adress.replace('http://', '')}
+														</Text>
+													)}
 												</View>
 											</View>
 											<View style={{ flex: 1 }} />
@@ -331,6 +347,25 @@ class messages extends Component {
 							}}
 						/>
 					</ScrollView>
+					<TouchableOpacity
+						onPress={() => {
+							const { navigate } = this.props.navigation;
+							//console.log(item);
+
+							navigate('Settings');
+							GLOBAL.main.setState({ isModalVisible: false });
+						}}
+					>
+						<Text
+							style={{
+								fontFamily: 'iransans',
+								textAlign: 'center',
+								paddingLeft: 10
+							}}
+						>
+							{global.lang == 'en' ? 'Setting' : 'تنظیمات'}
+						</Text>
+					</TouchableOpacity>
 				</View>
 			);
 	}

@@ -3,32 +3,33 @@ import { StyleSheet, Linking, ActivityIndicator, SafeAreaView } from 'react-nati
 import ActionButton from 'react-native-action-button';
 import defaultStyles from '../../config/styles';
 import Loading from '../../components/loading';
-import DropdownAlert from 'react-native-dropdownalert';
+import { Snackbar } from 'react-native-paper';
+// import DropdownAlert from 'react-native-dropdownalert';
 import { withNavigation } from 'react-navigation';
-import { FlatGrid } from 'react-native-super-grid';
+// import { FlatGrid } from 'react-native-super-grid';
 import Icon from 'react-native-vector-icons/Ionicons';
 import IconAnt from 'react-native-vector-icons/AntDesign';
 
 import Mstyles from '../../components/styles';
-import FormButton from '../../component/FormButton';
+// import FormButton from '../../component/FormButton';
 //import ExamAdd from '../../examAdd';
-import { AntDesign, Entypo } from '@expo/vector-icons';
-import { Ionicons } from '@expo/vector-icons';
+// import { AntDesign, Entypo } from '@expo/vector-icons';
+// import { Ionicons } from '@expo/vector-icons';
 //import SelectUser from '../../selectUser';
 import NetInfo from '@react-native-community/netinfo';
-import Modal, {
-	ModalTitle,
-	ModalContent,
-	ModalFooter,
-	ModalButton,
-	SlideAnimation,
-	ScaleAnimation
-} from 'react-native-modals';
-import { userInfo, toFarsi, getHttpAdress } from '../../components/DB';
+// import Modal, {
+// 	ModalTitle,
+// 	ModalContent,
+// 	ModalFooter,
+// 	ModalButton,
+// 	SlideAnimation,
+// 	ScaleAnimation
+// } from 'react-native-modals';
+import { userInfo, toFarsi, encrypt, getHttpAdress } from '../../components/DB';
 import { FlatList, ScrollView, Image, View, Text, RefreshControl, TouchableOpacity } from 'react-native';
 import GLOBAL from './../global';
-import { LinearGradient } from 'expo-linear-gradient';
-import { NavigationEvents } from 'react-navigation';
+// import { LinearGradient } from 'expo-linear-gradient';
+// import { NavigationEvents } from 'react-navigation';
 
 const colorhead = '#2e95d8';
 const colorlight = '#2e95d8';
@@ -71,7 +72,7 @@ class daftar extends Component {
 				headerBackTitle: 'Home'
 			},
 			headerTitleStyle: {
-				fontFamily: 'iransansbold',
+				fontFamily: 'iransans',
 				color: colorhead
 			}
 		};
@@ -88,11 +89,9 @@ class daftar extends Component {
 
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
-
 		if (!state.isConnected) {
-			//alert(state.isConnected);
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
 		/* #endregion */
 
@@ -107,7 +106,7 @@ class daftar extends Component {
 			'&g=' +
 			this.state.selectedItem +
 			'&mode=list';
-		console.log(uurl);
+		//console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -147,8 +146,8 @@ class daftar extends Component {
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
 		/* #endregion */
 
@@ -158,6 +157,7 @@ class daftar extends Component {
 		console.log(uurl);
 		try {
 			const response = await fetch(uurl);
+			//console.log(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
 				if (Object.keys(retJson).length == 0) {
@@ -195,7 +195,7 @@ class daftar extends Component {
 	};
 	_renderFooter = () => {
 		if (!this.state.isLoading) return null;
-		return <ActivityIndicator style={{ color: 'red' }} size="large" />;
+		return <ActivityIndicator size="small" color="#000" />;
 	};
 	_handleLoadMore = () => {
 		if (!this.state.isLoading) {
@@ -430,7 +430,7 @@ class daftar extends Component {
 					keyExtractor={(item) => {
 						return item.id;
 					}}
-					renderItem={({ item }) => {
+					renderItem={({ item, index }) => {
 						return (
 							<TouchableOpacity
 								// onPress={() => {
@@ -438,6 +438,7 @@ class daftar extends Component {
 								// 	global.eformsID = item.id;
 								// 	navigate('eforms', { eformsID: item.id, mode: 'add' });
 								// }}
+								key={index}
 								activeOpacity={0.8}
 								style={{
 									height: 68,
@@ -465,7 +466,12 @@ class daftar extends Component {
 														<Text style={[ styles.aztitlet, { paddingTop: 4 } ]}>
 															{toFarsi(item.arzshyabival)}
 														</Text>
-													) : null}
+													) : (
+														<Text />
+													)}
+													<Text style={[ styles.aztitlet, { paddingTop: 4 } ]}>
+														{toFarsi(item.day_)}
+													</Text>
 												</View>
 
 												{/* {global.ttype == 'administrator' ||
@@ -477,21 +483,21 @@ class daftar extends Component {
 														flex: 0.5
 													}}
 												>
-													{item.formulacleac &&
+													{item.formulacleac != null &&
 													item.formulacleac.indexOf('+') > -1 && (
 														<Text style={[ defaultStyles.lbl14, styles.greenbadge ]}>
 															{toFarsi(item.formulacleac)}
 														</Text>
 													)}
 
-													{item.formulacleac &&
+													{item.formulacleac != null &&
 													item.formulacleac.indexOf('-') > -1 && (
 														<Text style={[ defaultStyles.lbl14, styles.redbadge ]}>
 															{toFarsi(item.formulacleac)}
 														</Text>
 													)}
 
-													{item.formulacleac &&
+													{item.formulacleac != null &&
 													item.formulacleac.indexOf('-') == -1 &&
 													item.formulacleac.indexOf('+') == -1 && (
 														<Text style={[ defaultStyles.lbl14, styles.bluebadge ]}>
@@ -527,7 +533,7 @@ class daftar extends Component {
 					</ActionButton>
 				) : null}
 
-				<Modal.BottomModal
+				{/* <Modal.BottomModal
 					visible={this.state.bottomModalAndTitle}
 					onTouchOutside={() => this.setState({ bottomModalAndTitle: false })}
 					height={0.4}
@@ -586,6 +592,28 @@ class daftar extends Component {
 						/>
 					</ModalContent>
 				</Modal.BottomModal>
+	 */}
+				<Snackbar
+					visible={this.state.issnackin}
+					onDismiss={() => this.setState({ issnackin: false })}
+					style={{ backgroundColor: 'red', fontFamily: 'iransans' }}
+					wrapperStyle={{ fontFamily: 'iransans' }}
+					action={{
+						label: 'بستن',
+						onPress: () => {
+							this.setState({ issnackin: false });
+							this.setState(
+								{
+									//  loading: false,
+									//  save_loading: false
+								}
+							);
+							//this.props.navigation.goBack(null);
+						}
+					}}
+				>
+					{'لطفا دسترسی به اینترنت را چک کنید'}
+				</Snackbar>
 			</View>
 		);
 	}

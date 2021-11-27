@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
 import Addgallery from '../../../screen/modules/story/addgallery';
+import i18n from 'i18n-js';
 
 import { StyleSheet, Linking, ActivityIndicator, Alert } from 'react-native';
+import { RFPercentage, RFValue } from 'react-native-responsive-fontsize';
 import ActionButton from 'react-native-action-button';
 import defaultStyles from '../../../config/styles';
 
+import { Snackbar } from 'react-native-paper';
 import { withNavigation } from 'react-navigation';
 import { FlatGrid } from 'react-native-super-grid';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -23,7 +26,7 @@ import Modal, {
 	SlideAnimation,
 	ScaleAnimation
 } from 'react-native-modals';
-import { userInfo, toFarsi, getHttpAdress, getHttpAdressPure } from '../../../components/DB';
+import { userInfo, toFarsi, encrypt, getHttpAdress, getHttpAdressPure } from '../../../components/DB';
 import { FlatList, ScrollView, Image, View, Text, RefreshControl, TouchableOpacity } from 'react-native';
 import GLOBAL from './../../global';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -88,14 +91,15 @@ class webinar extends Component {
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			alert('لطفا دسترسی به اینترنت را چک کنید');
+			this.setState({ issnackin: true });
 			return;
 		}
 
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/delStoryID?p=' + param + '&id=' + id;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -140,7 +144,7 @@ class webinar extends Component {
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
+			this.setState({ issnackin: true });
 			return;
 		}
 		/* #endregion */
@@ -148,8 +152,9 @@ class webinar extends Component {
 		this.setState({ loading: true });
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/getStory?p=' + param;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -184,7 +189,7 @@ class webinar extends Component {
 	};
 	_renderFooter = () => {
 		if (!this.state.isLoading) return null;
-		return <ActivityIndicator style={{ color: 'red' }} size="large" />;
+		return <ActivityIndicator size="small" color="#000" />;
 	};
 	_handleLoadMore = () => {
 		if (!this.state.isLoading) {
@@ -294,7 +299,15 @@ class webinar extends Component {
 					data={this.state.cat}
 					keyExtractor={(item) => item.id.toString()}
 					horizontal
-					style={{ paddingBottom: 4, borderWidth: 0, marginTop: 4, marginRight: 4, marginLeft: 4 }}
+					contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-start' }}
+					style={{
+						flexDirection: 'row-reverse',
+						paddingBottom: 4,
+						borderWidth: 0,
+						marginTop: 4,
+						marginRight: 4,
+						marginLeft: 4
+					}}
 					renderItem={({ item, index }) => {
 						return (
 							<TouchableOpacity
@@ -356,7 +369,7 @@ class webinar extends Component {
 										{item.name}
 									</Text>
 									{this.state.selectedItem !== item.id ||
-										(this.state.dataLoading && <ActivityIndicator />)}
+										(this.state.dataLoading && <ActivityIndicator size="small" color="#000" />)}
 								</View>
 							</TouchableOpacity>
 						);
@@ -398,7 +411,14 @@ class webinar extends Component {
 						data={this.state.cat}
 						keyExtractor={(item) => item.id.toString()}
 						horizontal
-						style={{ paddingBottom: 4, borderWidth: 0, marginTop: 4, marginRight: 4, marginLeft: 4 }}
+						style={{
+							flexDirection: 'column-reverse',
+							paddingBottom: 4,
+							borderWidth: 0,
+							marginTop: 4,
+							marginRight: 4,
+							marginLeft: 4
+						}}
 						renderItem={({ item, index }) => {
 							return (
 								<TouchableOpacity
@@ -450,11 +470,13 @@ class webinar extends Component {
 											style={
 												this.state.selectedItem === item.id ? (
 													{
+														fontSize: 12.2,
 														color: 'white',
 														fontFamily: 'iransans'
 													}
 												) : (
 													{
+														fontSize: 12.2,
 														color: '#36D1DC',
 
 														fontFamily: 'iransans'
@@ -465,7 +487,7 @@ class webinar extends Component {
 											{item.name}
 										</Text>
 										{this.state.selectedItem !== item.id ||
-											(this.state.dataLoading && <ActivityIndicator />)}
+											(this.state.dataLoading && <ActivityIndicator size="small" color="#000" />)}
 									</View>
 								</TouchableOpacity>
 							);
@@ -480,7 +502,8 @@ class webinar extends Component {
 						//	stickyHeaderIndices={[ 0 ]}
 						ListFooterComponent={this._renderFooter}
 						onScroll={this.onScroll}
-						keyExtractor={(item) => item.id}
+						//keyExtractor={(item) => item.id}
+						keyExtractor={(item, index) => index.toString()}
 						initialNumToRender={10}
 						//onEndReachedThreshold={0.4}
 						//onEndReached={this._handleLoadMore.bind(this)}
@@ -574,7 +597,7 @@ class webinar extends Component {
 															onPress={() => {
 																Alert.alert(
 																	'حذف گالری',
-																	'آیا مایل به حدف گالری هستید؟',
+																	'آیا مایل به حذف گالری هستید؟',
 																	[
 																		// {
 																		// 	text: 'Ask me later',

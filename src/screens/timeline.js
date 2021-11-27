@@ -7,7 +7,8 @@
 import IconA from 'react-native-vector-icons/AntDesign';
 
 import NetInfo from '@react-native-community/netinfo';
-import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+import { userInfo, toFarsi, encrypt, getHttpAdress } from '../components/DB';
+import { Snackbar } from 'react-native-paper';
 import Loading from '../components/loading';
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, Image } from 'react-native';
@@ -128,8 +129,8 @@ export default class Example extends Component {
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
 		/* #endregion */
 
@@ -147,8 +148,10 @@ export default class Example extends Component {
 			'&groupcode=' +
 			this.groupcode;
 
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
+			//////console.log(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -202,7 +205,7 @@ export default class Example extends Component {
 	renderSelected() {
 		if (true)
 			return (
-				<Text style={{ marginTop: 10, textAlign: 'center' }}>
+				<Text style={{ marginTop: 10, textAlign: 'center', fontFamily: 'iransans' }}>
 					تاریخچه ارزشیابی
 					{/* Selected event: {this.state.selected.title} at {this.state.selected.time} */}
 				</Text>
@@ -210,22 +213,40 @@ export default class Example extends Component {
 	}
 
 	renderDetail(rowData, sectionID, rowID) {
-		let title = <Text style={[ styles.title ]}>{rowData.title}</Text>;
+		let title = <Text style={[ styles.title, { fontFamily: 'iransans' } ]}>{rowData.title}</Text>;
 
 		title = (
-			<View style={styles.view4}>
-				<Text style={[ styles.aztitle, { color: 'black', marginTop: 15 } ]}>{rowData.title}</Text>
+			<View style={{ textAlign: 'center' }}>
+				<Text
+					style={[
+						styles.aztitle,
+						{ color: 'black', marginTop: 15, fontFamily: 'iransans', alignSelf: 'right' }
+					]}
+				>
+					{rowData.title}
+				</Text>
 
 				{rowData.ax == undefined &&
 				rowData.scoreid == '9999' && (
-					<Text numberOfLines={1} style={[ styles.aztitle, { paddingTop: 4, color: 'black' } ]}>
+					<Text
+						numberOfLines={1}
+						style={[
+							styles.aztitle,
+							{ paddingTop: 4, color: 'black', fontFamily: 'iransans', alignSelf: 'right' }
+						]}
+					>
 						{toFarsi(rowData.cap)}
 					</Text>
 				)}
 
 				{rowData.scoreid != '0' &&
 				rowData.scoreid != '9999' && (
-					<Text style={[ styles.aztitle, { paddingTop: 4, color: 'black' } ]}>
+					<Text
+						style={[
+							styles.aztitle,
+							{ paddingTop: 4, color: 'black', fontFamily: 'iransans', alignSelf: 'right' }
+						]}
+					>
 						{toFarsi(rowData.arzv) + ' ' + toFarsi(rowData.arzvf)}
 					</Text>
 				)}
@@ -245,7 +266,12 @@ export default class Example extends Component {
 				)}
 
 				{rowData.az != '0' && (
-					<Text style={[ styles.aztitle, { paddingTop: 4, color: 'black' } ]}>
+					<Text
+						style={[
+							styles.aztitle,
+							{ paddingTop: 4, color: 'black', fontFamily: 'iransans', alignSelf: 'right' }
+						]}
+					>
 						{toFarsi(rowData.cap + ' از ' + rowData.az)}
 					</Text>
 				)}
@@ -285,6 +311,7 @@ export default class Example extends Component {
 						textAlign: 'center',
 						backgroundColor: '#ff9797',
 						color: 'white',
+						fontFamily: 'iransans',
 						padding: 5,
 						borderRadius: 13
 					}}
@@ -306,6 +333,27 @@ export default class Example extends Component {
 					columnFormat="single-column-right"
 					columnFormat="two-column"
 				/>
+				<Snackbar
+					visible={this.state.issnackin}
+					onDismiss={() => this.setState({ issnackin: false })}
+					style={{ backgroundColor: 'red', fontFamily: 'iransans' }}
+					wrapperStyle={{ fontFamily: 'iransans' }}
+					action={{
+						label: 'بستن',
+						onPress: () => {
+							this.setState({ issnackin: false });
+							this.setState(
+								{
+									//  loading: false,
+									//  save_loading: false
+								}
+							);
+							//this.props.navigation.goBack(null);
+						}
+					}}
+				>
+					{'لطفا دسترسی به اینترنت را چک کنید'}
+				</Snackbar>
 			</View>
 		);
 	}

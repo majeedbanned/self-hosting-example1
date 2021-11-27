@@ -6,7 +6,7 @@ import NetInfo from '@react-native-community/netinfo';
 import GLOBAL from './global';
 var Buffer = require('buffer/').Buffer;
 import * as Font from 'expo-font';
-import { AppLoading } from 'expo';
+//import { AppLoading } from 'expo';
 import { Ionicons, AntDesign, Entypo } from '@expo/vector-icons';
 import {
 	AppRegistry,
@@ -23,7 +23,7 @@ import {
 	ActivityIndicator,
 	Alert
 } from 'react-native';
-import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+import { userInfo, toFarsi,encrypt, getHttpAdress } from '../components/DB';
 
 import Icon from 'react-native-vector-icons/Ionicons';
 
@@ -125,7 +125,7 @@ export default class ContactList extends Component {
 		let uurl =
 			global.adress + '/pApi.asmx/getContactList?currentPage=' + this.page + '&p=' + param + '&q=' + this.arch;
 
-		//console.log(uurl);
+		//////////console.log(uurl);
 		//let page = 1;
 
 		fetch(uurl) //+ this.arch
@@ -181,8 +181,9 @@ export default class ContactList extends Component {
 			jsonstr +
 			'&messageID=' +
 			global.forwardID;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -315,7 +316,7 @@ export default class ContactList extends Component {
 					/>
 				</View>
 				<View style={{ backgroundColor: 'white' }}>
-					<Text style={{ paddingLeft: 10, paddingTop: 5, textAlign: 'left', fontFamily: 'iransansbold' }}>
+					<Text style={{ paddingLeft: 10, paddingTop: 5, textAlign: 'left', fontFamily: 'iransans' }}>
 						ارسال به:
 					</Text>
 				</View>
@@ -329,7 +330,7 @@ export default class ContactList extends Component {
 			return (
 				<View style={styles.container}>
 					<View style={{ justifyContent: 'center', flex: 1, flexDirection: 'column', alignItems: 'center' }}>
-						<ActivityIndicator style={{ color: '#000' }} />
+						<ActivityIndicator size="small" color="#000"/>
 						<TouchableOpacity
 							onPress={() => {
 								GLOBAL.examAdd.setState({

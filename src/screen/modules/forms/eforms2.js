@@ -16,7 +16,7 @@ import RNPickerSelect from 'react-native-picker-select';
 import MultiSelect from 'react-native-multiple-select';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
-import { userInfo, getHttpAdress } from '../../../components/DB';
+import { userInfo, getHttpAdress, encrypt } from '../../../components/DB';
 import RadioItem from '../../../components/radioItem';
 import Loading from '../../../components/loading';
 import moment from 'moment-jalaali';
@@ -298,7 +298,7 @@ class eforms2 extends Component {
 				headerBackTitle: 'Home'
 			},
 			headerTitleStyle: {
-				fontFamily: 'iransansbold'
+				fontFamily: 'iransans'
 				//color: colorhead
 			}
 		};
@@ -440,9 +440,8 @@ class eforms2 extends Component {
 		//alert(this.eformsID);
 
 		//if (global.messageEditID != '') {
-		if(true)
-		{
-		this.setState({
+		if (true) {
+			this.setState({
 				isEditing: true
 			});
 			console.log('sdsdsdsdsdsds');
@@ -512,9 +511,11 @@ class eforms2 extends Component {
 			this.mode +
 			'&extra=' +
 			this.Extra;
-		console.log(uurl);
+		////////console.log(uurl);
 		//alert();
 		try {
+			uurl = encrypt(uurl);
+			//////console.log(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -643,10 +644,11 @@ class eforms2 extends Component {
 		this.setState({ loading: true });
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/getStdName?p=' + param + '&txt=' + txt;
-		console.log(uurl);
+		////////console.log(uurl);
 		//console.log('sdsdsdsdsdsds');
 
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -732,10 +734,12 @@ class eforms2 extends Component {
 			this.mode +
 			'&extra=' +
 			this.Extra;
-		console.log(uurl);
+		////////console.log(uurl);
 		//	console.log('sdsdsdsdsdsds');
 
 		try {
+			uurl = encrypt(uurl);
+			//console.log(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -874,10 +878,11 @@ class eforms2 extends Component {
 			id +
 			'&extra=' +
 			this.Extra;
-		console.log(uurl);
+		////////console.log(uurl);
 		//console.log('sdsdsdsdsdsds');
 
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -914,7 +919,7 @@ class eforms2 extends Component {
 				// }));
 			}
 		} catch (e) {
-			console.log('err999999');
+			//	console.log('err999999');
 			this.dropDownAlertRef.alertWithType('error', 'پیام', 'خطادر دستیابی به اطلاعات');
 			this.setState({
 				loading: false
@@ -977,8 +982,10 @@ class eforms2 extends Component {
 			this.state.formid +
 			'&isAdminForms=true' +
 			this.isAdminForms;
-		console.log(uurl);
+		////////console.log(uurl);
 		//try {
+		uurl = encrypt(uurl);
+		//console.log(uurl);
 		const response = await fetch(uurl);
 		if (response.ok) {
 			let retJson = await response.json();
@@ -1098,16 +1105,16 @@ class eforms2 extends Component {
 		let url = '';
 		const picked = await DocumentPicker.getDocumentAsync({
 			type: '*/*',
-			copyToCacheDirectory: true
+			copyToCacheDirectory: false
 		});
 		if (picked.type === 'cancel') {
 			return;
 		} else if (picked.type === 'success') {
-			console.log('pp:' + picked.size);
+			//console.log('pp:' + picked.size);
 			const { name } = picked;
 			const { size } = picked;
 			if (size > this.state.formikDefault[item.maxSize]) {
-				console.log('filesize err:');
+				//	console.log('filesize err:');
 
 				// this.setState({
 				// 	fileSizeErr:
@@ -1124,9 +1131,9 @@ class eforms2 extends Component {
 
 				return;
 			}
-			console.log('fileUri');
+			//	console.log('fileUri');
 			const fileUri = `${FileSystem.documentDirectory}${name}`;
-			console.log('salam:' + fileUri);
+			//	console.log('salam:' + fileUri);
 
 			if (Platform.OS === 'ios') {
 				console.log(picked.uri);
@@ -1147,6 +1154,7 @@ class eforms2 extends Component {
 
 				//this.fileUpload1(pickerResult.uri);
 			}
+			url = uri;
 			//console.log('start!' + url);
 			//this.fileUpload1(pickerResult, document);
 
@@ -1160,11 +1168,12 @@ class eforms2 extends Component {
 			// 		'' +
 			// 		'/api/upload'
 			// );
+			//xhr.open('POST', global.adress.replace('/papi', ':8181') + '' + '' + '/api/upload');
 
 			xhr.open('POST', global.adress.replace('/papi', ':8181') + '' + '' + '/api/upload');
-			console.log('startmajid!');
+			//console.log('startmajid!');
 			xhr.onload = () => {
-				console.log('end!');
+				//	console.log('end!');
 
 				console.log(xhr.response);
 
@@ -1216,7 +1225,7 @@ class eforms2 extends Component {
 				// track the upload progress
 				xhr.upload.onprogress = ({ total, loaded }) => {
 					const uploadProgress = loaded / total;
-					console.log(uploadProgress);
+					//console.log(uploadProgress);
 					// this.setState({
 					// 	file1pg: uploadProgress
 					// });
@@ -1325,7 +1334,7 @@ class eforms2 extends Component {
 
 		let openImage1PickerAsync = async (tt) => {
 			//console.log(tt);
-			let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
+			let permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 			if (permissionResult.granted === false) {
 				alert('Permission to access camera roll is required!');
 				return;
@@ -1356,7 +1365,7 @@ class eforms2 extends Component {
 			return (
 				<View style={styles.container}>
 					<View style={{ justifyContent: 'center', flex: 1, flexDirection: 'column', alignItems: 'center' }}>
-						<ActivityIndicator style={{ color: 'red' }} />
+						<ActivityIndicator size="small" color="#000" />
 					</View>
 				</View>
 			);
@@ -1769,7 +1778,7 @@ class eforms2 extends Component {
 																activedate: item.id
 															});
 
-															console.log('ddddd:' + item.id);
+															//	console.log('ddddd:' + item.id);
 														}}
 														keyboardType="numeric"
 														//value={this.state.shoro_namayesh}
@@ -1858,7 +1867,7 @@ class eforms2 extends Component {
 														//hideTags
 
 														onAddItem={(e) => {
-															console.log('onAddItem - newItemsList: ', e);
+															//	console.log('onAddItem - newItemsList: ', e);
 															this.setState((prevState) => ({
 																formikDefault: {
 																	...prevState.formikDefault,
@@ -2197,7 +2206,7 @@ class eforms2 extends Component {
 															}
 
 															//console.log(this.state.formikDefault[item.mobileurl]);
-															let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
+															let permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 															if (permissionResult.granted === false) {
 																alert('Permission to access camera roll is required!');
 																return;
@@ -2239,9 +2248,9 @@ class eforms2 extends Component {
 																const xhr = new XMLHttpRequest();
 																xhr.open(
 																	'POST',
-																	global.adress.replace(':8080', '') +
+																	global.adress.replace('/papi', ':8181') +
 																		'' +
-																		':8181' +
+																		'' +
 																		'/api/upload'
 																);
 																xhr.onload = () => {
@@ -2610,7 +2619,7 @@ class eforms2 extends Component {
 
 											setTimeout(() => {
 												handleSubmit();
-											}, 500);
+											}, 100);
 										}}
 										// onPress={() => {
 										// 	console.log(JSON.stringify(this.state.formikDefault));
@@ -2625,6 +2634,7 @@ class eforms2 extends Component {
 										loading={this.state.savepress}
 										title={this.state.butcaption}
 									/>
+									<View style={{ height: 120 }} />
 								</View>
 							);
 						}}
@@ -2680,7 +2690,7 @@ class eforms2 extends Component {
 
 							// Handler which gets executed on day long press. Default = undefined
 							onDayLongPress={(day) => {
-								console.log('selected day', day);
+								//	console.log('selected day', day);
 							}}
 							// Month format in calendar title. Formatting values: http://arshaw.com/xdate/#Formatting
 							monthFormat={'yyyy MM'}
@@ -2916,7 +2926,7 @@ const styles = StyleSheet.create({
 		marginTop: 1,
 		paddingLeft: 20,
 		paddingRight: 20,
-		paddingTop: 20,
+		paddingTop: 5,
 		//height: '100%',
 		alignContent: 'center',
 		backgroundColor: '#f6fbff'
@@ -2930,5 +2940,5 @@ const styles = StyleSheet.create({
 	}
 });
 
-console.disableYellowBox = true;
+//console.disableYellowBox = true;
 export default withNavigation(eforms2);

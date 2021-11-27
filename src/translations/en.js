@@ -11,7 +11,14 @@ export default {
 	qrenter: 'Qr scanner',
 
 	frmPtcCaption: 'Participants',
-	frmListCaption: 'Forms List en',
+	frmListCaption: 'Forms List',
+	settingListCaption: 'Setting',
 
-	frmsrchCaption: 'Search'
+	fileListCaption: 'Files',
+
+	frmsrchCaption: 'Search',
+	addstory: 'New',
+	loading: 'Loading...',
+	grades: 'Grades',
+	sch: 'Schedule'
 };

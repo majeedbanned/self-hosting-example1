@@ -1,8 +1,9 @@
 import React, { PureComponent } from 'react';
-import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+import { userInfo, toFarsi, encrypt, getHttpAdress } from '../components/DB';
 import Modal from 'react-native-modalbox';
 import Loading from '../components/loading';
-
+import i18n from 'i18n-js';
+import { Snackbar } from 'react-native-paper';
 import NetInfo from '@react-native-community/netinfo';
 import { REAL_WINDOW_HEIGHT } from 'react-native-extra-dimensions-android';
 
@@ -188,18 +189,18 @@ class PureChild extends React.PureComponent {
 						{value.rclass != '0' &&
 						value.grade != '' && (
 							<Text numberOfLines={1} style={[ styles.cap1, { fontSize: 12 } ]}>
-								{toFarsi(value.rclass)}
+								{global.lang == 'fa' ? toFarsi(value.rclass) : value.rclass}
 							</Text>
 						)}
 						{value.rkol != '0' &&
 						value.grade != '' && (
 							<Text numberOfLines={1} style={[ styles.cap2, { fontSize: 12 } ]}>
-								{toFarsi(value.rkol)}
+								{global.lang == 'fa' ? toFarsi(value.rkol) : value.rkol}
 							</Text>
 						)}
 					</View>
-					<Text numberOfLines={1} style={[ styles.cap, { color: 'green', fontFamily: 'iransansbold' } ]}>
-						{toFarsi(value.grade)}
+					<Text numberOfLines={1} style={[ styles.cap, { color: 'green', fontFamily: 'iransans' } ]}>
+						{global.lang == 'fa' ? toFarsi(value.grade) : value.grade}
 					</Text>
 					{value.progress != null &&
 					value.grade != '' && (
@@ -219,7 +220,7 @@ class PureChild extends React.PureComponent {
 								// 	: { backgroundColor: 'green' }
 							]}
 						>
-							{toFarsi(value.progress) +
+							{(global.lang == 'fa' ? toFarsi(value.progress) : value.progress) +
 								(value.progress.includes('-') ? '↓' : value.progress == '' ? '' : '↑')}
 						</Text>
 					)}
@@ -852,8 +853,8 @@ class Sheet extends React.PureComponent {
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
 		/* #endregion */
 
@@ -862,6 +863,8 @@ class Sheet extends React.PureComponent {
 		let uurl = global.adress + '/pApi.asmx/getworkbook?g=&Id=' + '0' + '&p=' + param;
 		console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
+			////console.log(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -905,21 +908,572 @@ class Sheet extends React.PureComponent {
 		const { params } = navigation.state;
 
 		return {
-			headerTitle: 'ارزشیابی ماهیانه',
+			headerTitle: i18n.t('grades'),
 			headerRight: () => null,
 			headerBackTitle: 'بازگشت',
 			navigationOptions: {
 				headerBackTitle: 'Home'
 			},
 			headerTitleStyle: {
-				fontFamily: 'iransansbold',
+				fontFamily: 'iransans',
 				color: colorhead
 			}
 		};
 	};
 
 	componentDidMount() {
-		this.loadAPI();
+		if (global.lang == 'en') {
+			this.setState({
+				maindata: [
+					{
+						name: ' Humanities',
+						coursecode: '1111',
+						days: [
+							{
+								day: 'Jun',
+								grade: '13.05',
+								rclass: '12',
+								rkol: '12',
+								progress: ''
+							},
+							{
+								day: 'Feb',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							},
+							{
+								day: 'Mar',
+								grade: '9.5',
+								rclass: '11',
+								rkol: '16',
+								progress: ''
+							},
+							{
+								day: 'Apr',
+								grade: '10',
+								rclass: '1',
+								rkol: '1',
+								progress: '2.5%'
+							},
+							{
+								day: 'May',
+								grade: '19.5',
+								rclass: '11',
+								rkol: '11',
+								progress: '47.5%'
+							},
+							{
+								day: 'Jun',
+								grade: '19.25',
+								rclass: '11',
+								rkol: '11',
+								progress: '-1.25%'
+							},
+							{
+								day: 'Jul',
+								grade: '7',
+								rclass: '14',
+								rkol: '30',
+								progress: '-61.25%'
+							},
+							{
+								day: 'Aug',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							},
+							{
+								day: 'Sep',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							},
+							{
+								day: 'Oct',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							}
+						]
+					},
+					{
+						name: 'Journalism',
+						coursecode: '10011',
+						days: [
+							{
+								day: 'معدل',
+								grade: '13.8',
+								rclass: '5',
+								rkol: '13',
+								progress: ''
+							},
+							{
+								day: 'مهر',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							},
+							{
+								day: 'آبان',
+								grade: '9.75',
+								rclass: '7',
+								rkol: '7',
+								progress: ''
+							},
+							{
+								day: 'آذر',
+								grade: '10',
+								rclass: '1',
+								rkol: '1',
+								progress: '1.25%'
+							},
+							{
+								day: 'دی',
+								grade: '19.5',
+								rclass: '3',
+								rkol: '6',
+								progress: '47.5%'
+							},
+							{
+								day: 'بهمن',
+								grade: '20',
+								rclass: '1',
+								rkol: '1',
+								progress: '2.5%'
+							},
+							{
+								day: 'اسفند',
+								grade: '9.75',
+								rclass: '11',
+								rkol: '11',
+								progress: '-51.25%'
+							},
+							{
+								day: 'فروردین',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							},
+							{
+								day: 'اردیبهشت',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							},
+							{
+								day: 'خرداد',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							}
+						]
+					},
+					{
+						name: 'Literary analysis ',
+						coursecode: '10031',
+						days: [
+							{
+								day: 'معدل',
+								grade: '12.53',
+								rclass: '13',
+								rkol: '18',
+								progress: ''
+							},
+							{
+								day: 'مهر',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							},
+							{
+								day: 'آبان',
+								grade: '8',
+								rclass: '17',
+								rkol: '28',
+								progress: ''
+							},
+							{
+								day: 'آذر',
+								grade: '8.16',
+								rclass: '12',
+								rkol: '19',
+								progress: '0.8%'
+							},
+							{
+								day: 'دی',
+								grade: '18.25',
+								rclass: '13',
+								rkol: '17',
+								progress: '50.45%'
+							},
+							{
+								day: 'بهمن',
+								grade: '18.75',
+								rclass: '9',
+								rkol: '12',
+								progress: '2.5%'
+							},
+							{
+								day: 'اسفند',
+								grade: '9.5',
+								rclass: '6',
+								rkol: '9',
+								progress: '-46.25%'
+							},
+							{
+								day: 'فروردین',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							},
+							{
+								day: 'اردیبهشت',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							},
+							{
+								day: 'خرداد',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							}
+						]
+					},
+					{
+						name: ' Poetry',
+						coursecode: '10041',
+						days: [
+							{
+								day: 'معدل',
+								grade: '19.75',
+								rclass: '10',
+								rkol: '10',
+								progress: ''
+							},
+							{
+								day: 'مهر',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							},
+							{
+								day: 'آبان',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							},
+							{
+								day: 'آذر',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							},
+							{
+								day: 'دی',
+								grade: '20',
+								rclass: '1',
+								rkol: '1',
+								progress: ''
+							},
+							{
+								day: 'بهمن',
+								grade: '19.5',
+								rclass: '10',
+								rkol: '15',
+								progress: '-2.5%'
+							},
+							{
+								day: 'اسفند',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							},
+							{
+								day: 'فروردین',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							},
+							{
+								day: 'اردیبهشت',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							},
+							{
+								day: 'خرداد',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							}
+						]
+					},
+					{
+						name: 'Popular literature',
+						coursecode: '10051',
+						days: [
+							{
+								day: 'معدل',
+								grade: '13.2',
+								rclass: '7',
+								rkol: '13',
+								progress: ''
+							},
+							{
+								day: 'مهر',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							},
+							{
+								day: 'آبان',
+								grade: '8',
+								rclass: '14',
+								rkol: '26',
+								progress: ''
+							},
+							{
+								day: 'آذر',
+								grade: '9.5',
+								rclass: '6',
+								rkol: '10',
+								progress: '7.5%'
+							},
+							{
+								day: 'دی',
+								grade: '19.5',
+								rclass: '7',
+								rkol: '14',
+								progress: '50.0%'
+							},
+							{
+								day: 'بهمن',
+								grade: '19.5',
+								rclass: '7',
+								rkol: '11',
+								progress: ''
+							},
+							{
+								day: 'اسفند',
+								grade: '9.5',
+								rclass: '6',
+								rkol: '10',
+								progress: '-50.0%'
+							},
+							{
+								day: 'فروردین',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							},
+							{
+								day: 'اردیبهشت',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							},
+							{
+								day: 'خرداد',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							}
+						]
+					},
+					{
+						name: 'Rhetoric ',
+						coursecode: '10071',
+						days: [
+							{
+								day: 'معدل',
+								grade: '16.33',
+								rclass: '6',
+								rkol: '15',
+								progress: ''
+							},
+							{
+								day: 'مهر',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							},
+							{
+								day: 'آبان',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							},
+							{
+								day: 'آذر',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							},
+							{
+								day: 'دی',
+								grade: '20',
+								rclass: '1',
+								rkol: '1',
+								progress: ''
+							},
+							{
+								day: 'بهمن',
+								grade: '19',
+								rclass: '6',
+								rkol: '15',
+								progress: '-5.%'
+							},
+							{
+								day: 'اسفند',
+								grade: '10',
+								rclass: '1',
+								rkol: '1',
+								progress: '-45.%'
+							},
+							{
+								day: 'فروردین',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							},
+							{
+								day: 'اردیبهشت',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							},
+							{
+								day: 'خرداد',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							}
+						]
+					},
+					{
+						name: 'Technical writing',
+						coursecode: '10081',
+						days: [
+							{
+								day: 'معدل',
+								grade: '13.83',
+								rclass: '3',
+								rkol: '3',
+								progress: ''
+							},
+							{
+								day: 'مهر',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							},
+							{
+								day: 'آبان',
+								grade: '10',
+								rclass: '1',
+								rkol: '1',
+								progress: ''
+							},
+							{
+								day: 'آذر',
+								grade: '8.75',
+								rclass: '8',
+								rkol: '27',
+								progress: '-6.25%'
+							},
+							{
+								day: 'دی',
+								grade: '20',
+								rclass: '1',
+								rkol: '1',
+								progress: '56.25%'
+							},
+							{
+								day: 'بهمن',
+								grade: '18.75',
+								rclass: '5',
+								rkol: '19',
+								progress: '-6.25%'
+							},
+							{
+								day: 'اسفند',
+								grade: '5.5',
+								rclass: '11',
+								rkol: '38',
+								progress: '-66.25%'
+							},
+							{
+								day: 'فروردین',
+								grade: '20',
+								rclass: '1',
+								rkol: '1',
+								progress: '72.5%'
+							},
+							{
+								day: 'اردیبهشت',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							},
+							{
+								day: 'خرداد',
+								grade: '',
+								rclass: '',
+								rkol: '',
+								progress: ''
+							}
+						]
+					}
+				]
+			});
+
+			this.setState((prevState) => ({
+				//maindata: retJson,
+
+				isEditing: false
+			}));
+			setTimeout(async () => {
+				this.setState({
+					count: this.state.maindata.length,
+					NUM_COLS: this.state.maindata[0].days.length
+				});
+			}, 200);
+		}
+
+		if (global.lang == 'fa') this.loadAPI();
 		this.listener = this.scrollPosition.addListener((position) => {
 			this.headerScrollView.scrollTo({ x: position.value, animated: false });
 		});
@@ -1033,7 +1587,7 @@ class Sheet extends React.PureComponent {
 					//onEndReached={this.handleScrollEndReached}
 					onEndReachedThreshold={0.005}
 				/>
-				{this.state.loading && <ActivityIndicator />}
+				{this.state.loading && <ActivityIndicator size="small" color="#000" />}
 
 				<Modalm
 					animationInTiming={0.1}
@@ -1095,6 +1649,27 @@ class Sheet extends React.PureComponent {
 						<Workbookdt />
 					</View>
 				</Modalm>
+				<Snackbar
+					visible={this.state.issnackin}
+					onDismiss={() => this.setState({ issnackin: false })}
+					style={{ backgroundColor: 'red', fontFamily: 'iransans' }}
+					wrapperStyle={{ fontFamily: 'iransans' }}
+					action={{
+						label: 'بستن',
+						onPress: () => {
+							this.setState({ issnackin: false });
+							this.setState(
+								{
+									//  loading: false,
+									//  save_loading: false
+								}
+							);
+							//this.props.navigation.goBack(null);
+						}
+					}}
+				>
+					{'لطفا دسترسی به اینترنت را چک کنید'}
+				</Snackbar>
 			</View>
 		);
 	}

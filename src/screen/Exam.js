@@ -3,11 +3,12 @@ import * as ImageManipulator from 'expo-image-manipulator';
 import { StyleSheet, TextInput, Alert, Dimensions, Animated, Button } from 'react-native';
 import defaultStyles from '../config/styles';
 import { Snackbar } from 'react-native-paper';
+import { RFPercentage, RFValue } from 'react-native-responsive-fontsize';
 
 import { WebView } from 'react-native-webview';
 import Swiper from 'react-native-swiper';
 import * as Permissions from 'expo-permissions';
-import { Modal, YellowBox, BackHandler } from 'react-native';
+import { Modal, BackHandler } from 'react-native';
 import InputSpinner from 'react-native-input-spinner';
 import ImageViewer from 'react-native-image-zoom-viewer';
 
@@ -45,7 +46,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { RadioButton } from 'react-native-paper';
 import NetInfo from '@react-native-community/netinfo';
 
-import { userInfo, toFarsi, getHttpAdress, isNet } from '../components/DB';
+import { userInfo, toFarsi, encrypt, getHttpAdress, isNet } from '../components/DB';
 import {
 	FlatList,
 	ScrollView,
@@ -105,6 +106,7 @@ class Exam extends Component {
 
 		(this.page = 1),
 			(this.state = {
+				loadingTemp: false,
 				recDelete: [],
 				firstplay: false,
 				colsecamera: 'بستن دوربین',
@@ -142,7 +144,7 @@ class Exam extends Component {
 		this.uurl = '';
 	}
 
-	static navigationOptions = ({ navigation }) => {
+	static navigationOptions1 = ({ navigation }) => {
 		const { params } = navigation.state;
 
 		return {
@@ -150,7 +152,7 @@ class Exam extends Component {
 			headerLeft: null,
 			headerRight: () => (
 				<TouchableOpacity
-					style={{ borderRadius: 5, backgroundColor: 'red' }}
+					style={{ borderRadius: 5, backgroundColor: '#db503d', marginEnd: 10 }}
 					onPress={async () => {
 						//const { navigation } = this.props;
 						//YellowBox.ignoreWarnings([ 'Animated: `useNativeDriver`' ]);
@@ -222,8 +224,9 @@ class Exam extends Component {
 
 							borderRadius: 3,
 							paddingBottom: 3,
-							fontSize: 11,
+							fontSize: 12.2,
 							marginEnd: 10,
+							marginStart: 10,
 							fontFamily: 'iransans'
 						}}
 					>
@@ -236,6 +239,12 @@ class Exam extends Component {
 			}
 		};
 	};
+
+	static navigationOptions = ({ navigation, screenProps }) => ({
+		headerRight: navigation.state.params ? navigation.state.params.headerRight : null,
+		headerTitle: navigation.state.params ? navigation.state.params.headerTitle : null,
+		headerLeft: null
+	});
 
 	// static navigationOptions = {
 	// 	//To set the header image and title for the current Screen
@@ -284,11 +293,13 @@ class Exam extends Component {
 			this.examID +
 			'&istest=' +
 			global.ttype;
-		console.log(uurl);
+		////////console.log(uurl);
 
 		//return;
 
 		try {
+			uurl = encrypt(uurl);
+			//////console.log(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -348,6 +359,106 @@ class Exam extends Component {
 		}
 	};
 
+	apiPostTemp = async (jsonstr) => {
+		//alert();
+		/* #region  check internet */
+		//alert(isNet());
+		let state = await NetInfo.fetch();
+		if (!state.isConnected) {
+			this.setState({ issnackin: true });
+			return;
+		}
+		// console.log('1');
+		// if (!isNet) {
+		//	this.setState({ issnackin: true });
+		// 	return;
+		// }
+		// /* #endregion */
+		// console.log('1');
+
+		this.setState({ loadingTemp: true });
+		//this.setState({ loading: true, save_loading: true });
+
+		let param = userInfo();
+		//return;
+		//global.examID = '26668';
+		//global.adress = 'http://192.168.1.12:8080/';
+		let uurl =
+			global.adress +
+			'/pApi.asmx/setExamStdTemp?p=' +
+			param +
+			'&json=' +
+			jsonstr +
+			'&formid=' +
+			this.examID +
+			'&istest=' +
+			global.ttype;
+		////////console.log(uurl);
+
+		//return;
+
+		try {
+			//uurl = encrypt(uurl);
+			//console.log(uurl);
+			const response = await fetch(uurl);
+			if (response.ok) {
+				let retJson = await response.json();
+				if (Object.keys(retJson).length == 0) {
+					this.setState({
+						loading: false,
+						save_loading: false
+					});
+					return;
+				}
+				//alert(retJson.msg);
+				this.setState({
+					//fulldata: retJson,
+					//butcaption: retJson.msg,
+					loadingTemp: false
+					//save_loading: false
+				});
+
+				//this.setState({ issnack: true, msg: retJson.msg });
+
+				// if (retJson.result == 'ok')
+				// 	setTimeout(async () => {
+				// 		this.props.navigation.goBack(null);
+				// 	}, 3000);
+
+				// Alert.alert(
+				// 	'ثبت آزمون',
+				// 	retJson.msg,
+				// 	[
+				// 		{
+				// 			text: 'تایید',
+				// 			onPress: () => this.props.navigation.goBack(null),
+				// 			style: 'cancel'
+				// 		}
+				// 	],
+				// 	{ cancelable: false }
+				// );
+				//alert(retJson[0].id_azmoon);
+
+				// const elementsIndex = this.state.answers.findIndex((element) => element.id == '125-7');
+				// let newArray = [ ...this.state.answers ];
+				// newArray[elementsIndex] = { ...newArray[elementsIndex], pasokh: '666' };
+				// this.setState({
+				// 	answers: newArray
+				// });
+
+				// console.log(this.state.answers);
+			}
+		} catch (e) {
+			//console.log('err');
+			//this.dropDownAlertRef.alertWithType('error', 'پیام', 'خطادر دستیابی به اطلاعات');
+			this.setState({
+				loadingTemp: false
+				//save_loading: false
+			});
+			return;
+		}
+	};
+
 	apiPostTashih = async (jsonstr) => {
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
@@ -373,7 +484,7 @@ class Exam extends Component {
 			global.ttype +
 			'&std=' +
 			this.activeStd;
-		console.log(uurl);
+		////////console.log(uurl);
 
 		//const { navigate } = this.props.navigation;
 
@@ -394,6 +505,8 @@ class Exam extends Component {
 		//return;
 
 		try {
+			uurl = encrypt(uurl);
+			//////console.log(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -481,10 +594,125 @@ class Exam extends Component {
 		//alert();
 	}
 	async componentDidMount() {
-		BackHandler.addEventListener('hardwareBackPress', this.handleBackButton);
+		this.props.navigation.setParams({
+			headerTitle: '',
+			headerLeft: null,
+			headerRight: () => (
+				<View style={{ flexDirection: 'row' }}>
+					{this.state.loadingTemp == true && <ActivityIndicator size="small" />}
+					<TouchableOpacity
+						style={{ borderRadius: 5, backgroundColor: '#7ac968', marginEnd: 10 }}
+						onPress={async () => {
+							this.examMode = navigation.getParam('mode');
+
+							let objJsonB64 = Buffer.from(JSON.stringify(this.state.fulldata)).toString('base64');
+
+							let ret = global.schoolcode + ',' + global.username + ',';
+							let newArray = this.state.fulldata.map(function(item) {
+								ret += item.id + ',^';
+								let sss = item.Soals.map(function(qq) {
+									ret +=
+										'soal' +
+										qq.id_soal +
+										'`' +
+										qq._pasokh +
+										'`' +
+										qq._recServer.replace('Uploaded file: ', '') +
+										'~';
+
+									return qq;
+								});
+
+								return item;
+							});
+
+							let attachment = '';
+							this.state.elsaghArr.map((item) => {
+								attachment += item.serverurl.replace('Uploaded file: ', '') + '`';
+							});
+							ret += '|' + attachment;
+
+							objJsonB64 = Buffer.from(JSON.stringify(ret)).toString('base64');
+							//this.setState({ loadingTemp: true });
+
+							this.apiPostTemp(JSON.stringify(objJsonB64));
+							return;
+						}}
+					>
+						<Text
+							style={{
+								color: 'white',
+
+								borderRadius: 3,
+								paddingBottom: 3,
+								fontSize: 12.2,
+								marginEnd: 10,
+								marginStart: 10,
+								fontFamily: 'iransans'
+							}}
+						>
+							ذخیره موقت
+						</Text>
+					</TouchableOpacity>
+
+					<TouchableOpacity
+						style={{ borderRadius: 5, backgroundColor: '#db503d', marginEnd: 10 }}
+						onPress={async () => {
+							//alert();
+							this.examMode = navigation.getParam('mode');
+
+							if (this.examMode == 'start') {
+								Alert.alert(
+									' اخطار',
+									'آیا مایل به خروج از آزمون هستید؟',
+									[
+										{
+											text: 'بله',
+											onPress: async () => {
+												navigation.goBack(null);
+											},
+											style: 'cancel'
+										},
+										{
+											text: 'خیر',
+											onPress: () => console.log('Cancel Pressed'),
+											style: 'cancel'
+										}
+									],
+									{ cancelable: false }
+								);
+							} else {
+								navigation.goBack(null);
+							}
+						}}
+					>
+						<Text
+							style={{
+								color: 'white',
+
+								borderRadius: 3,
+								paddingBottom: 3,
+								fontSize: 12.2,
+								marginEnd: 10,
+								marginStart: 10,
+								fontFamily: 'iransans'
+							}}
+						>
+							خروج از آزمون
+						</Text>
+					</TouchableOpacity>
+				</View>
+			)
+		});
+
+		BackHandler.addEventListener('hardwareBackPress', () => {
+			//	alert();
+			return true;
+		});
+		//	BackHandler.addEventListener('hardwareBackPress', this.handleBackButton);
 		//alert();
 		const { navigation } = this.props;
-		YellowBox.ignoreWarnings([ 'Animated: `useNativeDriver`' ]);
+		//LogBox.ignore([ 'Animated: `useNativeDriver`' ]);
 		this.examID = navigation.getParam('examID');
 		this.examMode = navigation.getParam('mode');
 		this.activeStd = navigation.getParam('std');
@@ -517,6 +745,7 @@ class Exam extends Component {
 			global.adress + '/pApi.asmx/getExambody?id=' + this.examID + '&p=' + param + '&exammode=' + this.examMode;
 		console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -851,7 +1080,7 @@ class Exam extends Component {
 		if (true) {
 			//console.log(global.adress.replace(':8080', '') + '' + ':8181' + '/api/upload');
 			//let url = url;
-			//	console.log('majmaj:' + url);
+			///console.log('majmaj:' + url);
 
 			const xhr = new XMLHttpRequest();
 			//xhr.open('POST', global.adress.replace(':8080', '') + '' + ':8181' + '/api/upload');
@@ -932,7 +1161,10 @@ class Exam extends Component {
 	handleUploadGalleryPhoto = async (url) => {
 		//alert(url);
 		//console.log(photo.uri);
-		let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
+		let permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+		//><
+		//alert(permissionResult)
+
 		if (permissionResult.granted === false) {
 			alert('Permission to access camera roll is required!');
 			return;
@@ -1054,6 +1286,9 @@ class Exam extends Component {
 	// };
 	_askForPermissions = async () => {
 		const response = await Permissions.askAsync(Permissions.AUDIO_RECORDING);
+		//><
+		//alert(response)
+
 		this.setState({
 			haveRecordingPermissions: response.status === 'granted'
 		});
@@ -1218,6 +1453,7 @@ class Exam extends Component {
 		});
 	};
 	_onPlayPausePressed = (url) => {
+		console.log(url);
 		if (this.state.Sindex == 0 && this.state.firstplay == false) {
 			//console.log(this.sound);
 			this.changeQuestion(url);
@@ -1259,13 +1495,13 @@ class Exam extends Component {
 	};
 
 	playSound(name, sound) {
-		console.log('Playing ' + name);
+		//console.log('Playing ' + name);
 		Audio.Sound
 			.createAsync(sound, { shouldPlay: true })
 			.then((res) => {
 				res.sound.setOnPlaybackStatusUpdate((status) => {
 					if (!status.didJustFinish) return;
-					console.log('Unloading ' + name);
+					//	console.log('Unloading ' + name);
 					res.sound.unloadAsync().catch(() => {});
 				});
 			})
@@ -1321,7 +1557,7 @@ class Exam extends Component {
 			if (!uuri.includes('file://')) uuri = getHttpAdress() + 'azmoon/' + uuri;
 			//	console.log(uuri);
 			//return;
-
+			console.log(uuri);
 			const { sound, status } = await Audio.Sound.createAsync(
 				{ uri: uuri },
 				initialStatus,
@@ -1333,14 +1569,14 @@ class Exam extends Component {
 			//	this._updateScreenForSoundStatus;
 		}
 		//this.sound.playAsync();
-		console.log('changed');
+		//console.log('changed');
 		//	this._getRecordingTimestamp();
 		//this.sound.setPositionAsync(0);
 		//this.sound.stopAsync();
 	}
 	async _stopRecordingAndEnablePlayback(id_soal) {
 		//	alert(id_soal);
-		console.log('stop');
+		//	console.log('stop');
 		this.setState({
 			isLoading: true
 		});
@@ -1509,8 +1745,8 @@ class Exam extends Component {
 
 				_imageuri
 			} = this.state.fulldata[0].Soals[this.state.Sindex];
-
-			global.activeMp3 = getHttpAdress() + 'azmoon/' + file1;
+			if (file1.split('.').pop() == 'mp3') global.activeMp3 = getHttpAdress() + 'azmoon/' + file1;
+			if (ax.split('.').pop() == 'mp3') global.activeMp3 = getHttpAdress() + 'azmoon/' + ax;
 			const {
 				recordvoice,
 				them_id,
@@ -1576,7 +1812,7 @@ class Exam extends Component {
 										// );
 									}}
 								>
-									<Text style={{ fontSize: 18, marginBottom: 10, color: 'white' }}>
+									<Text style={{ fontSize: 12.2, marginBottom: 10, color: 'white' }}>
 										{' '}
 										{this.state.colsecamera}{' '}
 									</Text>
@@ -2034,7 +2270,7 @@ class Exam extends Component {
 												<Animated.Text
 													style={{
 														color: animatedColor,
-														fontSize: 17,
+														fontSize: 12.2,
 														fontWeight: 'bold',
 														fontFamily: 'iransans'
 													}}
@@ -2305,23 +2541,29 @@ class Exam extends Component {
 									>
 										{(direction == 'rtl' || direction == '') &&
 										speed != 'pdf' && (
-											<HTML
-												html={
-													'<span style="color:#1f9efd;text-align:left;direction:rtl;font-family:iransansbold;font-size:15;line-height:35px" >' +
-													soal +
-													'</span>'
-												}
-											/>
+											<ScrollView>
+												<HTML
+													key={id_soal}
+													imagesMaxWidth={Dimensions.get('window').width}
+													html={
+														'<span style="border-width:0;;color:#1f9efd;text-align:left;direction:rtl;font-family:iransans;font-size:14;line-height:35px" >' +
+														soal +
+														'</span>'
+													}
+												/>
+											</ScrollView>
 										)}
 										{direction == 'ltr' &&
 										speed != 'pdf' && (
-											<HTML
-												html={
-													'<span style="color:#1f9efd;text-align:left;direction:ltr;font-family:iransansbold;font-size:15;line-height:35px" >' +
-													soal +
-													'</span>'
-												}
-											/>
+											<ScrollView>
+												<HTML
+													html={
+														'<span style="border-width:0;;color:#1f9efd;text-align:left;direction:ltr;font-family:iransans;font-size:15;line-height:35px" >' +
+														soal +
+														'</span>'
+													}
+												/>
+											</ScrollView>
 										)}
 
 										{ax != '' &&
@@ -2329,7 +2571,15 @@ class Exam extends Component {
 												<View style={styles.p1}>
 													{/* key={Math.floor(Math.random() * 100)} */}
 													<TouchableOpacity
-														style={styles.soalimg}
+														//style={styles.soalimg}
+														style={{
+															borderRadius: 15,
+															width: '100%',
+															paddingBottom: 5,
+															paddingTop: 5,
+															borderWidth: 0,
+															alignSelf: 'center'
+														}}
 														onPress={() => {
 															this.handleimgclick(ax);
 														}}
@@ -2341,46 +2591,52 @@ class Exam extends Component {
 															backgroundColor="#001"
 														> */}
 														<Image
-															borderRadius={15}
-															source={{ uri: getHttpAdress() + 'azmoon/' + ax + '' }}
-															style={{
-																width: '100%',
-																height: '100%',
-																borderWidth: 1,
-																borderColor: '#ccc'
-															}}
+															style={[
+																styles.contain,
+																{
+																	paddingTop: 5,
+																	flex: 1,
+																	//borderRadius: 15,
+																	borderWidth: 0,
+																	//borderColor: '#ccc',
+																	shadowOffset: {
+																		width: 1,
+																		height: 2
+																	},
+																	width: '100%',
+																	shadowOpacity: 0.57,
+																	shadowRadius: 2.49
+																	//	elevation: 3
+																}
+															]}
 															resizeMode="contain"
+															source={{ uri: getHttpAdress() + 'azmoon/' + ax + '' }}
 														/>
 														{/* //</Lightbox> */}
 													</TouchableOpacity>
 												</View>
 											))}
-
-										{file1 != '' &&
-											(file1.split('.').pop() == 'mp3' && (
-												// key={Math.floor(Math.random() * 100)}
-												<View style={styles.p1}>
-													<TouchableOpacity
-														onPress={() => {
-															GLOBAL.main.setState({
-																isAudioVisible: true
-															});
-														}}
-														style={{
-															margin: 5,
-															width: '100%',
-															height: 110,
-															alignItems: 'center'
-														}}
-													>
-														<AntDesign
-															name="playcircleo"
-															size={57}
-															style={styles.massage}
-														/>
-													</TouchableOpacity>
-												</View>
-											))}
+										{/* file1 != '' && */}
+										{(file1.split('.').pop() == 'mp3' || ax.split('.').pop() == 'mp3') && (
+											// key={Math.floor(Math.random() * 100)}
+											<View style={styles.p1}>
+												<TouchableOpacity
+													onPress={() => {
+														GLOBAL.main.setState({
+															isAudioVisible: true
+														});
+													}}
+													style={{
+														margin: 5,
+														width: '100%',
+														height: 110,
+														alignItems: 'center'
+													}}
+												>
+													<AntDesign name="playcircleo" size={57} style={styles.massage} />
+												</TouchableOpacity>
+											</View>
+										)}
 										{imgResponse == 'True' && (
 											<View style={styles.p2}>
 												<View>
@@ -2394,7 +2650,7 @@ class Exam extends Component {
 														}}
 														buttonColor="white"
 														borderColor="white"
-														fontSizeb={14}
+														fontSizeb={12.2}
 														heightb={40}
 														borderRadiusb={10}
 														style={{ marginTop: 0 }}
@@ -2487,7 +2743,17 @@ class Exam extends Component {
 													inputStyle={[
 														defaultStyles.inputStyle,
 
-														{ padding: 10, textAlign: 'right', height: 190 }
+														{
+															padding: 10,
+															textAlign: 'right',
+															height: 190,
+
+															direction:
+																direction != '' && direction != undefined
+																	? direction
+																	: 'ltr',
+															textAlign: direction == 'rtl' ? 'right' : 'left'
+														}
 													]}
 													//label={item.caption}
 													//placeholder={item.placeholder}
@@ -2732,7 +2998,7 @@ class Exam extends Component {
 											}}
 											buttonColor="white"
 											borderColor="white"
-											fontSizeb={14}
+											fontSizeb={12.2}
 											heightb={40}
 											borderRadiusb={10}
 											widthb={180}
@@ -2820,7 +3086,7 @@ class Exam extends Component {
 												}}
 												buttonColor="white"
 												borderColor="white"
-												fontSizeb={14}
+												fontSizeb={12.2}
 												heightb={40}
 												borderRadiusb={10}
 												//widthb={180}
@@ -2909,7 +3175,7 @@ class Exam extends Component {
 												}}
 												buttonColor="#1f9efd"
 												borderColor="white"
-												fontSizeb={14}
+												fontSizeb={12.2}
 												heightb={40}
 												borderRadiusb={10}
 												//widthb={180}
@@ -2993,7 +3259,7 @@ class Exam extends Component {
 											iconRight
 											buttonColor="#1f9efd"
 											borderColor="white"
-											fontSizeb={14}
+											fontSizeb={12.2}
 											heightb={40}
 											//widthb={180}
 											borderRadiusb={10}
@@ -3019,7 +3285,7 @@ class Exam extends Component {
 											buttonColor="#1f9efd"
 											borderColor="white"
 											backgroundColor="#e3f1fc"
-											fontSizeb={14}
+											fontSizeb={12.2}
 											heightb={40}
 											//widthb={180}
 											borderRadiusb={10}
@@ -3136,7 +3402,7 @@ class Exam extends Component {
 								widthb={'100%'}
 								buttonColor="white"
 								borderColor="white"
-								fontSizeb={14}
+								fontSizeb={12.2}
 								heightb={40}
 								borderRadiusb={10}
 								style={{ marginTop: 0 }}
@@ -3292,7 +3558,7 @@ class Exam extends Component {
 										borderColor="white"
 										icon={<Icon1 name="close" size={15} color="#1f9efd" />}
 										backgroundColor="#e3f1fc"
-										fontSizeb={14}
+										fontSizeb={12.2}
 										heightb={40}
 										borderRadiusb={10}
 										//style={{ marginTop: 0, flex: 1 }}
@@ -3415,8 +3681,10 @@ const styles = StyleSheet.create({
 	},
 	soalimg: {
 		margin: 5,
-		width: 600 / 3 - 17,
+		//	width: 600 / 3 - 17,
+		//width: '100%',
 		height: 110
+		//flex: 1
 		//borderWidth: 1
 	},
 	p1: {
@@ -3437,7 +3705,8 @@ const styles = StyleSheet.create({
 	soalnumtext: {
 		color: 'white',
 		fontFamily: 'iransans',
-		padding: 3
+		padding: 3,
+		fontSize: 12.2
 		//backgroundColor: 'red'
 	},
 	elsaghbadge: {
@@ -3511,6 +3780,8 @@ const styles = StyleSheet.create({
 			width: 2,
 			height: 1
 		},
+		elevation: 1.5,
+
 		shadowOpacity: 0.6,
 		shadowRadius: 3
 	},
@@ -3521,7 +3792,7 @@ const styles = StyleSheet.create({
 		textAlign: 'right',
 		marginRight: 10,
 		//paddingTop: 5,
-		fontSize: 11,
+		fontSize: 12.2,
 		marginTop: 0,
 		fontFamily: 'iransans'
 	},
@@ -3572,8 +3843,8 @@ const styles = StyleSheet.create({
 			height: 3
 		},
 		shadowOpacity: 0.67,
-		shadowRadius: 3.49,
-		elevation: 1
+		shadowRadius: 3.49
+		//elevation: 1
 		//borderColor: 'red'
 	},
 	gozine: {
@@ -3628,14 +3899,14 @@ const styles = StyleSheet.create({
 		alignSelf: 'center',
 		fontFamily: 'iransans',
 		textAlign: 'center',
-		fontSize: 18,
+		fontSize: 12.2,
 		color: 'white'
 	},
 	aztitlet: {
 		alignSelf: 'center',
 		fontFamily: 'iransans',
 		textAlign: 'center',
-		fontSize: 13,
+		fontSize: 12.2,
 		borderWidth: 1,
 		padding: 1,
 		borderColor: 'white',
@@ -3643,7 +3914,7 @@ const styles = StyleSheet.create({
 		color: 'white'
 	},
 	actionButtonIcon: {
-		fontSize: 20,
+		fontSize: 12.2,
 		height: 22,
 		color: 'white'
 	},
@@ -3669,7 +3940,7 @@ const styles = StyleSheet.create({
 		alignSelf: 'center',
 		fontFamily: 'iransans',
 		color: 'black',
-		fontSize: 15
+		fontSize: 12.2
 	},
 	image2: {
 		width: 50,
@@ -3720,7 +3991,7 @@ const styles = StyleSheet.create({
 		height: 85
 	},
 	itemName: {
-		fontSize: 12,
+		fontSize: 12.2,
 		color: '#fff',
 		fontWeight: '600',
 		paddingBottom: 12,
@@ -3729,7 +4000,7 @@ const styles = StyleSheet.create({
 	},
 	itemCode: {
 		fontWeight: '600',
-		fontSize: 12,
+		fontSize: 12.2,
 		color: '#fff'
 	}
 });

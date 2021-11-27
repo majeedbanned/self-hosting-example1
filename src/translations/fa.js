@@ -12,5 +12,12 @@ export default {
 	frmPtcCaption: 'شرکت کنندگان',
 	frmListCaption: 'لیست فرم ها',
 
-	frmsrchCaption: 'جستجو'
+	frmsrchCaption: 'جستجو',
+	settingListCaption: 'تنظیمات',
+	fileListCaption: 'بانک فایل ',
+
+	addstory: 'جدید',
+	loading: 'لطفا منتظر بمانید...',
+	grades: 'نمرات ماهیانه',
+	sch: 'برنامه هفتگی'
 };

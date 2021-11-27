@@ -1,8 +1,11 @@
 import React, { PureComponent } from 'react';
-import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+import { userInfo, toFarsi, encrypt, getHttpAdress } from '../components/DB';
 import Modal from 'react-native-modalbox';
+import { Snackbar } from 'react-native-paper';
+
 import Eform2 from '../screen/modules/forms/eforms2';
 import update from 'immutability-helper';
+import Timeline from '../screens/timeline';
 
 import Loading from '../components/loading';
 import NetInfo from '@react-native-community/netinfo';
@@ -49,7 +52,7 @@ const black = '#000';
 const white = '#fff';
 
 const styles = StyleSheet.create({
-	container: { backgroundColor: 'white', marginVertical: 0, marginBottom: 110 },
+	container: { backgroundColor: 'white', marginVertical: 0, marginBottom: 80 },
 	header: { flexDirection: 'row', borderTopWidth: 0, borderColor: black },
 	identity: { position: 'absolute' },
 	// width: CELL_WIDTH
@@ -282,7 +285,7 @@ class monthgrade extends React.PureComponent {
 				headerBackTitle: 'Home'
 			},
 			headerTitleStyle: {
-				fontFamily: 'iransansbold'
+				fontFamily: 'iransans'
 				//color: this.state.colorhead
 			}
 		};
@@ -354,6 +357,7 @@ class monthgrade extends React.PureComponent {
 				<PureChild
 					identity={this.state.maindata[col].coursecode}
 					col1={col}
+					row1={row}
 					value1={value}
 					//hozor={value.hozor}
 					CELL_WIDTH={this.state.CELL_WIDTH}
@@ -367,53 +371,66 @@ class monthgrade extends React.PureComponent {
 	formatCellIdentitiy(col, row, value, name, lname) {
 		//console.log(col + '-' + value);
 		return (
-			<View
+			<TouchableOpacity
 				key={col + '-' + value}
-				style={[
-					styles.cellidentity,
-					{ width: this.state.FIRST_CELL_WIDTH, borderWidth: 0, height: this.state.CELL_HEIGHT }
-				]}
+				onPress={() => {
+					//alert(value);
+					//this.loadDiary(value);
+					this.std = value;
+					this.setState({ std: value });
+					//alert(this.std);
+					this.refs.modaltime.open();
+				}}
+				style={styles.cellidentity}
 			>
-				{/* <TouchableOpacity
+				<View
+					key={col + '-' + value}
+					style={[
+						styles.cellidentity,
+						{ width: this.state.FIRST_CELL_WIDTH, borderWidth: 0, height: this.state.CELL_HEIGHT }
+					]}
+				>
+					{/* <TouchableOpacity
 					onPress={() => {
 						alert(value);
 					}}
 					style={styles.cellidentity}
 				> */}
-				<View
-					key={col + '-' + value}
-					style={{
-						backgroundColor: this.state.IDENTITY_COLOR,
-						flex: 1,
-						alignItems: 'center',
-						justifyContent: 'center',
-						width: this.state.FIRST_CELL_WIDTH,
-						borderRadius: 5,
-						borderBottomWidth: 0,
-						margin: 2
-					}}
-				>
-					{/* <Text>{value}</Text> */}
-					<Text
-						numberOfLines={2}
-						style={[
-							styles.cap,
-							{
-								fontSize: 12,
-								color: 'white',
-								borderWidth: 0,
-								//	width: 80,
-								textAlign: 'center'
-								//transform: [ { rotate: '270deg' } ]
-							}
-						]}
+					<View
+						key={col + '-' + value}
+						style={{
+							backgroundColor: this.state.IDENTITY_COLOR,
+							flex: 1,
+							alignItems: 'center',
+							justifyContent: 'center',
+							width: this.state.FIRST_CELL_WIDTH,
+							borderRadius: 5,
+							borderBottomWidth: 0,
+							margin: 2
+						}}
 					>
-						{toFarsi(name)}
-					</Text>
-					{/* <Text>{lname}</Text> */}
+						{/* <Text>{value}</Text> */}
+						<Text
+							numberOfLines={2}
+							style={[
+								styles.cap,
+								{
+									fontSize: 12,
+									color: 'white',
+									borderWidth: 0,
+									//	width: 80,
+									textAlign: 'center'
+									//transform: [ { rotate: '270deg' } ]
+								}
+							]}
+						>
+							{toFarsi(name)}
+						</Text>
+						{/* <Text>{lname}</Text> */}
+					</View>
+					{/* </TouchableOpacity> */}
 				</View>
-				{/* </TouchableOpacity> */}
-			</View>
+			</TouchableOpacity>
 		);
 	}
 
@@ -511,7 +528,7 @@ class monthgrade extends React.PureComponent {
 				this.formatCellIdentitiy(
 					i,
 					'fix',
-					this.state.maindata[i] == null ? 'nol' : this.state.maindata[i].studentcode,
+					this.state.maindata[i] == null ? 'nol' : this.state.maindata[i].std,
 					this.state.maindata[i] == null ? 'nol' : this.state.maindata[i].name,
 					this.state.maindata[i] == null ? 'nol' : this.state.maindata[i].lname
 				)
@@ -591,12 +608,11 @@ class monthgrade extends React.PureComponent {
 		}
 
 		/* #region  check internet */
-		let state = await NetInfo.fetch();
 
+		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			//alert(state.isConnected);
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
 		/* #endregion */
 
@@ -611,8 +627,9 @@ class monthgrade extends React.PureComponent {
 			'&g=' +
 			this.state.selectedItem +
 			'&mode=list';
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -654,13 +671,14 @@ class monthgrade extends React.PureComponent {
 			GLOBAL.main.setState({ isModalVisible: true });
 		}
 		/* #region  check internet */
+
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
 		/* #endregion */
-
+		//alert();
 		this.setState({ loading: true });
 		let param = userInfo();
 		let uurl =
@@ -677,6 +695,8 @@ class monthgrade extends React.PureComponent {
 			this.groupcode;
 		console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
+			//////console.log(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -741,10 +761,11 @@ class monthgrade extends React.PureComponent {
 			GLOBAL.main.setState({ isModalVisible: true });
 		}
 		/* #region  check internet */
+
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
 		/* #endregion */
 
@@ -760,8 +781,9 @@ class monthgrade extends React.PureComponent {
 			this.state.selectedItem +
 			'&ext=' +
 			idaz;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -1010,7 +1032,9 @@ class monthgrade extends React.PureComponent {
 											</Text>
 
 											{this.state.selectedItem !== item.id ||
-												(this.state.dataLoading && <ActivityIndicator color="white" />)}
+												(this.state.dataLoading && (
+													<ActivityIndicator size="small" color="#000" />
+												))}
 										</View>
 									</TouchableOpacity>
 								);
@@ -1110,6 +1134,31 @@ class monthgrade extends React.PureComponent {
 								justifyContent: 'center',
 								alignItems: 'center',
 								alignSelf: 'stretch',
+								height: '80%'
+							}
+						]}
+						entry={'top'}
+						animationDuration={400}
+						position={'center'}
+						ref={'modaltime'}
+						//swipeToClose={this.state.swipeToClose}
+						swipeToClose={false}
+						onClosed={this.onClose}
+						onOpened={this.onOpen}
+						onClosingState={this.onClosingState}
+					>
+						<View style={{ flex: 1, width: '100%', borderWidth: 1 }}>
+							<Timeline std1={this.state.std} groupcode={this.groupcode} coursecode={this.coursecode} />
+						</View>
+					</Modal>
+
+					<Modal
+						style={[
+							{
+								borderRadius: 25,
+								justifyContent: 'center',
+								alignItems: 'center',
+								alignSelf: 'stretch',
 								height: 260
 							}
 						]}
@@ -1174,6 +1223,28 @@ class monthgrade extends React.PureComponent {
 							<Icon name="printer" style={styles.actionButtonIcon} />
 						</ActionButton>
 					)}
+
+					<Snackbar
+						visible={this.state.issnackin}
+						onDismiss={() => this.setState({ issnackin: false })}
+						style={{ backgroundColor: 'red', fontFamily: 'iransans' }}
+						wrapperStyle={{ fontFamily: 'iransans' }}
+						action={{
+							label: 'بستن',
+							onPress: () => {
+								this.setState({ issnackin: false });
+								this.setState(
+									{
+										//  loading: false,
+										//  save_loading: false
+									}
+								);
+								//this.props.navigation.goBack(null);
+							}
+						}}
+					>
+						{'لطفا دسترسی به اینترنت را چک کنید'}
+					</Snackbar>
 				</View>
 			);
 	}

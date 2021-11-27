@@ -1,34 +1,40 @@
 import React, { Component } from 'react';
 import { StyleSheet, Linking, ActivityIndicator, SafeAreaView } from 'react-native';
 import ActionButton from 'react-native-action-button';
+import { SearchBar } from 'react-native-elements';
+
 import defaultStyles from '../../../config/styles';
+import { RFPercentage, RFValue } from 'react-native-responsive-fontsize';
 import Loading from '../../../components/loading';
 import DropdownAlert from 'react-native-dropdownalert';
+//import { RFPercentage, RFValue } from 'react-native-responsive-fontsize';
+
+import { Snackbar } from 'react-native-paper';
 import { withNavigation } from 'react-navigation';
 import { FlatGrid } from 'react-native-super-grid';
 import Icon from 'react-native-vector-icons/Ionicons';
 import IconAnt from 'react-native-vector-icons/AntDesign';
 
 import Mstyles from '../../../components/styles';
-import FormButton from '../../../component/FormButton';
-import ExamAdd from './../../examAdd';
-import { AntDesign, Entypo } from '@expo/vector-icons';
-import { Ionicons } from '@expo/vector-icons';
-import SelectUser from './../../selectUser';
+// import FormButton from '../../../component/FormButton';
+// import ExamAdd from './../../examAdd';
+// import { AntDesign, Entypo } from '@expo/vector-icons';
+// import { Ionicons } from '@expo/vector-icons';
+// import SelectUser from './../../selectUser';
 import NetInfo from '@react-native-community/netinfo';
-import Modal, {
-	ModalTitle,
-	ModalContent,
-	ModalFooter,
-	ModalButton,
-	SlideAnimation,
-	ScaleAnimation
-} from 'react-native-modals';
-import { userInfo, toFarsi, getHttpAdress } from '../../../components/DB';
+// import Modal, {
+// 	ModalTitle,
+// 	ModalContent,
+// 	ModalFooter,
+// 	ModalButton,
+// 	SlideAnimation,
+// 	ScaleAnimation
+// } from 'react-native-modals';
+import { userInfo, toFarsi, encrypt, getHttpAdress } from '../../../components/DB';
 import { FlatList, ScrollView, Image, View, Text, RefreshControl, TouchableOpacity } from 'react-native';
 import GLOBAL from './../../global';
-import { LinearGradient } from 'expo-linear-gradient';
-import { NavigationEvents } from 'react-navigation';
+// import { LinearGradient } from 'expo-linear-gradient';
+// import { NavigationEvents } from 'react-navigation';
 
 const colorhead = '#e64d3f';
 const colorlight = '#e64d3f';
@@ -39,6 +45,7 @@ class courseslist extends Component {
 		super(props);
 		(this.page = 1),
 			(this.state = {
+				searchText: '',
 				bottomModalAndTitle: false,
 				refreshing: false,
 				isModalVisible: false,
@@ -71,7 +78,7 @@ class courseslist extends Component {
 				headerBackTitle: 'Home'
 			},
 			headerTitleStyle: {
-				fontFamily: 'iransansbold',
+				fontFamily: 'iransans',
 				color: colorhead
 			}
 		};
@@ -100,11 +107,9 @@ class courseslist extends Component {
 
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
-
 		if (!state.isConnected) {
-			//alert(state.isConnected);
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
 		/* #endregion */
 
@@ -118,10 +123,13 @@ class courseslist extends Component {
 			param +
 			'&g=' +
 			this.state.selectedItem +
-			'&q='; //+
+			'&q=' +
+			this.state.searchText; //+
 		//'&mode=list';
-		console.log(uurl);
+		//////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
+			//////console.log(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -154,17 +162,26 @@ class courseslist extends Component {
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
 		/* #endregion */
 
 		this.setState({ loading: true });
 		let param = userInfo();
 		let uurl =
-			global.adress + '/pApi.asmx/courselist?id=1' + '&p=' + param + '&g=' + this.state.selectedItem + '&q=';
-		console.log(uurl);
+			global.adress +
+			'/pApi.asmx/courselist?id=1' +
+			'&p=' +
+			param +
+			'&g=' +
+			this.state.selectedItem +
+			'&q=' +
+			this.state.searchText;
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
+			//////console.log(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -211,6 +228,34 @@ class courseslist extends Component {
 			this.loadAPI(this.page, 'more');
 		}
 	};
+
+	searchFilterFunction = (text) => {
+		//alert();
+		this.setState({ searchText: text });
+		if (text == '' || text == undefined) {
+			this.page = 1;
+			this.loadAPI(1, '');
+			//this.flatListRef.scrollToOffset({ animated: true, offset: 0 });
+		}
+		if (text.length < 2) return;
+		this.page = 1;
+		this.loadAPI(1, text);
+		this.flatListRef.scrollToOffset({ animated: true, offset: 0 });
+
+		return;
+
+		const newData = this.arrayholder.filter((item) => {
+			const itemData = `${item.name}`;
+
+			//const textData = text.toUpperCase();
+
+			return itemData.indexOf(text) > -1;
+		});
+		this.setState({
+			data: newData
+		});
+	};
+
 	clickEventListener = (item) => {
 		const { navigate } = this.props.navigation;
 
@@ -234,12 +279,13 @@ class courseslist extends Component {
 		return (
 			<View style={{ backgroundColor: 'white' }}>
 				<FlatList
+					contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-start' }}
 					extraData={this.state.selectedItem}
 					data={this.state.cat}
 					keyExtractor={(item) => item.id.toString()}
 					horizontal
 					style={{
-						flexDirection: 'column-reverse',
+						flexDirection: 'row-reverse',
 						paddingBottom: 4,
 						borderWidth: 0,
 						marginTop: 4,
@@ -293,11 +339,14 @@ class courseslist extends Component {
 										style={
 											this.state.selectedItem === item.id ? (
 												{
+													fontSize: 12.2,
 													color: 'white',
 													fontFamily: 'iransans'
 												}
 											) : (
 												{
+													fontSize: 12.2,
+
 													color: colorlight,
 
 													fontFamily: 'iransans'
@@ -313,6 +362,30 @@ class courseslist extends Component {
 							</TouchableOpacity>
 						);
 					}}
+				/>
+
+				<SearchBar
+					inputContainerStyle={{ backgroundColor: '#eee' }}
+					containerStyle={{
+						flex: 2,
+						marginStart: 8,
+						marginEnd: 8,
+						//height: 25,
+						borderBottomWidth: 0,
+						backgroundColor: 'white',
+						borderTopRightRadius: 24,
+						borderTopLeftRadius: 24
+					}}
+					placeholder="جستجو"
+					inputContainerStyle={{ height: 15, backgroundColor: '#eee' }}
+					lightTheme
+					showLoading={this.state.loading}
+					round
+					inputStyle={{ textAlign: 'center', fontSize: 14, fontFamily: 'iransans' }}
+					//showLoading={this.state.loading}
+					onChangeText={(text) => this.searchFilterFunction(text)}
+					autoCorrect={false}
+					value={this.state.searchText}
 				/>
 			</View>
 		);
@@ -345,6 +418,9 @@ class courseslist extends Component {
 		return (
 			<View style={Mstyles.container}>
 				<FlatList
+					ref={(ref) => {
+						this.flatListRef = ref;
+					}}
 					ListHeaderComponent={this.renderHeader}
 					stickyHeaderIndices={[ 0 ]}
 					ListFooterComponent={this._renderFooter}
@@ -454,7 +530,7 @@ class courseslist extends Component {
 					</ActionButton>
 				) : null}
 
-				<Modal.BottomModal
+				{/* <Modal.BottomModal
 					visible={this.state.bottomModalAndTitle}
 					onTouchOutside={() => this.setState({ bottomModalAndTitle: false })}
 					height={0.4}
@@ -513,6 +589,28 @@ class courseslist extends Component {
 						/>
 					</ModalContent>
 				</Modal.BottomModal>
+	 */}
+				<Snackbar
+					visible={this.state.issnackin}
+					onDismiss={() => this.setState({ issnackin: false })}
+					style={{ backgroundColor: 'red', fontFamily: 'iransans' }}
+					wrapperStyle={{ fontFamily: 'iransans' }}
+					action={{
+						label: 'بستن',
+						onPress: () => {
+							this.setState({ issnackin: false });
+							this.setState(
+								{
+									//  loading: false,
+									//  save_loading: false
+								}
+							);
+							//this.props.navigation.goBack(null);
+						}
+					}}
+				>
+					{'لطفا دسترسی به اینترنت را چک کنید'}
+				</Snackbar>
 			</View>
 		);
 	}
@@ -553,7 +651,7 @@ const styles = StyleSheet.create({
 		},
 		shadowOpacity: 0.37,
 		shadowRadius: 2.49,
-		elevation: 1,
+		elevation: 5,
 		borderRadius: 13,
 		zIndex: 0,
 		//elevate: 0,
@@ -600,7 +698,7 @@ const styles = StyleSheet.create({
 		fontFamily: 'iransans',
 		textAlign: 'left',
 		//width: '100%',
-		fontSize: 13,
+		fontSize: 12,
 		borderWidth: 1,
 		padding: 1,
 		borderColor: 'white',

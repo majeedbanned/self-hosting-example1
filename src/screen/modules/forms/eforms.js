@@ -16,7 +16,7 @@ import RNPickerSelect from 'react-native-picker-select';
 import MultiSelect from 'react-native-multiple-select';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
-import { userInfo, getHttpAdress } from '../../../components/DB';
+import { userInfo, getHttpAdress, encrypt } from '../../../components/DB';
 import RadioItem from '../../../components/radioItem';
 import Loading from '../../../components/loading';
 import moment from 'moment-jalaali';
@@ -333,7 +333,7 @@ class eforms extends Component {
 				headerBackTitle: 'Home'
 			},
 			headerTitleStyle: {
-				fontFamily: 'iransansbold'
+				fontFamily: 'iransans'
 				//color: colorhead
 			}
 		};
@@ -352,8 +352,9 @@ class eforms extends Component {
 		this.setState({ loading: true });
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/getLimiteUpload?id=' + '1' + '&p=' + param + '&g=' + '1';
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -473,12 +474,20 @@ class eforms extends Component {
 		headerRight: navigation.state.params ? navigation.state.params.headerRight : null,
 		headerTitle: navigation.state.params ? navigation.state.params.headerTitle : null
 	});
+
+	componentWillUnmount() {
+		// fix Warning: Can't perform a React state update on an unmounted component
+		this.setState = (state, callback) => {
+			return;
+		};
+	}
+
 	componentDidMount() {
 		const { navigation } = this.props;
 		this.mode = navigation.getParam('mode');
 		this.extra = navigation.getParam('extra');
 
-		console.log('mode  :  ' + this.mode);
+		//console.log('mode  :  ' + this.mode);
 
 		this.props.navigation.setParams({
 			headerTitle: '',
@@ -641,6 +650,8 @@ class eforms extends Component {
 		console.log(uurl);
 		//alert();
 		try {
+			uurl = encrypt(uurl);
+			//console.log(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -760,10 +771,12 @@ class eforms extends Component {
 		this.setState({ loading: true });
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/getStdName?p=' + param + '&txt=' + txt;
-		console.log(uurl);
+		////////console.log(uurl);
 		//console.log('sdsdsdsdsdsds');
 
 		try {
+			uurl = encrypt(uurl);
+			//////console.log(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -853,6 +866,8 @@ class eforms extends Component {
 		//	console.log('sdsdsdsdsdsds');
 
 		try {
+			uurl = encrypt(uurl);
+			//console.log(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -916,10 +931,11 @@ class eforms extends Component {
 			this.isAdminForms +
 			'&instanceid=' +
 			eformsID;
-		console.log(uurl);
+		////////console.log(uurl);
 		//	console.log('sdsdsdsdsdsds');
 
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -995,10 +1011,11 @@ class eforms extends Component {
 			fill +
 			'&id=' +
 			id;
-		console.log(uurl);
+		////////console.log(uurl);
 		//console.log('sdsdsdsdsdsds');
 
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -1035,7 +1052,7 @@ class eforms extends Component {
 				// }));
 			}
 		} catch (e) {
-			console.log('err999999');
+			//console.log('err999999');
 			this.dropDownAlertRef.alertWithType('error', 'پیام', 'خطادر دستیابی به اطلاعات');
 			this.setState({
 				loading: false
@@ -1105,8 +1122,10 @@ class eforms extends Component {
 			this.isAdminForms +
 			'&extra=' +
 			this.extra;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
+			console.log(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -1155,7 +1174,7 @@ class eforms extends Component {
 				// console.log(this.state.answers);
 			}
 		} catch (e) {
-			console.log('err9999999');
+			//console.log('err9999999');
 			//this.dropDownAlertRef.alertWithType('error', 'پیام', 'خطادر دستیابی به اطلاعات');
 			this.setState({
 				loading: false,
@@ -1182,7 +1201,7 @@ class eforms extends Component {
 	};
 
 	onAddItem = (newItemsList) => {
-		console.log('onAddItem - newItemsList: ', newItemsList);
+		///console.log('onAddItem - newItemsList: ', newItemsList);
 		this.setState({
 			selectText: newItemsList[newItemsList.length - 1],
 			itemsList: newItemsList,
@@ -1209,12 +1228,18 @@ class eforms extends Component {
 		let url = '';
 		const picked = await DocumentPicker.getDocumentAsync({
 			type: '*/*',
-			copyToCacheDirectory: true
+			copyToCacheDirectory: false
 		});
+		const uri = FileSystem.documentDirectory + picked.name;
+		await FileSystem.copyAsync({
+			from: picked.uri,
+			to: uri
+		});
+		//alert(picked);
 		if (picked.type === 'cancel') {
 			return;
 		} else if (picked.type === 'success') {
-			console.log('pp:' + picked.size);
+			//	console.log('pp:' + picked.size);
 			const { name } = picked;
 			const { size } = picked;
 			if (size > this.state.formikDefault[item.maxSize]) {
@@ -1235,9 +1260,9 @@ class eforms extends Component {
 
 				return;
 			}
-			console.log('fileUri');
+			//	console.log('fileUri');
 			const fileUri = `${FileSystem.documentDirectory}${name}`;
-			console.log('salam:' + fileUri);
+			//	console.log('salam:' + fileUri);
 
 			if (Platform.OS === 'ios') {
 				console.log(picked.uri);
@@ -1258,6 +1283,7 @@ class eforms extends Component {
 
 				//this.fileUpload1(pickerResult.uri);
 			}
+			url = uri;
 			//console.log('start!' + url);
 			//this.fileUpload1(pickerResult, document);
 
@@ -1266,11 +1292,11 @@ class eforms extends Component {
 			//xhr.open('POST', global.adress.replace(':8080', '') + '' + ':8181' + '/api/upload');
 			xhr.open('POST', global.adress.replace('/papi', ':8181') + '' + '' + '/api/upload');
 
-			console.log('startmajid!');
+			console.log(global.adress.replace('/papi', ':8181') + '' + '' + '/api/upload');
 			xhr.onload = () => {
-				console.log('end!');
+				//	console.log('end!');
 
-				console.log(xhr.response);
+				console.log('log:' + xhr.response);
 
 				this.setState((prevState) => ({
 					formikDefault: {
@@ -1285,7 +1311,7 @@ class eforms extends Component {
 			};
 
 			xhr.onerror = (e) => {
-				console.log(e, 'upload failed');
+				console.log(e);
 			};
 			// 4. catch for request timeout
 			xhr.ontimeout = (e) => {
@@ -1293,16 +1319,17 @@ class eforms extends Component {
 			};
 
 			const formData = new FormData();
-
+			console.log(url);
 			formData.append('file', {
 				uri: url, // this is the path to your file. see Expo ImagePicker or React Native ImagePicker
 				type: `image/jpg`, // example: image/jpg
 				name: `upload.jpg` // example: upload.jpg
 			});
 			// 6. upload the request
-			console.log('start send!');
-
+			//	console.log('start send!');
+			//console.log('sstart');
 			xhr.send(formData);
+			//console.log('eend');
 
 			this.setState((prevState) => ({
 				formikDefault: {
@@ -1317,10 +1344,12 @@ class eforms extends Component {
 
 			// 7. track upload progress
 			if (xhr.upload) {
+				console.log('uupload');
+
 				// track the upload progress
 				xhr.upload.onprogress = ({ total, loaded }) => {
 					const uploadProgress = loaded / total;
-					console.log(uploadProgress);
+					//console.log(uploadProgress);
 					// this.setState({
 					// 	file1pg: uploadProgress
 					// });
@@ -1403,12 +1432,12 @@ class eforms extends Component {
 	};
 	render() {
 		let test = [
-			{ fid: '6', name: 'کادر متنی', code: 'white', icon: 'format-line-weight', bkcolor: '#e091ca' },
-			{ fid: '7', name: 'لیست انتخابی', code: 'white', icon: 'format-line-weight', bkcolor: '#fbb97c' },
+			{ fid: '6', name: 'کادر متنی', code: 'white', icon: 'format-textbox', bkcolor: '#e091ca' },
+			{ fid: '7', name: 'لیست انتخابی', code: 'white', icon: 'format-list-numbered-rtl', bkcolor: '#fbb97c' },
 			{ fid: '11', name: 'ویرایشگر متن', code: 'white', icon: 'format-line-weight', bkcolor: '#f79383' },
-			{ fid: '8', name: 'چک باکس ', code: 'white', icon: 'format-line-weight', bkcolor: '#34ace0' },
-			{ fid: '9', name: 'بارگزاری فایل', code: 'white', icon: 'format-line-weight', bkcolor: '#34ace0' },
-			{ fid: '10', name: ' انتخاب تاریخ', code: 'white', icon: 'format-line-weight', bkcolor: '#34ace0' }
+			{ fid: '8', name: 'چک باکس ', code: 'white', icon: 'toggle-switch-off', bkcolor: '#34ace0' },
+			{ fid: '9', name: 'بارگزاری فایل', code: 'white', icon: 'file-image-outline', bkcolor: '#34ace0' },
+			{ fid: '10', name: ' انتخاب تاریخ', code: 'white', icon: 'calendar-check', bkcolor: '#34ace0' }
 			// { name: ' انتخاب ساعت', code: 'white', icon: 'md-checkmark-circle-outline', bkcolor: '#34ace0' }
 		];
 		//const { otherParam } = route.params;
@@ -1430,7 +1459,7 @@ class eforms extends Component {
 
 		let openImage1PickerAsync = async (tt) => {
 			//console.log(tt);
-			let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
+			let permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 			if (permissionResult.granted === false) {
 				alert('Permission to access camera roll is required!');
 				return;
@@ -1461,7 +1490,7 @@ class eforms extends Component {
 			return (
 				<View style={styles.container}>
 					<View style={{ justifyContent: 'center', flex: 1, flexDirection: 'column', alignItems: 'center' }}>
-						<ActivityIndicator style={{ color: 'red' }} />
+						<ActivityIndicator size="small" color="#000" />
 					</View>
 				</View>
 			);
@@ -2128,7 +2157,7 @@ class eforms extends Component {
 																activedate: item.id
 															});
 
-															console.log('ddddd:' + item.id);
+															//	console.log('ddddd:' + item.id);
 														}}
 														keyboardType="numeric"
 														//value={this.state.shoro_namayesh}
@@ -2830,7 +2859,7 @@ class eforms extends Component {
 																}
 
 																//console.log(this.state.formikDefault[item.mobileurl]);
-																let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
+																let permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 																if (permissionResult.granted === false) {
 																	alert(
 																		'Permission to access camera roll is required!'
@@ -2844,12 +2873,20 @@ class eforms extends Component {
 																		allowsMultipleSelection: true
 																	}
 																);
+																//alert('ssize');
 																if (!pickerResult.cancelled) {
+																	let ssize = 768;
+																	let qquality = 0.5;
+																	if (item.options != '') {
+																		ssize = item.options.split('|')[0];
+																		qquality = item.options.split('|')[1];
+																	}
+
 																	let pickerResultNew = await ImageManipulator.manipulateAsync(
 																		pickerResult.uri,
-																		[ { resize: { width: 768 } } ],
+																		[ { resize: { width: parseFloat(ssize) } } ],
 																		{
-																			compress: 0.5,
+																			compress: parseFloat(qquality),
 																			format: 'jpeg',
 																			base64: true
 																		}
@@ -2863,12 +2900,12 @@ class eforms extends Component {
 																	}
 
 																	//this.ImageUpload1(pickerResult.uri);
-																	console.log(
-																		global.adress.replace(':8080', '') +
-																			'' +
-																			':8181' +
-																			'/api/upload'
-																	);
+																	// console.log(
+																	// 	global.adress.replace(':8080', '') +
+																	// 		'' +
+																	// 		':8181' +
+																	// 		'/api/upload'
+																	// );
 																	let url = pickerResultNew.uri;
 																	console.log(url);
 																	const xhr = new XMLHttpRequest();
@@ -2882,6 +2919,13 @@ class eforms extends Component {
 
 																	xhr.open(
 																		'POST',
+																		global.adress.replace('/papi', ':8181') +
+																			'' +
+																			'' +
+																			'/api/upload'
+																	);
+
+																	console.log(
 																		global.adress.replace('/papi', ':8181') +
 																			'' +
 																			'' +
@@ -2913,6 +2957,7 @@ class eforms extends Component {
 																	};
 
 																	const formData = new FormData();
+																	console.log(url);
 
 																	formData.append('file', {
 																		uri: url, // this is the path to your file. see Expo ImagePicker or React Native ImagePicker
@@ -3422,6 +3467,7 @@ class eforms extends Component {
 										loading={this.state.savepress}
 										title={this.state.butcaption}
 									/>
+									<View style={{ height: 250 }} />
 								</View>
 							);
 						}}
@@ -3740,5 +3786,5 @@ const styles = StyleSheet.create({
 	}
 });
 
-console.disableYellowBox = true;
+//console.disableYellowBox = true;
 export default withNavigation(eforms);

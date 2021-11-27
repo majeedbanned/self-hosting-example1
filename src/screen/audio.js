@@ -134,7 +134,7 @@ export default class App extends React.Component {
 			)
 		];
 
-		console.log(' mp3:' + global.activeMp3);
+	//	console.log(' mp3:' + global.activeMp3);
 		Audio.setAudioModeAsync({
 			allowsRecordingIOS: false,
 			staysActiveInBackground: false,

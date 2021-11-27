@@ -3,7 +3,7 @@ import GLOBAL from './global';
 import { Alert, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { LocaleConfig, Agenda } from 'react-native-calendars-persian';
 import NetInfo from '@react-native-community/netinfo';
-import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+import { userInfo, toFarsi, encrypt, getHttpAdress } from '../components/DB';
 import { withNavigation } from 'react-navigation';
 import Icon from 'react-native-vector-icons/AntDesign';
 import { Snackbar } from 'react-native-paper';
@@ -90,9 +90,10 @@ class AgendaScreen extends Component {
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/delEvent?eid=' + eid + '&p=' + param; //+
 
-		console.log(uurl);
+		////////console.log(uurl);
 
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -197,7 +198,7 @@ class AgendaScreen extends Component {
 		return (
 			<React.Fragment>
 				<Agenda
-					jalali={true}
+					jalali={global.lang == 'fa' ? true : false}
 					firstDay={6}
 					testID={testIDs.agenda.CONTAINER}
 					// items={this.state.items}
@@ -234,15 +235,9 @@ class AgendaScreen extends Component {
 					// hideExtraDays={false}
 				/>
 				{(true && global.ttype == 'administrator') || global.ttype == 'teacher' ? (
-					<ActionButton
-						offsetX={15}
-						offsetY={15}
-						useNativeDriver
-						position="left"
-						buttonColor="rgba(231,76,60,1)"
-					>
+					<ActionButton offsetX={15} offsetY={15} useNativeDriver position="left" buttonColor="#3F51B5">
 						<ActionButton.Item
-							buttonColor="#9b59b6"
+							buttonColor="#3F51B5"
 							title="تعریف رویداد "
 							textStyle={{ fontFamily: 'iransans' }}
 							onPress={() => {

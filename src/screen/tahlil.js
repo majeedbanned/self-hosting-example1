@@ -1,8 +1,9 @@
 import React, { PureComponent } from 'react';
 import { Snackbar } from 'react-native-paper';
-import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+import { userInfo, toFarsi, encrypt, getHttpAdress } from '../components/DB';
 import { WebView } from 'react-native-webview';
 import Modal from 'react-native-modalbox';
+import { RFPercentage, RFValue } from 'react-native-responsive-fontsize';
 import Loading from '../components/loading';
 import NetInfo from '@react-native-community/netinfo';
 import { REAL_WINDOW_HEIGHT } from 'react-native-extra-dimensions-android';
@@ -44,7 +45,7 @@ const black = '#000';
 const white = '#fff';
 
 const styles = StyleSheet.create({
-	container: { backgroundColor: 'white', marginVertical: 0, marginBottom: 140 },
+	container: { backgroundColor: 'white', marginVertical: 0, marginBottom: 110 },
 	header: { flexDirection: 'row', borderTopWidth: 0, borderColor: black },
 	identity: { position: 'absolute' },
 	// width: CELL_WIDTH
@@ -66,7 +67,7 @@ const styles = StyleSheet.create({
 		height: 85
 	},
 	itemName: {
-		fontSize: 12,
+		fontSize: 12.2,
 		color: '#fff',
 		fontWeight: '600',
 		paddingBottom: 12,
@@ -269,7 +270,8 @@ class tahlil extends React.PureComponent {
 				headerBackTitle: 'Home'
 			},
 			headerTitleStyle: {
-				fontFamily: 'iransansbold'
+				fontFamily: 'iransans',
+				fontSize: 12.2
 				//color: this.state.colorhead
 			}
 		};
@@ -374,7 +376,7 @@ class tahlil extends React.PureComponent {
 						style={[
 							styles.cap,
 							{
-								fontSize: 12,
+								fontSize: 12.2,
 								color: 'white',
 								borderWidth: 0,
 								//	width: 80,
@@ -563,10 +565,10 @@ class tahlil extends React.PureComponent {
 
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
-        if (!state.isConnected) {
-            this.setState({ issnackin: true });
-            return;
-        }
+		if (!state.isConnected) {
+			this.setState({ issnackin: true });
+			return;
+		}
 		/* #endregion */
 
 		this.setState({ loading: true });
@@ -580,8 +582,9 @@ class tahlil extends React.PureComponent {
 			'&g=' +
 			this.state.selectedItem +
 			'&mode=list';
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -621,10 +624,10 @@ class tahlil extends React.PureComponent {
 		}
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
-        if (!state.isConnected) {
-            this.setState({ issnackin: true });
-            return;
-        }
+		if (!state.isConnected) {
+			this.setState({ issnackin: true });
+			return;
+		}
 		/* #endregion */
 		const { navigation } = this.props;
 		this.examID = navigation.getParam('examID');
@@ -641,8 +644,9 @@ class tahlil extends React.PureComponent {
 			'&dmn=' +
 			global.adress;
 
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -835,7 +839,14 @@ class tahlil extends React.PureComponent {
 							data={this.state.cat}
 							keyExtractor={(item) => item.id.toString()}
 							horizontal
-							style={{ paddingBottom: 4, borderWidth: 0, marginTop: 4, marginRight: 4, marginLeft: 4 }}
+							style={{
+								flexDirection: 'row-reverse',
+								paddingBottom: 4,
+								borderWidth: 0,
+								marginTop: 4,
+								marginRight: 4,
+								marginLeft: 4
+							}}
 							renderItem={({ item, index }) => {
 								return (
 									<TouchableOpacity
@@ -848,10 +859,10 @@ class tahlil extends React.PureComponent {
 											style={
 												this.state.selectedItem === item.id ? (
 													{
-														backgroundColor: this.state.colorhead,
+														backgroundColor: this.state.HEADER_COLOR,
 														fontFamily: 'iransans',
 														borderWidth: 1,
-														borderColor: this.state.colorhead,
+														borderColor: this.state.HEADER_COLOR,
 														flexDirection: 'row',
 														borderRadius: 15,
 														margin: 3,
@@ -866,7 +877,7 @@ class tahlil extends React.PureComponent {
 														fontFamily: 'iransans',
 														borderWidth: 1,
 														flexDirection: 'row',
-														borderColor: this.state.colorhead,
+														borderColor: this.state.HEADER_COLOR,
 														borderRadius: 15,
 														margin: 3,
 														paddingTop: 8,
@@ -881,12 +892,15 @@ class tahlil extends React.PureComponent {
 												style={
 													this.state.selectedItem === item.id ? (
 														{
+															fontSize: 12.2,
 															color: 'white',
 															fontFamily: 'iransans'
 														}
 													) : (
 														{
-															color: this.state.colorhead,
+															fontSize: 12.2,
+
+															color: this.state.HEADER_COLOR,
 
 															fontFamily: 'iransans'
 														}
@@ -897,7 +911,7 @@ class tahlil extends React.PureComponent {
 											</Text>
 
 											{this.state.selectedItem !== item.id ||
-												(this.state.dataLoading && <ActivityIndicator color="white" />)}
+												(this.state.dataLoading && <ActivityIndicator size="small" color="#000" />)}
 										</View>
 									</TouchableOpacity>
 								);

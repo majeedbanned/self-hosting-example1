@@ -2,7 +2,9 @@ import React, { Component } from 'react';
 import { StyleSheet, Linking, ActivityIndicator, SafeAreaView } from 'react-native';
 import ActionButton from 'react-native-action-button';
 import defaultStyles from '../config/styles';
+import i18n from 'i18n-js';
 
+import { Snackbar } from 'react-native-paper';
 import Loading from '../components/loading';
 import DropdownAlert from 'react-native-dropdownalert';
 import { withNavigation } from 'react-navigation';
@@ -27,7 +29,7 @@ import Modal, {
 	SlideAnimation,
 	ScaleAnimation
 } from 'react-native-modals';
-import { userInfo, toFarsi, getHttpAdress, toEng } from '../components/DB';
+import { userInfo, toFarsi, encrypt, getHttpAdress, toEng } from '../components/DB';
 import { FlatList, ScrollView, Image, View, Text, RefreshControl, TouchableOpacity } from 'react-native';
 import GLOBAL from './global';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -74,42 +76,57 @@ class settings extends Component {
 			//this.loadAPI_grp(1, 'pull');
 		});
 	}
-	// static navigationOptions = ({ navigation }) => {
-	// 	const { params } = navigation.state;
+	static navigationOptions = ({ navigation }) => {
+		const { params } = navigation.state;
 
-	// 	return {
-	// 		headerTitle: 'تنظیمات',
-	// 		headerRight: () => null,
-	// 		//headerLeft: () => null,
+		return {
+			headerTitle: i18n.t('settingListCaption'),
+			headerRight: () => null,
+			//headerLeft: () => null,
 
-	// 		headerBackTitle: 'بازگشت',
-	// 		navigationOptions: {
-	// 			headerBackTitle: 'Home'
-	// 		},
-	// 		headerTitleStyle: {
-	// 			fontFamily: 'iransansbold',
-	// 			color: colorhead
-	// 		}
-	// 	};
-	// };
+			headerBackTitle: 'بازگشت',
+			navigationOptions: {
+				headerBackTitle: 'Home'
+			},
+			headerTitleStyle: {
+				fontFamily: 'iransans',
+				color: colorhead
+			}
+		};
+	};
 	async componentDidMount() {
 		//this.loadAPI_grp(this.page, 'pull');
 		//this.loadAPI(this.page, 'pull');
+		if (global.lang == 'fa')
+			this.setState({
+				cat: [
+					{
+						id: '1',
 
-		this.setState({
-			cat: [
-				{
-					id: '1',
+						name: 'تغییر کلمه عبور'
+					},
+					{
+						id: '2',
 
-					name: 'تغییر کلمه عبور'
-				},
-				{
-					id: '2',
+						name: 'حذف کاربر'
+					}
+				]
+			});
+		else
+			this.setState({
+				cat: [
+					{
+						id: '1',
 
-					name: 'حذف کاربر'
-				}
-			]
-		});
+						name: 'Change Password  '
+					},
+					{
+						id: '2',
+
+						name: 'Remove user '
+					}
+				]
+			});
 	}
 
 	loadAPI_grp = async (page, type) => {
@@ -118,12 +135,11 @@ class settings extends Component {
 		}
 
 		/* #region  check internet */
-		let state = await NetInfo.fetch();
 
+		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			//alert(state.isConnected);
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
 		/* #endregion */
 
@@ -138,8 +154,9 @@ class settings extends Component {
 			'&g=' +
 			this.state.selectedItem +
 			'&mode=list';
-		//console.log(uurl);
+		//////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -170,10 +187,11 @@ class settings extends Component {
 			GLOBAL.main.setState({ isModalVisible: true });
 		}
 		/* #region  check internet */
+
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
 		/* #endregion */
 
@@ -181,8 +199,9 @@ class settings extends Component {
 		let param = userInfo();
 		let uurl =
 			global.adress + '/pApi.asmx/chpass?cu=' + this.state.oldpass + '&p=' + param + '&pass=' + this.state.pass;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -243,7 +262,7 @@ class settings extends Component {
 	};
 	_renderFooter = () => {
 		if (!this.state.isLoading) return null;
-		return <ActivityIndicator style={{ color: 'red' }} size="large" />;
+		return <ActivityIndicator size="small" color="#000" />;
 	};
 	_handleLoadMore = () => {
 		if (!this.state.isLoading) {
@@ -267,11 +286,11 @@ class settings extends Component {
 
 	handleSubmit = async () => {
 		if (this.state.pass == '' || this.state.pass1 == '' || this.state.oldpass == '') {
-			alert('لطفا اطلاعات را کامل وارد کنید ');
+			alert(global.lang == 'fa' ? 'لطفا اطلاعات را کامل وارد کنید ' : 'please fill out form fields');
 			return;
 		}
 		if (this.state.pass != this.state.pass1) {
-			alert('تکرار کلمه عبور اشتباه است');
+			alert(global.lang == 'fa' ? 'تکرار کلمه عبور اشتباه است' : 'new password is wrong!');
 			return;
 		}
 
@@ -290,7 +309,14 @@ class settings extends Component {
 					data={this.state.cat}
 					keyExtractor={(item) => item.id.toString()}
 					horizontal
-					style={{ paddingBottom: 4, borderWidth: 0, marginTop: 4, marginRight: 4, marginLeft: 4 }}
+					style={{
+						flexDirection: 'column-reverse',
+						paddingBottom: 4,
+						borderWidth: 0,
+						marginTop: 4,
+						marginRight: 4,
+						marginLeft: 4
+					}}
 					renderItem={({ item, index }) => {
 						return (
 							<TouchableOpacity
@@ -352,7 +378,7 @@ class settings extends Component {
 										{item.name}
 									</Text>
 									{this.state.selectedItem !== item.id ||
-										(this.state.dataLoading && <ActivityIndicator />)}
+										(this.state.dataLoading && <ActivityIndicator size="small" color="#000" />)}
 								</View>
 							</TouchableOpacity>
 						);
@@ -394,7 +420,14 @@ class settings extends Component {
 						data={this.state.cat}
 						keyExtractor={(item) => item.id.toString()}
 						horizontal
-						style={{ paddingBottom: 4, borderWidth: 0, marginTop: 4, marginRight: 4, marginLeft: 4 }}
+						style={{
+							flexDirection: 'column-reverse',
+							paddingBottom: 4,
+							borderWidth: 0,
+							marginTop: 4,
+							marginRight: 4,
+							marginLeft: 4
+						}}
 						renderItem={({ item, index }) => {
 							return (
 								<TouchableOpacity
@@ -456,7 +489,7 @@ class settings extends Component {
 											{item.name}
 										</Text>
 										{this.state.selectedItem !== item.id ||
-											(this.state.dataLoading && <ActivityIndicator />)}
+											(this.state.dataLoading && <ActivityIndicator size="small" color="#000" />)}
 									</View>
 								</TouchableOpacity>
 							);
@@ -478,7 +511,7 @@ class settings extends Component {
 							inputContainerStyle={[ defaultStyles.inputc, defaultStyles.shadowx ]}
 							inputStyle={defaultStyles.inputStyle}
 							//label={i18n.t('password')}
-							placeholder="کلمه عبور قبلی"
+							placeholder={global.lang == 'fa' ? 'کلمه عبور قبلی' : 'Old Password'}
 							errorStyle={defaultStyles.err}
 							//	errorMessage={errors.password}
 							containerStyle={{ marginTop: 10 }}
@@ -495,7 +528,7 @@ class settings extends Component {
 							inputContainerStyle={[ defaultStyles.inputc, defaultStyles.shadowx ]}
 							inputStyle={defaultStyles.inputStyle}
 							//label={i18n.t('password')}
-							placeholder="کلمه عبور جدید"
+							placeholder={global.lang == 'fa' ? 'کلمه عبور جدید' : 'New Password'}
 							errorStyle={defaultStyles.err}
 							//	errorMessage={errors.password}
 							containerStyle={{ marginTop: 10 }}
@@ -511,7 +544,7 @@ class settings extends Component {
 							inputContainerStyle={[ defaultStyles.inputc, defaultStyles.shadowx ]}
 							inputStyle={defaultStyles.inputStyle}
 							//label={i18n.t('password')}
-							placeholder="تکرار کلمه عبور "
+							placeholder={global.lang == 'fa' ? 'کلمه عبور جدید' : 'New Password'}
 							errorStyle={defaultStyles.err}
 							//	errorMessage={errors.password}
 							containerStyle={{ marginTop: 10 }}
@@ -530,10 +563,32 @@ class settings extends Component {
 							containerStyle={defaultStyles.shadowx}
 							//disabled={!isValid }
 							loading={this.state.isSubmitting}
-							title={'تغییر کلمه عبور'}
+							title={global.lang == 'fa' ? 'تغییر کلمه عبور' : 'Change Password'}
 						/>
 					</View>
 				)}
+
+				<Snackbar
+					visible={this.state.issnackin}
+					onDismiss={() => this.setState({ issnackin: false })}
+					style={{ backgroundColor: 'red', fontFamily: 'iransans' }}
+					wrapperStyle={{ fontFamily: 'iransans' }}
+					action={{
+						label: 'بستن',
+						onPress: () => {
+							this.setState({ issnackin: false });
+							this.setState(
+								{
+									//  loading: false,
+									//  save_loading: false
+								}
+							);
+							//this.props.navigation.goBack(null);
+						}
+					}}
+				>
+					{'لطفا دسترسی به اینترنت را چک کنید'}
+				</Snackbar>
 			</View>
 		);
 	}

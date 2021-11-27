@@ -2,7 +2,7 @@ import Constants from 'expo-constants';
 import * as Notifications from 'expo-notifications';
 import * as Permissions from 'expo-permissions';
 export default (registerForPushNotificationsAsync = async () => {
-	alert('fuck');
+	//alert('fuck');
 	if (Constants.isDevice) {
 		const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
 		let finalStatus = existingStatus;
@@ -18,7 +18,7 @@ export default (registerForPushNotificationsAsync = async () => {
 		console.log(token);
 		this.setState({ expoPushToken: token });
 	} else {
-		alert('Must use physical device for Push Notifications');
+		//alert('Must use physical device for Push Notifications');
 	}
 
 	if (Platform.OS === 'android') {

@@ -6,7 +6,7 @@ import { I18nManager, Platform } from 'react-native';
 import Swiper from 'react-native-swiper';
 import { HelloChandu, _getcount, getQuery, _query, _fetch, _connected } from '../components/DB';
 
-import { AppLoading } from 'expo';
+//import { AppLoading } from 'expo';
 import Icon from 'react-native-vector-icons/AntDesign';
 import { useFonts } from '@use-expo/font';
 import { Ionicons, AntDesign, Entypo } from '@expo/vector-icons';
@@ -228,6 +228,25 @@ class settingUserDelete extends Component {
 			);
 		});
 
+		let results = await Database.executeSql('select * from users ', []);
+
+		global.username = '';
+		global.password = '';
+		global.schoolcode = '';
+		global.adress = '';
+		global.firstname = '';
+		global.lastname = '';
+		global.schoolname = '';
+		global.ttype = '';
+		if (results.rows.length == 0) {
+			//if (true) {
+
+			const { navigate } = this.props.navigation;
+			navigate('Login', { mode: false });
+		} else {
+			GLOBAL.main.setState({ isModalVisible: true });
+		}
+
 		this.loadfromdb();
 	};
 
@@ -258,8 +277,8 @@ class settingUserDelete extends Component {
 		//     'Inter-Black': require('./../../assets/IRANSansMobile.ttf'),
 		//   });
 		if (!this.state.fontLoaded) {
-			return <AppLoading />;
-		} else if (!this.state.data) return <AppLoading />;
+			return <View />;
+		} else if (!this.state.data) return <View />;
 		else
 			// 	return (
 			// 		<View style={{ flex: 1, backgroundColor: 'white', justifyContent: 'center' }}>
@@ -271,7 +290,7 @@ class settingUserDelete extends Component {
 				<View style={styles.container}>
 					{/* <Text
 						style={{
-							fontFamily: 'iransansbold',
+							fontFamily: 'iransans',
 							textAlign: 'left',
 							paddingLeft: 10
 						}}
@@ -316,24 +335,49 @@ class settingUserDelete extends Component {
 													activeOpactity={1.9}
 													key={index}
 													onPress={() => {
-														Alert.alert(
-															'حذف کاربر',
-															'آیا مایل به حدف کاربر هستید؟',
-															[
-																{
-																	text: 'خیر',
-																	onPress: () => console.log('Cancel Pressed'),
-																	style: 'cancel'
-																},
-																{
-																	text: 'بله',
-																	onPress: () => {
-																		this.deleteapi(item.username, item.schoolcode);
-																	}
-																}
-															],
-															{ cancelable: false }
-														);
+														global.lang == 'fa'
+															? Alert.alert(
+																	'حذف کاربر',
+																	'آیا مایل به حذف کاربر هستید؟',
+																	[
+																		{
+																			text: 'خیر',
+																			onPress: () => console.log('Cancel Pressed'),
+																			style: 'cancel'
+																		},
+																		{
+																			text: 'بله',
+																			onPress: () => {
+																				this.deleteapi(
+																					item.username,
+																					item.schoolcode
+																				);
+																			}
+																		}
+																	],
+																	{ cancelable: false }
+																)
+															: Alert.alert(
+																	' Delete User',
+																	'Do you want delete user?',
+																	[
+																		{
+																			text: 'NO',
+																			onPress: () => console.log('Cancel Pressed'),
+																			style: 'cancel'
+																		},
+																		{
+																			text: 'YES',
+																			onPress: () => {
+																				this.deleteapi(
+																					item.username,
+																					item.schoolcode
+																				);
+																			}
+																		}
+																	],
+																	{ cancelable: false }
+																);
 													}}
 												>
 													<Icon
@@ -380,7 +424,11 @@ class settingUserDelete extends Component {
 														}}
 													>
 														{item.schoolname + ' - '}
-														{item.ttype == 'student' && 'دانش آموز'}
+														{item.ttype == 'student' && global.lang == 'fa' ? (
+															'دانش آموز'
+														) : (
+															'Student'
+														)}
 														{item.ttype == 'teacher' && 'معلم'}
 														{item.ttype == 'administrator' && 'مدیر'}
 													</Text>

@@ -2,6 +2,7 @@ import React, { Component, PureComponent } from 'react';
 import { StyleSheet, Linking, ActivityIndicator, Alert } from 'react-native';
 import ActionButton from 'react-native-action-button';
 import defaultStyles from '../../../config/styles';
+import { RFPercentage, RFValue } from 'react-native-responsive-fontsize';
 import { SearchBar } from 'react-native-elements';
 import { Avatar, Badge } from 'react-native-elements';
 import { Menu, MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu';
@@ -27,7 +28,7 @@ import Modal, {
 	SlideAnimation,
 	ScaleAnimation
 } from 'react-native-modals';
-import { userInfo, toFarsi, getHttpAdress } from '../../../components/DB';
+import { userInfo, toFarsi, encrypt, getHttpAdress } from '../../../components/DB';
 import { FlatList, ScrollView, Image, View, Text, RefreshControl, TouchableOpacity } from 'react-native';
 import GLOBAL from './../../global';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -38,7 +39,7 @@ const CustomProgressBar = ({ visible }) => (
 		<View style={{ flex: 1, backgroundColor: '#dcdcdc', alignItems: 'center', justifyContent: 'center' }}>
 			<View style={{ borderRadius: 10, backgroundColor: 'white', padding: 25 }}>
 				<Text style={{ fontSize: 20, fontWeight: '200' }}>Loading</Text>
-				<ActivityIndicator size="large" />
+				<ActivityIndicator size="large" color="#000" />
 			</View>
 		</View>
 	</Modal>
@@ -114,9 +115,9 @@ class PureChild extends React.PureComponent {
 							selectedItem == 1 ? (
 								[ '#36D1DC', '#5B86E5' ]
 							) : selectedItem == 2 ? (
-								[ '#9dbffd', '#c4ecfb' ]
+								[ '#36D1DC', '#36D1DC' ]
 							) : (
-								[ '#a6d3f2', '#6ca1cb' ]
+								[ '#36D1DC', '#36D1DC' ]
 							)
 						}
 						start={{ x: 0, y: 1 }}
@@ -190,7 +191,7 @@ class PureChild extends React.PureComponent {
 															//marginTop: 8,
 															fontSize: 19,
 
-															fontFamily: 'iransansbold',
+															fontFamily: 'iransans',
 															color: 'white'
 														}}
 													>
@@ -257,7 +258,7 @@ class PureChild extends React.PureComponent {
 																customStyles={this.optionStyles}
 																onSelect={() => {
 																	Alert.alert(
-																		'حذف پیام',
+																		'حذف ',
 																		'آیا مایل به حذف آزمون و امکان آزمون مجدد  هستید؟',
 																		[
 																			{
@@ -285,6 +286,41 @@ class PureChild extends React.PureComponent {
 																text="امکان آزمون مجدد"
 															/>
 														)}
+
+														{selectedItem == 2 && (
+															<MenuOption
+																customStyles={this.optionStyles}
+																onSelect={() => {
+																	Alert.alert(
+																		' ',
+																		'آیا مایل به نمایش مجدد دکمه شروع آزمون هستید؟',
+																		[
+																			{
+																				text: 'خیر',
+																				onPress: () =>
+																					console.log('Cancel Pressed'),
+																				style: 'cancel'
+																			},
+																			{
+																				text: 'بله',
+																				onPress: this.props.ondelShow
+																				// onPress: () => {
+																				// 	this.props.ondel;
+																				// 	// this.loadAPI(
+																				// 	// 	item.StudentCode,
+																				// 	// 	'',
+																				// 	// 	index
+																				// 	// );
+																				// }
+																			}
+																		],
+																		{ cancelable: false }
+																	);
+																}}
+																text="نمایش مجدد دکمه ورود به آزمون"
+															/>
+														)}
+
 														{/* <MenuOption
 															onSelect={() => alert(`Not called`)}
 															disabled={true}
@@ -531,7 +567,7 @@ class participateList extends Component {
 				headerBackTitle: 'Home'
 			},
 			headerTitleStyle: {
-				fontFamily: 'iransansbold'
+				fontFamily: 'iransans'
 			}
 		};
 	};
@@ -633,6 +669,7 @@ class participateList extends Component {
 		console.log('' + uurl);
 		//	return;
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -645,6 +682,7 @@ class participateList extends Component {
 				}
 				//console.log(retJson);
 				//	alert(index);
+
 				let newimagesAddFile = this.state.data;
 
 				newimagesAddFile.splice(index, 1); //to remove a single item starting at index
@@ -658,6 +696,83 @@ class participateList extends Component {
 					}
 				);
 			}
+
+			//alert();
+			this.loadAPIBadge(1, '');
+		} catch (e) {
+			console.log('err');
+			this.dropDownAlertRef.alertWithType('error', 'پیام', 'خطادر دستیابی به اطلاعات');
+			this.setState(
+				{
+					// loading: false,
+					// dataLoading: false
+				}
+			);
+			return;
+		}
+	};
+
+	loadAPIdelShow = async (stdid, type, index) => {
+		const examid = this.props.examid;
+
+		//	alert(type);
+		if (type == undefined) type = '';
+		if (global.adress == 'undefined') {
+			GLOBAL.main.setState({ isModalVisible: true });
+		}
+		/* #region  check internet */
+		let state = await NetInfo.fetch();
+		if (!state.isConnected) {
+			this.setState({ issnackin: true });
+			return;
+		}
+		/* #endregion */
+
+		//this.setState({ loading: true });
+		let param = userInfo();
+		let uurl =
+			global.adress +
+			'/pApi.asmx/getExamStdListReexamShow?currentPage=' +
+			'1' +
+			'&p=' +
+			param +
+			'&examid=' +
+			this.examID +
+			'&stdid=' +
+			stdid;
+		console.log('' + uurl);
+		//	return;
+		try {
+			uurl = encrypt(uurl);
+			const response = await fetch(uurl);
+			if (response.ok) {
+				let retJson = await response.json();
+				//if (page == 1) this.setState({ data: [] });
+
+				console.log(retJson);
+				if (retJson.result == 'ok') {
+					//	alert(retJson.msg);
+					//this.props.unmountMe(stdid);
+				}
+				//console.log(retJson);
+				//	alert(index);
+
+				// let newimagesAddFile = this.state.data;
+
+				// newimagesAddFile.splice(index, 1); //to remove a single item starting at index
+				// this.setState({ data: newimagesAddFile });
+
+				// this.setState(
+				// 	{
+				// 		// data: page === 1 ? retJson : [ ...this.state.data, ...retJson ],
+				// 		// dataLoading: false,
+				// 		// loading: false
+				// 	}
+				// );
+			}
+
+			//alert();
+			//this.loadAPIBadge(1, '');
 		} catch (e) {
 			console.log('err');
 			this.dropDownAlertRef.alertWithType('error', 'پیام', 'خطادر دستیابی به اطلاعات');
@@ -699,7 +814,7 @@ class participateList extends Component {
 			type +
 			'&mode=' +
 			this.state.selectedItem;
-		console.log(uurl);
+		////////console.log(uurl);
 		fetch(uurl) //+ this.arch
 			.then((response) => response.json())
 			.then((responseText) => {
@@ -720,7 +835,9 @@ class participateList extends Component {
 								text: 'بله',
 								onPress: () => {
 									//alert(global.adress + '/upload/xls/' + responseText.path);
-									Linking.openURL(global.adress + '/upload/xls/' + responseText.path);
+									Linking.openURL(
+										global.adress.replace('papi', '') + '/upload/xls/' + responseText.path
+									);
 								}
 							}
 						],
@@ -772,8 +889,10 @@ class participateList extends Component {
 			type +
 			'&mode=' +
 			this.state.selectedItem;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
+			//////console.log(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -832,8 +951,10 @@ class participateList extends Component {
 			type +
 			'&mode=' +
 			this.state.selectedItem;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
+			//////console.log(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -868,7 +989,7 @@ class participateList extends Component {
 
 	_renderFooter = () => {
 		if (!this.state.isLoading) return null;
-		return <ActivityIndicator style={{ color: 'red' }} size="large" />;
+		return <ActivityIndicator style={{ color: 'red' }} size="small" color="#000" />;
 	};
 	_handleLoadMore = () => {
 		if (!this.state.isLoading) {
@@ -895,8 +1016,9 @@ class participateList extends Component {
 		this.setState({ isRefreshing: true });
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/getExamList?currentPage=' + '1' + '&p=' + param;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -980,6 +1102,11 @@ class participateList extends Component {
 		await this.loadAPIdel(stdcode, '', index);
 		//alert(index);
 	};
+
+	handeldelShow = async (index, stdcode) => {
+		await this.loadAPIdelShow(stdcode, '', index);
+		//alert(index);
+	};
 	searchFilterFunction = (text) => {
 		//alert();
 		this.setState({ searchText: text });
@@ -1030,12 +1157,13 @@ class participateList extends Component {
 		return (
 			<View style={{ backgroundColor: 'white' }}>
 				<FlatList
+					contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-start' }}
 					extraData={this.state.selectedItem}
 					data={this.state.cat}
 					keyExtractor={(item) => item.id.toString()}
 					horizontal
 					style={{
-						flexDirection: 'column-reverse',
+						flexDirection: 'row-reverse',
 						paddingBottom: 4,
 						borderWidth: 0,
 						marginTop: 4,
@@ -1113,11 +1241,14 @@ class participateList extends Component {
 										style={
 											this.state.selectedItem === item.id ? (
 												{
+													fontSize: 12.2,
 													color: 'white',
 													fontFamily: 'iransans'
 												}
 											) : (
 												{
+													fontSize: 12.2,
+
 													color: '#36D1DC',
 
 													fontFamily: 'iransans'
@@ -1128,7 +1259,7 @@ class participateList extends Component {
 										{item.name}
 									</Text>
 									{this.state.selectedItem !== item.id ||
-										(this.state.dataLoading && <ActivityIndicator />)}
+										(this.state.dataLoading && <ActivityIndicator size="small" color="#000" />)}
 								</View>
 							</TouchableOpacity>
 						);
@@ -1199,7 +1330,7 @@ class participateList extends Component {
 						>
 							<View style={{ borderRadius: 10, backgroundColor: 'white', padding: 25 }}>
 								<Text style={{ fontSize: 20, fontWeight: '200' }}>Loading</Text>
-								<ActivityIndicator size="large" />
+								<ActivityIndicator size="small" color="#000" />
 							</View>
 						</View>
 					</Modal>
@@ -1256,6 +1387,7 @@ class participateList extends Component {
 						return (
 							<PureChild
 								ondel={() => this.handeldel(index, item.StudentCode)}
+								ondelShow={() => this.handeldelShow(index, item.StudentCode)}
 								navigation={this.props.navigation}
 								unmountMe={this.handleChildUnmount}
 								examid={this.examID}

@@ -41,6 +41,7 @@ export async function isNet() {
 }
 
 export function encrypt(text) {
+	let orginal = text;
 	key = 'abcdefghijklmnopabcdefgh';
 	var CryptoJS = require('crypto-js');
 	var key = CryptoJS.enc.Utf8.parse(key);
@@ -48,8 +49,8 @@ export function encrypt(text) {
 	//QUJDREVGR0g=
 	var encoded = CryptoJS.enc.Utf8.parse(text);
 	var ciphertext = CryptoJS.TripleDES.encrypt(encoded, key, { mode: CryptoJS.mode.CBC, iv: iv });
-
-	return ciphertext.toString();
+	//uurl = uurl + '&hash=' + hash;
+	return orginal + '&hash=' + ciphertext.toString();
 }
 
 export function decrypt(encryptedText) {

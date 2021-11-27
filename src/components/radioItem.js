@@ -1,14 +1,14 @@
 import React from 'react';
-import { StyleSheet, View, Image } from 'react-native';
+import { StyleSheet, View, Image, ScrollView } from 'react-native';
 import { RadioButton } from 'react-native-paper';
 import Lightbox from 'react-native-lightbox';
-import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+import { userInfo, toFarsi, encrypt, getHttpAdress } from '../components/DB';
 import HTML from 'react-native-render-html';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 const radioItem = ({ value, html, direction, axg, border, Speed, enabled, onimgclick }) => {
 	return (
 		<View>
-			{html != '' && (
+			{(html != '' || axg != '') && (
 				<View
 					style={[
 						styles.gozine,
@@ -28,7 +28,7 @@ const radioItem = ({ value, html, direction, axg, border, Speed, enabled, onimgc
 						<View style={{ flexDirection: direction == 'ltr' ? 'row-reverse' : 'row' }}>
 							<View
 								style={{
-									marginEnd: 15,
+									marginEnd: Platform.OS === 'android' ? 0 : 5,
 									borderColor: '#1f9efd',
 									borderWidth: Platform.OS === 'android' ? 0 : 2,
 									borderRadius: 35,
@@ -44,19 +44,24 @@ const radioItem = ({ value, html, direction, axg, border, Speed, enabled, onimgc
 							{/* <HTML html={html} /> */}
 							{(direction == 'rtl' || direction == '') &&
 							Speed != 'pdf' && (
-								<HTML
-									html={
-										'<span style="text-align:left;direction:rtl;font-family:iransans;font-size:15;line-height:35px" >' +
-										html +
-										'</span>'
-									}
-								/>
+								<ScrollView style={{ flex: 1 }}>
+									<HTML
+										//containerStyle={{ borderWidth: 1 }}
+										//allowFontScaling={true}
+										html={
+											'<span style="overflow: scroll;text-align:left;direction:rtl;font-family:iransans;font-size:13;line-height:35px" >' +
+											html +
+											'</span>'
+										}
+									/>
+								</ScrollView>
 							)}
 							{(direction == 'rtl' || direction == '') &&
 							Speed == 'pdf' && (
 								<HTML
+									style={{}}
 									html={
-										'<span style="text-align:left;direction:rtl;font-family:iransans;font-size:15;line-height:35px" >' +
+										'<span style="text-align:left;direction:rtl;font-family:iransans;font-size:13;line-height:35px" >' +
 										'گزینه  ' +
 										toFarsi(value) +
 										'</span>'
@@ -66,20 +71,22 @@ const radioItem = ({ value, html, direction, axg, border, Speed, enabled, onimgc
 
 							{direction == 'ltr' &&
 							Speed != 'pdf' && (
-								<HTML
-									html={
-										'<span style="text-align:left;direction:ltr;font-family:iransans;font-size:15;line-height:35px" >' +
-										html +
-										'</span>'
-									}
-								/>
+								<ScrollView style={{ flex: 1 }}>
+									<HTML
+										html={
+											'<span style="text-align:left;direction:ltr;font-family:iransans;font-size:13;line-height:35px" >' +
+											html +
+											'</span>'
+										}
+									/>
+								</ScrollView>
 							)}
 
 							{direction == 'ltr' &&
 							Speed == 'pdf' && (
 								<HTML
 									html={
-										'<span style="text-align:left;direction:ltr;font-family:iransansbold;font-size:15;line-height:35px" >' +
+										'<span style="overflow: scroll;text-align:left;direction:ltr;font-family:iransans;font-size:13;line-height:35px" >' +
 										value +
 										'</span>'
 									}
@@ -138,7 +145,9 @@ const styles = StyleSheet.create({
 	contain: {
 		flex: 1,
 		width: '100%',
-		height: 150
+		height: 150,
+		borderRadius: 15
+
 		//borderWidth: 1,
 		//borderColor: 'red'
 	},

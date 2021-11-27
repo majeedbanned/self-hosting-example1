@@ -3,26 +3,60 @@
 		"name": "پارس آموز",
 		"slug": "rn-starter",
 		"privacy": "public",
-		"sdkVersion": "38.0.0",
 		"platforms": [ "ios", "android", "web" ],
-		"version": "1.0.0",
+		"version": "1.1.3",
 		"orientation": "portrait",
 		"icon": "./assets/icon.png",
+
 		"splash": {
 			"image": "./assets/splash.png",
 			"resizeMode": "contain",
 			"backgroundColor": "#ffffff"
 		},
+		"hooks": {
+			"postPublish": [
+				{
+					"file": "sentry-expo/upload-sourcemaps",
+					"config": {
+						"organization": "sentry",
+						"project": "parsamooz",
+						"authToken": "dfd3b38be5df4a8cb2cd4d2e823678eda3d742759c4044ad9d3debaad593cc2d"
+					}
+				}
+			]
+		},
 		"updates": {
-			"fallbackToCacheTimeout": 0
+			"enabled": true,
+			"checkAutomatically": "ON_ERROR_RECOVERY",
+			"fallbackToCacheTimeout": 30000
 		},
 		"assetBundlePatterns": [ "**/*" ],
 		"ios": {
-			"supportsTablet": true
+			"supportsTablet": true,
+			"bundleIdentifier": "com.arsis.farsamooz",
+			"buildNumber": "17"
 		},
 		"android": {
 			"package": "com.arsis.parsamooz",
-			"versionCode": 1
+			"permissions": [ "RECORD_AUDIO", "NOTIFICATIONS", "CAMERA" ],
+			"versionCode": 73,
+			"googleServicesFile": "./google-services.json",
+			"useNextNotificationsApi": true
+		},
+		"extra": {
+			"bugsnag": {
+				"apiKey": "576c83ffb18767015ba6d3e1a2de1911"
+			}
+		},
+		"description": "test",
+		"plugins": [ "sentry-expo" ]
+	},
+	"web": {
+		"config": {
+			"firebase": {
+				"projectId": "taban1-1552333602145",
+				"apiKey": "AIzaSyDronnJhJQjnRJFuzwry2JFMrg_sQHONGg"
+			}
 		}
 	}
 }

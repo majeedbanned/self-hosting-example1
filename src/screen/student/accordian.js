@@ -3,7 +3,7 @@ import { View, TouchableOpacity, Text, FlatList, StyleSheet, LayoutAnimation, Pl
 import { Colors } from './colors';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { toFarsi } from '../../components/DB';
-//import { userInfo, toFarsi, getHttpAdress } from '../../components/DB';
+//import { userInfo, toFarsi,encrypt, getHttpAdress } from '../../components/DB';
 
 export default class Accordian extends Component {
 	constructor(props) {
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
 		fontSize: 12
 	},
 	title: {
-		fontFamily: 'iransansbold',
+		fontFamily: 'iransans',
 		fontSize: 14,
 		fontWeight: 'bold',
 		color: Colors.DARKGRAY
@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
 	title1: {
 		alignSelf: 'flex-start',
 		textAlign: 'left',
-		fontFamily: 'iransansbold',
+		fontFamily: 'iransans',
 		//backgroundColor: Colors.GREEN,
 		borderRadius: 8,
 		marginBottom: 3,

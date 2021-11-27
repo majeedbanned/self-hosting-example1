@@ -721,7 +721,7 @@ export default class extends Component {
 					} else {
 						return (
 							<View style={pageStyleLoading} key={i}>
-								{loadMinimalLoader ? loadMinimalLoader : <ActivityIndicator />}
+								{loadMinimalLoader ? loadMinimalLoader : <ActivityIndicator size="small" color="#000" />}
 							</View>
 						);
 					}

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { StyleSheet, Linking, Dimensions, Alert } from 'react-native';
 import { SearchBar } from 'react-native-elements';
 import Iconan from 'react-native-vector-icons/AntDesign';
+import { RFPercentage, RFValue } from 'react-native-responsive-fontsize';
 import { Snackbar } from 'react-native-paper';
 import ActionButton from 'react-native-action-button';
 import { withNavigation } from 'react-navigation';
@@ -28,7 +29,7 @@ import Modal, {
 	SlideAnimation,
 	ScaleAnimation
 } from 'react-native-modals';
-import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+import { userInfo, toFarsi, encrypt, getHttpAdress } from '../components/DB';
 import {
 	FlatList,
 	ScrollView,
@@ -83,8 +84,10 @@ class webinar extends Component {
 
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/delVclassID?p=' + param + '&id=' + id;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
+			//////console.log(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -246,6 +249,8 @@ class webinar extends Component {
 		if (page == 1) this.setState({ data: [] });
 		console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
+			////console.log(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -279,7 +284,7 @@ class webinar extends Component {
 	};
 	_renderFooter = () => {
 		if (!this.state.isLoading) return null;
-		return <ActivityIndicator style={{ color: 'red' }} size="large" />;
+		return <ActivityIndicator size="small" color="#000" />;
 	};
 	_handleLoadMore = () => {
 		if (!this.onEndReachedCalledDuringMomentum) {
@@ -312,7 +317,7 @@ class webinar extends Component {
 		this.setState({ isRefreshing: true });
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/getExamList?currentPage=' + '1' + '&p=' + param;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -367,11 +372,21 @@ class webinar extends Component {
 		return (
 			<View style={{ backgroundColor: 'white' }}>
 				<FlatList
+					showsVerticalScrollIndicator={false}
+					showsHorizontalScrollIndicator={false}
 					extraData={this.state.selectedItem}
+					contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-start' }}
 					data={this.state.cat}
 					keyExtractor={(item) => item.id.toString()}
 					horizontal
-					style={{ paddingBottom: 4, borderWidth: 0, marginTop: 4, marginRight: 4, marginLeft: 4 }}
+					style={{
+						flexDirection: 'row-reverse',
+						paddingBottom: 4,
+						borderWidth: 0,
+						marginTop: 4,
+						marginRight: 4,
+						marginLeft: 4
+					}}
 					renderItem={({ item, index }) => {
 						return (
 							<TouchableOpacity
@@ -417,11 +432,14 @@ class webinar extends Component {
 										style={
 											this.state.selectedItem === item.id ? (
 												{
+													fontSize: 12.2,
 													color: 'white',
 													fontFamily: 'iransans'
 												}
 											) : (
 												{
+													fontSize: 12.2,
+
 													color: '#ff8184',
 
 													fontFamily: 'iransans'
@@ -432,7 +450,7 @@ class webinar extends Component {
 										{item.name}
 									</Text>
 									{this.state.selectedItem !== item.value ||
-										(this.state.dataLoading && <ActivityIndicator />)}
+										(this.state.dataLoading && <ActivityIndicator size="small" color="#000" />)}
 								</View>
 							</TouchableOpacity>
 						);
@@ -458,7 +476,7 @@ class webinar extends Component {
 					showLoading={this.state.loading}
 					//round
 					inputContainerStyle={{ borderRadius: 10, height: 15, backgroundColor: '#eee' }}
-					inputStyle={{ textAlign: 'center', fontSize: 13, fontFamily: 'iransans' }}
+					inputStyle={{ textAlign: 'center', fontSize: 12.2, fontFamily: 'iransans' }}
 					//showLoading={this.state.loading}
 					onChangeText={(text) => this.searchFilterFunction(text)}
 					autoCorrect={false}
@@ -727,7 +745,7 @@ class webinar extends Component {
 																		onPress={() => {
 																			Alert.alert(
 																				'حذف کلاس مجازی',
-																				'آیا مایل به حدف کلاس هستید؟',
+																				'آیا مایل به حذف کلاس هستید؟',
 																				[
 																					// {
 																					// 	text: 'Ask me later',
@@ -877,7 +895,7 @@ class webinar extends Component {
 													<FormButton
 														buttonColor="#ff8184"
 														borderColor="white"
-														fontSizeb={14}
+														fontSizeb={12.2}
 														heightb={40}
 														borderRadiusb={10}
 														style={{ paddingTop: 0 }}
@@ -913,7 +931,7 @@ class webinar extends Component {
 														}}
 														buttonColor="#ff8184"
 														borderColor="white"
-														fontSizeb={14}
+														fontSizeb={12.2}
 														heightb={40}
 														borderRadiusb={10}
 														style={{ marginTop: 0 }}
@@ -948,7 +966,7 @@ class webinar extends Component {
 														}}
 														buttonColor="#ff8184"
 														borderColor="white"
-														fontSizeb={14}
+														fontSizeb={12.2}
 														heightb={40}
 														borderRadiusb={10}
 														style={{ marginTop: 0 }}
@@ -988,7 +1006,7 @@ class webinar extends Component {
 														}}
 														buttonColor="#ff8184"
 														borderColor="white"
-														fontSizeb={14}
+														fontSizeb={12.2}
 														heightb={40}
 														borderRadiusb={10}
 														style={{ marginTop: 0 }}
@@ -1016,12 +1034,14 @@ class webinar extends Component {
 												</View>
 											)}
 
-											{item.active == 'True' && (
+											{(item.active == 'True' ||
+												global.ttype == 'administrator' ||
+												global.ttype == 'teacher') && (
 												<View style={styles.textpart} style={{ paddingTop: 20 }}>
 													<FormButton
 														onPress={() => {
 															//alert();
-															//console.log(item.url);
+															console.log(item.url);
 															//return;
 															console.log(global.adress.replace('papi', '') + item.url);
 															if (item.scoid == null) {
@@ -1060,7 +1080,7 @@ class webinar extends Component {
 														}}
 														buttonColor="#ff8184"
 														borderColor="white"
-														fontSizeb={14}
+														fontSizeb={12.2}
 														heightb={40}
 														borderRadiusb={10}
 														style={{ marginTop: 0 }}
@@ -1082,9 +1102,24 @@ class webinar extends Component {
 				)}
 
 				{global.ttype == 'administrator' ? (
-					<ActionButton position="left" buttonColor="rgba(231,76,60,1)">
+					<ActionButton position="left" buttonColor="#ff5f9a">
 						<ActionButton.Item
-							buttonColor="#9b59b6"
+							buttonColor="#ff5f9a"
+							textStyle={{ fontFamily: 'iransans' }}
+							title="راهنما"
+							onPress={() => {
+								Linking.openURL('http://farsamooz.ir/apphlp/5.mp4');
+							}}
+						>
+							<Icon
+								name="md-play-circle"
+								size={35}
+								color="#fff"
+								style={{ marginRight: 0, marginTop: 0 }}
+							/>
+						</ActionButton.Item>
+						<ActionButton.Item
+							buttonColor="#ff5f9a"
 							title="تعریف کلاس مجازی"
 							onPress={() => {
 								global.examEditID = '';
@@ -1099,7 +1134,7 @@ class webinar extends Component {
 								});
 							}}
 						>
-							<Iconan name="edit" style={styles.actionButtonIcon} />
+							<Iconan name="edit" size={20} color="#fff" style={{ marginRight: 0, marginTop: 0 }} />
 						</ActionButton.Item>
 
 						{/* <ActionButton.Item buttonColor='#1abc9c' title="All Tasks" onPres‍s={() => {}}>
@@ -1225,14 +1260,14 @@ const styles = StyleSheet.create({
 		alignSelf: 'center',
 		fontFamily: 'iransans',
 		textAlign: 'center',
-		fontSize: 16,
+		fontSize: 15.2,
 		color: 'white'
 	},
 	aztitlet: {
 		alignSelf: 'center',
 		fontFamily: 'iransans',
 		textAlign: 'center',
-		fontSize: 12,
+		fontSize: 12.2,
 		borderWidth: 0.3,
 		padding: 1,
 		marginRight: 10,
@@ -1241,7 +1276,7 @@ const styles = StyleSheet.create({
 		color: 'white'
 	},
 	actionButtonIcon: {
-		fontSize: 20,
+		fontSize: 12.2,
 		height: 22,
 		color: 'white'
 	},
@@ -1267,7 +1302,7 @@ const styles = StyleSheet.create({
 		alignSelf: 'center',
 		fontFamily: 'iransans',
 		color: 'white',
-		fontSize: 15
+		fontSize: 12.2
 	},
 	image2: {
 		width: 50,
@@ -1318,7 +1353,7 @@ const styles = StyleSheet.create({
 		height: 85
 	},
 	itemName: {
-		fontSize: 12,
+		fontSize: 12.2,
 		color: '#fff',
 		fontWeight: '600',
 		paddingBottom: 12,
@@ -1327,7 +1362,7 @@ const styles = StyleSheet.create({
 	},
 	itemCode: {
 		fontWeight: '600',
-		fontSize: 12,
+		fontSize: 12.2,
 		color: '#fff'
 	}
 });

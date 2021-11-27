@@ -26,7 +26,7 @@ export class ViewSelector extends React.Component {
 				onPress={this.onPressHandler}
 			>
 				<Text style={{}} style={{ color: 'black', fontFamily: 'iransans' }}>
-					تغییر حالت نمایش
+					{global.lang == 'en' ? 'Change Mode' : '	تغییر حالت نمایش'}
 					{/* {this.props.viewType} */}
 				</Text>
 			</TouchableOpacity>

@@ -4,7 +4,7 @@ import Mstyles from '../../../components/styles';
 import GLOBAL from '../../global';
 import { withNavigation } from 'react-navigation';
 import * as Font from 'expo-font';
-import { AppLoading } from 'expo';
+//import { AppLoading } from 'expo';
 import { Ionicons, AntDesign, Entypo } from '@expo/vector-icons';
 import {
 	AppRegistry,
@@ -21,7 +21,7 @@ import {
 	ActivityIndicator,
 	Alert
 } from 'react-native';
-import { userInfo, toFarsi, getHttpAdress } from '../../../components/DB';
+import { userInfo, toFarsi,encrypt, getHttpAdress } from '../../../components/DB';
 
 import Icon from 'react-native-vector-icons/Ionicons';
 
@@ -130,7 +130,7 @@ class stdSearch extends Component {
 		let uurl =
 			global.adress + '/pApi.asmx/getContactList?currentPage=' + this.page + '&p=' + param + '&q=' + this.arch;
 
-		//console.log(uurl);
+		//////////console.log(uurl);
 		//let page = 1;
 
 		fetch(uurl) //+ this.arch
@@ -394,7 +394,7 @@ class stdSearch extends Component {
 															style={{
 																fontSize: 12,
 																color: 'green',
-																fontFamily: 'iransansbold'
+																fontFamily: 'iransans'
 															}}
 														>{`${item.coursename == null ? '' : item.coursename} `}</Text>
 													</View>

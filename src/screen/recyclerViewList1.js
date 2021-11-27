@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { RecyclerListView, DataProvider } from 'recyclerlistview';
-import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+import { userInfo, toFarsi, encrypt, getHttpAdress } from '../components/DB';
 
 import { DataCall } from '../utils/DataCall';
 import { LayoutUtil } from '../utils/LayoutUtil';
@@ -26,7 +26,57 @@ export default class recyclerViewList1 extends Component {
 		this.fetchMoreData();
 	}
 
+	static navigationOptions = ({ navigation }) => {
+		const { params } = navigation.state;
+
+		return {
+			//headerTitle: i18n.t('frmListCaption'),
+
+			headerBackTitle: 'بازگشت',
+			navigationOptions: {
+				headerBackTitle: 'Home'
+			},
+			headerTitleStyle: {
+				fontFamily: 'iransans'
+				//color: colorhead
+			}
+		};
+	};
+
 	loadAPI = async (storyID) => {
+		//alert(storyID);
+		if (global.lang == 'en') {
+			if (storyID == 1)
+				return [
+					'http://ios.farsamooz.ir/1-1.jpg',
+					'http://ios.farsamooz.ir/1-2.jpg',
+					'http://ios.farsamooz.ir/1-3.jpg'
+				];
+			else if (storyID == 2)
+				return [
+					'http://ios.farsamooz.ir/2-1.jpg',
+					'http://ios.farsamooz.ir/2-2.jpg',
+					'http://ios.farsamooz.ir/2-3.jpg'
+				];
+			else if (storyID == 3)
+				return [
+					'http://ios.farsamooz.ir/3-1.jpg',
+					'http://ios.farsamooz.ir/3-2.jpg',
+					'http://ios.farsamooz.ir/3-3.jpg'
+				];
+			else if (storyID == 4)
+				return [
+					'http://ios.farsamooz.ir/4-1.jpg',
+					'http://ios.farsamooz.ir/4-2.jpg',
+					'http://ios.farsamooz.ir/4-3.jpg'
+				];
+			else if (storyID == 5)
+				return [
+					'http://ios.farsamooz.ir/5-1.jpg',
+					'http://ios.farsamooz.ir/5-2.jpg',
+					'http://ios.farsamooz.ir/5-3.jpg'
+				];
+		}
 		// if (global.adress == 'undefined') {
 		// 	GLOBAL.main.setState({ isModalVisible: true });
 		// }

@@ -1,32 +1,35 @@
 import React, { Component } from 'react';
-import { StyleSheet, Dimensions, Alert } from 'react-native';
+import { StyleSheet, Dimensions, Alert, Linking } from 'react-native';
 import { REAL_WINDOW_HEIGHT } from 'react-native-extra-dimensions-android';
 import defaultStyles from '../config/styles';
 import Loading from '../components/loading';
 import { SearchBar } from 'react-native-elements';
 import { Snackbar } from 'react-native-paper';
+import { RFPercentage, RFValue } from 'react-native-responsive-fontsize';
+
 import ActionButton from 'react-native-action-button';
 import Modalm from 'react-native-modal';
 
 import { withNavigation } from 'react-navigation';
 import { FlatGrid } from 'react-native-super-grid';
 import Icon from 'react-native-vector-icons/AntDesign';
+import Iconio from 'react-native-vector-icons/Ionicons';
 import Mstyles from '../components/styles';
 import FormButton from '../component/FormButton';
-import ExamAdd from '../screen/examAdd';
+// import ExamAdd from '../screen/examAdd';
 
-import { Ionicons } from '@expo/vector-icons';
-import SelectUser from '../screen/selectUser';
+// import { Ionicons } from '@expo/vector-icons';
+// import SelectUser from '../screen/selectUser';
 import NetInfo from '@react-native-community/netinfo';
-import Modal, {
-	ModalTitle,
-	ModalContent,
-	ModalFooter,
-	ModalButton,
-	SlideAnimation,
-	ScaleAnimation
-} from 'react-native-modals';
-import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+// import Modal, {
+// 	ModalTitle,
+// 	ModalContent,
+// 	ModalFooter,
+// 	ModalButton,
+// 	SlideAnimation,
+// 	ScaleAnimation
+// } from 'react-native-modals';
+import { userInfo, toFarsi, encrypt, getHttpAdress } from '../components/DB';
 import {
 	FlatList,
 	ScrollView,
@@ -39,7 +42,7 @@ import {
 } from 'react-native';
 import GLOBAL from './global';
 import { LinearGradient } from 'expo-linear-gradient';
-import { NavigationEvents } from 'react-navigation';
+// import { NavigationEvents } from 'react-navigation';
 
 class vclass extends Component {
 	constructor(props) {
@@ -102,9 +105,10 @@ class vclass extends Component {
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/rebuildExam?eid=' + eid + '&p=' + param; //+
 
-		console.log(uurl);
+		////////console.log(uurl);
 
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -155,9 +159,10 @@ class vclass extends Component {
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/delExam?eid=' + eid + '&p=' + param; //+
 
-		console.log(uurl);
+		////////console.log(uurl);
 
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -223,9 +228,11 @@ class vclass extends Component {
 			this.state.selectedItem +
 			'&q=' +
 			this.state.searchText;
-		console.log(uurl);
+
 		if (page == 1) this.setState({ data: [] });
 		try {
+			uurl = encrypt(uurl);
+			//console.log(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -288,8 +295,9 @@ class vclass extends Component {
 			idexam +
 			'&mode=' +
 			modex;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -322,7 +330,7 @@ class vclass extends Component {
 
 	_renderFooter = () => {
 		if (!this.state.isLoading) return null;
-		return <ActivityIndicator style={{ color: 'red' }} size="large" />;
+		return <ActivityIndicator size="small" color="#000" />;
 	};
 	_handleLoadMore = () => {
 		if (!this.state.isLoading) {
@@ -524,7 +532,7 @@ class vclass extends Component {
 		this.setState({ isRefreshing: true });
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/getExamList?currentPage=' + '1' + '&p=' + param;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -621,11 +629,13 @@ class vclass extends Component {
 										style={
 											this.state.selectedItem === item.id ? (
 												{
+													fontSize: 12.2,
 													color: 'white',
 													fontFamily: 'iransans'
 												}
 											) : (
 												{
+													fontSize: 12.2,
 													color: '#a976fb',
 
 													fontFamily: 'iransans'
@@ -637,7 +647,7 @@ class vclass extends Component {
 									</Text>
 
 									{this.state.selectedItem !== item.id ||
-										(this.state.dataLoading && <ActivityIndicator color="white" />)}
+										(this.state.dataLoading && <ActivityIndicator size="small" color="#000" />)}
 								</View>
 							</TouchableOpacity>
 						);
@@ -663,7 +673,7 @@ class vclass extends Component {
 					showLoading={this.state.loading}
 					//round
 					inputContainerStyle={{ borderRadius: 10, height: 15, backgroundColor: '#eee' }}
-					inputStyle={{ textAlign: 'center', fontSize: 13, fontFamily: 'iransans' }}
+					inputStyle={{ textAlign: 'center', fontSize: 12.2, fontFamily: 'iransans' }}
 					//showLoading={this.state.loading}
 					onChangeText={(text) => this.searchFilterFunction(text)}
 					autoCorrect={false}
@@ -757,7 +767,12 @@ class vclass extends Component {
 					contentContainerStyle={{ flexGrow: 1 }}
 					ListEmptyComponent={() => (
 						<View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-							{!this.state.dataLoading && <Text style={defaultStyles.lbl14}> آزمونی تعریف نشده است</Text>}
+							{!this.state.dataLoading && (
+								<Text style={[ defaultStyles.lbl14, { fontSize: 12.2, color: '#a976fb' } ]}>
+									{' '}
+									آزمونی تعریف نشده است
+								</Text>
+							)}
 						</View>
 					)}
 					onEndReachedThreshold={0.4}
@@ -903,7 +918,7 @@ class vclass extends Component {
 												<FormButton
 													buttonColor="#1f9efd"
 													borderColor="white"
-													fontSizeb={14}
+													fontSizeb={12.2}
 													heightb={40}
 													borderRadiusb={10}
 													style={{ paddingTop: 0 }}
@@ -931,14 +946,14 @@ class vclass extends Component {
 												<FormButton
 													buttonColor="#1f9efd"
 													borderColor="white"
-													fontSizeb={14}
+													fontSizeb={12.2}
 													heightb={40}
 													onPress={() => {
 														const { navigate } = this.props.navigation;
 														navigate('tahlil', { examID: item.id, mode: 'tahlil' });
 													}}
 													borderRadiusb={10}
-													style={{}}
+													style={{ fontSize: 12.2 }}
 													backgroundColor="#e3f1fc"
 													buttonType="outline"
 													//onPress={handleSubmit}
@@ -968,7 +983,7 @@ class vclass extends Component {
 													}}
 													buttonColor="#1f9efd"
 													borderColor="white"
-													fontSizeb={14}
+													fontSizeb={12.2}
 													heightb={40}
 													borderRadiusb={10}
 													style={{ marginTop: 0 }}
@@ -1003,7 +1018,7 @@ class vclass extends Component {
 													}}
 													buttonColor="#1f9efd"
 													borderColor="white"
-													fontSizeb={14}
+													fontSizeb={12.2}
 													heightb={40}
 													loading={this.state.loadingstartExam}
 													borderRadiusb={10}
@@ -1025,9 +1040,25 @@ class vclass extends Component {
 				/>
 
 				{(true && global.ttype == 'administrator') || global.ttype == 'teacher' ? (
-					<ActionButton useNativeDriver position="left" buttonColor="rgba(231,76,60,1)">
+					<ActionButton useNativeDriver position="left" buttonColor="#f36af9">
 						<ActionButton.Item
-							buttonColor="#9b59b6"
+							buttonColor="#a976fb"
+							textStyle={{ fontFamily: 'iransans' }}
+							title="راهنما"
+							onPress={() => {
+								Linking.openURL('http://farsamooz.ir/apphlp/4.mov');
+							}}
+						>
+							<Iconio
+								name="md-play-circle"
+								size={35}
+								color="#fff"
+								style={{ marginRight: 0, marginTop: 0 }}
+							/>
+						</ActionButton.Item>
+
+						<ActionButton.Item
+							buttonColor="#a976fb"
 							title="تعریف آزمون "
 							textStyle={{ fontFamily: 'iransans' }}
 							onPress={() => {
@@ -1044,7 +1075,8 @@ class vclass extends Component {
 								});
 							}}
 						>
-							<Icon name="upcircle" style={styles.actionButtonIcon} />
+							<Icon name="edit" size={20} color="#fff" style={{ marginRight: 0, marginTop: 0 }} />
+							{/* <Icon name="rightcircleo" style={styles.actionButtonIcon} /> */}
 						</ActionButton.Item>
 
 						{/* <ActionButton.Item
@@ -1246,7 +1278,8 @@ const styles = StyleSheet.create({
 		alignSelf: 'center',
 		fontFamily: 'iransans',
 		textAlign: 'center',
-		fontSize: 15,
+		//fontSize: 15,
+		fontSize: 14,
 		//fontWeight: 'bold',
 		color: 'white'
 	},
@@ -1254,7 +1287,7 @@ const styles = StyleSheet.create({
 		alignSelf: 'center',
 		fontFamily: 'iransans',
 		textAlign: 'center',
-		fontSize: 12,
+		fontSize: 12.2,
 		borderWidth: 0.5,
 		padding: 1,
 		borderColor: 'white',
@@ -1262,7 +1295,7 @@ const styles = StyleSheet.create({
 		color: 'white'
 	},
 	actionButtonIcon: {
-		fontSize: 20,
+		fontSize: 12.2,
 		height: 22,
 		color: 'white'
 	},
@@ -1288,7 +1321,7 @@ const styles = StyleSheet.create({
 		alignSelf: 'center',
 		fontFamily: 'iransans',
 		color: 'white',
-		fontSize: 13
+		fontSize: 12.2
 	},
 	image2: {
 		width: 50,
@@ -1339,7 +1372,7 @@ const styles = StyleSheet.create({
 		height: 85
 	},
 	itemName: {
-		fontSize: 12,
+		fontSize: 12.2,
 		color: '#fff',
 		fontWeight: '600',
 		paddingBottom: 12,
@@ -1348,7 +1381,7 @@ const styles = StyleSheet.create({
 	},
 	itemCode: {
 		fontWeight: '600',
-		fontSize: 12,
+		fontSize: 12.2,
 		color: '#fff'
 	}
 });

@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import FadeInView from './FadeInView';
-import { Permissions, FileSystem } from 'expo';
+//import { Permissions, FileSystem } from 'expo';
 
 import { Audio, Video } from 'expo-av';
 import { InstantSearch } from 'react-instantsearch-native';

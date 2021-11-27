@@ -4,9 +4,10 @@ import RNPickerSelect from 'react-native-picker-select';
 import { AntDesign, Entypo } from '@expo/vector-icons';
 import { FontAwesome } from '@expo/vector-icons';
 import GLOBAL from '../screen/global';
+import { Snackbar } from 'react-native-paper';
 import IconA from 'react-native-vector-icons/AntDesign';
 
-import { userInfo, toFarsi, getHttpAdress, tozang } from '../components/DB';
+import { userInfo, toFarsi, encrypt, getHttpAdress, tozang } from '../components/DB';
 import Mstyles from '../components/styles';
 import NetInfo from '@react-native-community/netinfo';
 import Eform2 from '../screen/modules/forms/eforms2';
@@ -21,7 +22,8 @@ import {
 	Text,
 	View,
 	Platform,
-	TouchableHighlight
+	TouchableHighlight,
+	Linking
 } from 'react-native';
 import { TouchableOpacity, TouchableWithoutFeedback, Button, Image, RefreshControl, Alert } from 'react-native';
 // import Fixgridcell from '../components/fixgridcell';
@@ -96,7 +98,7 @@ const styles = StyleSheet.create({
 		marginBottom: 0,
 		flex: 1,
 		zIndex: 1,
-		elevation: 2,
+		//elevation: 2,
 		height: 50,
 		width: '100%',
 		flexDirection: 'column'
@@ -113,14 +115,15 @@ const styles = StyleSheet.create({
 	},
 	mainpanel: {
 		zIndex: 122,
-		elevation: 2,
-		shadowColor: '#ccc',
-		shadowOffset: {
-			width: 3,
-			height: 3
-		},
-		shadowOpacity: 0.67,
-		shadowRadius: 3.49
+		backgroundColor: '#eee'
+		//	elevation: 2,
+		//shadowColor: '#ccc',
+		// shadowOffset: {
+		// 	width: 3,
+		// 	height: 3
+		// },
+		// shadowOpacity: 0.67,
+		// shadowRadius: 3.49
 	},
 	view4: {
 		paddingStart: 10,
@@ -153,8 +156,9 @@ const styles = StyleSheet.create({
 	header: { flexDirection: 'row', borderWidth: 0, borderColor: black },
 	identity: { position: 'absolute', width: CELL_WIDTH },
 	body: {
-		marginLeft: 73
-		//CELL_WIDTH
+		marginLeft: 73,
+		//CELL_WIDTH,
+		alignSelf: 'flex-start'
 	},
 	itemContainerv: {
 		justifyContent: 'flex-end',
@@ -171,9 +175,10 @@ const styles = StyleSheet.create({
 	},
 	itemName: {
 		fontSize: 12,
-		color: '#343a40',
-		fontWeight: '600',
-		paddingBottom: 12,
+		color: '#fff',
+		//fontWeight: '600',
+		paddingBottom: 5,
+		padding: 5,
 		fontFamily: 'iransans',
 		textAlign: 'center'
 	},
@@ -268,6 +273,7 @@ class PureChild extends React.PureComponent {
 		//const onprees = this.props.onprees;
 		//alert(value);
 		if (!value) return null;
+		//console.log(col + '-' + row);
 		return (
 			// <View style={{ borderWidth: 1 }}>
 			<View
@@ -328,8 +334,9 @@ class PureChild extends React.PureComponent {
 					}
 				>
 					{value ? (
-						value.map((item) => (
+						value.map((item, index) => (
 							<View
+								key={index}
 								style={[
 									{
 										//overflow: 'visible',
@@ -376,6 +383,7 @@ class PureChild extends React.PureComponent {
 						))
 					) : (
 						<View
+							key={index}
 							style={[
 								{
 									borderColor: '#ccc',
@@ -570,6 +578,12 @@ class Sheet extends React.PureComponent {
 				activeOpacity={0.5}
 				key={col + '-' + row}
 				onPress={() => {
+					//alert();
+					this.setState({
+						acForm: 0,
+						insid: 0
+					});
+
 					this.setState({
 						extra:
 							value.zang +
@@ -582,18 +596,20 @@ class Sheet extends React.PureComponent {
 							'-' +
 							this.classcode
 					});
-					this.setState({ datacell: [] });
+					//	this.setState({ datacell: [] });
 					this.loadcell();
 					//alert(value.zang + '-' + value.day + '-' + data1.studentcode);
 					global.fix_col = col;
 					global.fix_row = row;
 					this.refs.modal2.open();
-					this.setState({
-						acForm: 0
-					});
 				}}
 			>
-				<PureChild col1={col} value1={value ? value.disc : null} hozor={value ? value.hozor : null} />
+				<PureChild
+					col1={col}
+					row1={row}
+					value1={value ? value.disc : null}
+					hozor={value ? value.hozor : null}
+				/>
 			</TouchableOpacity>
 		);
 		return (
@@ -746,8 +762,8 @@ class Sheet extends React.PureComponent {
 				{this.formatCellforizen('frozen-row')}
 
 				<ScrollView
-				 showsVerticalScrollIndicator={false}
-				 showsHorizontalScrollIndicator={false}
+					showsVerticalScrollIndicator={false}
+					showsHorizontalScrollIndicator={false}
 					//scrollEnabled={false}
 					ref={(ref) => (this.headerScrollView = ref)}
 					horizontal={true}
@@ -825,8 +841,8 @@ class Sheet extends React.PureComponent {
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
 		/* #endregion */
 
@@ -847,8 +863,11 @@ class Sheet extends React.PureComponent {
 			this.maxdate +
 			'&state=' +
 			page;
-		console.log(uurl);
+		//
 		try {
+			console.log(uurl);
+			uurl = encrypt(uurl);
+			//////console.log(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -911,8 +930,8 @@ class Sheet extends React.PureComponent {
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
 		/* #endregion */
 		let part = this.state.extra.split('-')[0];
@@ -938,8 +957,9 @@ class Sheet extends React.PureComponent {
 			std +
 			'&zang=' +
 			part;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -956,11 +976,13 @@ class Sheet extends React.PureComponent {
 				this.setState({
 					datacell: []
 				});
+				//alert();
 				this.setState({
 					//data: page === 1 ? retJson : [ ...this.state.data, ...retJson ],
 					datacell: retJson,
 					dataLoading: false,
 
+					acForm: 0,
 					isRefreshing: false,
 					loading: false
 				});
@@ -981,7 +1003,14 @@ class Sheet extends React.PureComponent {
 		headerTitle: navigation.state.params ? navigation.state.params.headerTitle : null
 	});
 
+	componentWillUnmount() {
+		// fix Warning: Can't perform a React state update on an unmounted component
+		this.setState = (state, callback) => {
+			return;
+		};
+	}
 	componentDidMount() {
+		//alert();
 		const { navigation } = this.props;
 
 		this.coursecode = navigation.getParam('coursecode');
@@ -994,6 +1023,15 @@ class Sheet extends React.PureComponent {
 				<View style={{ flexDirection: 'row' }}>
 					<TouchableOpacity
 						onPress={() => {
+							//const { navigate } = this.props.navigation;
+
+							Linking.openURL('http://farsamooz.ir/apphlp/2.mp4');
+						}}
+					>
+						<Icon name="md-play-circle" size={35} color="#aaa" style={{ marginRight: 15, marginTop: -6 }} />
+					</TouchableOpacity>
+					<TouchableOpacity
+						onPress={() => {
 							const { navigate } = this.props.navigation;
 
 							navigate('monthgrade', {
@@ -1004,7 +1042,7 @@ class Sheet extends React.PureComponent {
 							});
 						}}
 					>
-						<FontAwesome name="edit" size={25} color="#000" style={{ marginRight: 25 }} />
+						<FontAwesome name="edit" size={25} color="#aaa" style={{ marginRight: 25 }} />
 					</TouchableOpacity>
 
 					<TouchableOpacity
@@ -1013,7 +1051,7 @@ class Sheet extends React.PureComponent {
 							this.loadAPI('back');
 						}}
 					>
-						<FontAwesome name="arrow-right" size={25} color="#000" style={{ marginRight: 20 }} />
+						<FontAwesome name="arrow-right" size={25} color="#aaa" style={{ marginRight: 20 }} />
 					</TouchableOpacity>
 					<TouchableOpacity
 						onPress={() => {
@@ -1021,13 +1059,13 @@ class Sheet extends React.PureComponent {
 							this.loadAPI('forword');
 						}}
 					>
-						<FontAwesome name="arrow-left" size={25} color="#000" style={{ marginRight: 10 }} />
+						<FontAwesome name="arrow-left" size={25} color="#aaa" style={{ marginRight: 10 }} />
 					</TouchableOpacity>
 				</View>
 			)
 		});
 
-		console.log('componentDidMount');
+		//	console.log('2980b9nentDidMount');
 		this.listener = this.scrollPosition.addListener((position) => {
 			this.headerScrollView.scrollTo({ x: position.value, animated: false });
 		});
@@ -1644,8 +1682,8 @@ class Sheet extends React.PureComponent {
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
 		/* #endregion */
 
@@ -1661,8 +1699,9 @@ class Sheet extends React.PureComponent {
 			'&mode=' +
 			hozor;
 
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -1725,8 +1764,8 @@ class Sheet extends React.PureComponent {
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
 		/* #endregion */
 
@@ -1744,8 +1783,9 @@ class Sheet extends React.PureComponent {
 			'&groupcode=' +
 			this.groupcode;
 
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -1803,7 +1843,7 @@ class Sheet extends React.PureComponent {
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
+			this.setState({ issnackin: true });
 			return;
 		}
 		/* #endregion */
@@ -1811,9 +1851,9 @@ class Sheet extends React.PureComponent {
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/delSheetRow?eid=' + eid + '&p=' + param; //+
 
-		console.log(uurl);
-
 		try {
+			uurl = encrypt(uurl);
+			////console.log(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -1827,7 +1867,7 @@ class Sheet extends React.PureComponent {
 				}
 
 				//** */	this.setState({ issnack: true, msg: retJson.msg });
-
+				//alert();
 				let newimagesAddFile = this.state.datacell;
 				//alert(index);
 				newimagesAddFile.splice(index, 1); //to remove a single item starting at index
@@ -1857,6 +1897,7 @@ class Sheet extends React.PureComponent {
 
 	clickEventListener = (item) => {
 		//const { navigate } = this.props.navigation;
+		//	this.setState({ acForm: 1 });
 
 		if (item.name == 'حاضر') {
 			this.setAPI('1');
@@ -1880,7 +1921,7 @@ class Sheet extends React.PureComponent {
 			this.setState({ acForm: 18, insid: 0 });
 
 			this.setState({ acForm: 17, insid: 0 });
-		} else if (item.name == 'ثبت توضیحات') {
+		} else if (item.name == 'توضیحات') {
 			this.setState({ acForm: 18, insid: 0 });
 		} else if (item.name == 'ثبت عکس') {
 			this.setState({ acForm: 19, insid: 0 });
@@ -1923,17 +1964,17 @@ class Sheet extends React.PureComponent {
 			// });
 
 			//add
-			this.setState({
-				maindata: update(this.state.maindata, {
-					[global.fix_col]: { days: { [global.fix_row]: { disc: { $push: [ { cap: '12', az: '16' } ] } } } }
-				})
-			});
-			//delete
-			this.setState({
-				maindata: update(this.state.maindata, {
-					[global.fix_col]: { days: { [global.fix_row]: { disc: { $splice: [ [ 0, 1 ] ] } } } }
-				})
-			});
+			// this.setState({
+			// 	maindata: update(this.state.maindata, {
+			// 		[global.fix_col]: { days: { [global.fix_row]: { disc: { $push: [ { cap: '12', az: '16' } ] } } } }
+			// 	})
+			// });
+			// //delete
+			// this.setState({
+			// 	maindata: update(this.state.maindata, {
+			// 		[global.fix_col]: { days: { [global.fix_row]: { disc: { $splice: [ [ 0, 1 ] ] } } } }
+			// 	})
+			// });
 		}
 	};
 
@@ -1985,19 +2026,54 @@ class Sheet extends React.PureComponent {
 				this.setState({ someProperty, colpop: false });
 			});
 		} else if (item.name == 'حذف حضور و غیاب') {
-			this.setAPI('00');
-			Object.keys(this.state.maindata).forEach((k) => {
-				var someProperty = { ...this.state.maindata[k] };
-				someProperty.days[global.head_key].hozor = 0;
-				this.setState({ someProperty, colpop: false });
-			});
+			Alert.alert(
+				' اخطار',
+				'آیا مایل به حذف حضور و غیاب  هستید؟',
+				[
+					{
+						text: 'خیر',
+
+						style: 'cancel'
+					},
+					{
+						text: 'بله',
+						onPress: () => {
+							this.setAPI('00');
+
+							Object.keys(this.state.maindata).forEach((k) => {
+								var someProperty = { ...this.state.maindata[k] };
+								someProperty.days[global.head_key].hozor = 0;
+								this.setState({ someProperty, colpop: false });
+							});
+						}
+					}
+				],
+				{ cancelable: false }
+			);
 		} else if (item.name == 'حذف همه نمرات') {
-			this.setAPI('-1');
-			Object.keys(this.state.maindata).forEach((k) => {
-				var someProperty = { ...this.state.maindata[k] };
-				someProperty.days[global.head_key].disc = [];
-				this.setState({ someProperty, colpop: false });
-			});
+			Alert.alert(
+				' اخطار',
+				'آیا مایل به حذف همه نمرات ردیف  هستید؟',
+				[
+					{
+						text: 'خیر',
+
+						style: 'cancel'
+					},
+					{
+						text: 'بله',
+						onPress: () => {
+							this.setAPI('-1');
+							Object.keys(this.state.maindata).forEach((k) => {
+								var someProperty = { ...this.state.maindata[k] };
+								someProperty.days[global.head_key].disc = [];
+								this.setState({ someProperty, colpop: false });
+							});
+						}
+					}
+				],
+				{ cancelable: false }
+			);
 		} else if (item.name == 'ثبت فعالیت معلم') {
 			const { navigate } = this.props.navigation;
 			if (this.state.ishint)
@@ -2053,18 +2129,18 @@ class Sheet extends React.PureComponent {
 		}
 	};
 	onClose() {
-		console.log('Modal just closed');
+		//	console.log('Modal just closed');
 	}
 	onClose1 = () => {
 		//this.loadAPI();
 	};
 
 	onOpen() {
-		console.log('Modal just opened');
+		//	console.log('Modal just opened');
 	}
 
 	onClosingState(state) {
-		console.log('the open/close of the swipeToClose just changed');
+		//	console.log('the open/close of the swipeToClose just changed');
 	}
 
 	onPressCourse(item) {
@@ -2170,45 +2246,46 @@ class Sheet extends React.PureComponent {
 
 		let data = [ { key: 'body', render: body } ];
 		let test = [
-			{ name: 'حاضر', code: 'black', icon: 'ios-list', bkcolor: '#cafad5' },
-			{ name: 'غایب', code: 'white', icon: 'ios-add-circle-outline', bkcolor: '#f5c4d3' },
-			{ name: 'تاخیر', code: 'white', icon: 'ios-settings', bkcolor: '#f7f1b0' },
-			{ name: 'لیست', code: 'white', icon: 'md-checkmark-circle-outline', bkcolor: '#89c2d9' },
+			{ name: 'حاضر', code: 'black', icon: 'ios-list', bkcolor: '#96e091' },
+			{ name: 'غایب', code: 'white', icon: 'ios-add-circle-outline', bkcolor: '#f79383' },
+			{ name: 'تاخیر', code: 'white', icon: 'ios-settings', bkcolor: '#fbb97c' },
+			{ name: 'لیست', code: 'white', icon: 'md-checkmark-circle-outline', bkcolor: '#3babd1' },
 
-			{ name: 'ثبت نمره', code: 'white', icon: 'md-checkmark-circle-outline', bkcolor: '#89c2d9' },
-			{ name: 'ارزشیابی توصیفی', code: 'white', icon: 'md-checkmark-circle-outline', bkcolor: '#89c2d9' },
+			{ name: 'ثبت نمره', code: 'white', icon: 'md-checkmark-circle-outline', bkcolor: '#3babd1' },
+			{ name: 'ارزشیابی توصیفی', code: 'white', icon: 'md-checkmark-circle-outline', bkcolor: '#3babd1' },
 
-			{ name: 'ثبت توضیحات', code: 'white', icon: 'md-checkmark-circle-outline', bkcolor: '#89c2d9' },
-			{ name: 'ثبت عکس', code: 'white', icon: 'md-checkmark-circle-outline', bkcolor: '#89c2d9' }
+			{ name: 'توضیحات', code: 'white', icon: 'md-checkmark-circle-outline', bkcolor: '#3babd1' },
+			{ name: 'ثبت عکس', code: 'white', icon: 'md-checkmark-circle-outline', bkcolor: '#3babd1' }
 		];
 
 		let fmenu = [
 			{ name: 'تعریف عناوین ارزشیابی', code: 'white', icon: 'ios-list', bkcolor: '#e091ca' },
-			{ name: 'تعریف مقادیر ارزشیابی', code: 'white', icon: 'ios-add-circle-outline', bkcolor: '#fbb97c' }
+			{ name: 'تعریف مقادیر ارزشیابی', code: 'white', icon: 'ios-list', bkcolor: '#fbb97c' }
 		];
 
 		let colmnu = [
-			{ name: 'همه حاضر', code: 'white', icon: 'ios-list', bkcolor: '#e091ca' },
-			{ name: 'همه غایب', code: 'white', icon: 'ios-add-circle-outline', bkcolor: '#fbb97c' },
-			{ name: 'همه تاخیر', code: 'white', icon: 'ios-settings', bkcolor: '#f79383' },
-			{ name: 'حذف حضور و غیاب', code: 'white', icon: 'ios-settings', bkcolor: '#f79383' },
-			{ name: 'حذف همه نمرات', code: 'white', icon: 'ios-settings', bkcolor: '#f79383' },
+			{ name: 'همه حاضر', code: 'white', icon: 'md-checkmark-circle-outline', bkcolor: '#96e091' },
+			{ name: 'همه غایب', code: 'white', icon: 'close-circle-outline', bkcolor: '#f79383' },
+			{ name: 'همه تاخیر', code: 'white', icon: 'alarm-outline', bkcolor: '#fbb97c' },
+			{ name: 'حذف حضور و غیاب', code: 'white', icon: 'trash-outline', bkcolor: '#e091ca' },
+			{ name: 'حذف همه نمرات', code: 'white', icon: 'trash-sharp', bkcolor: '#91a1e0' },
 
-			{ name: 'ثبت فعالیت معلم', code: 'white', icon: 'md-checkmark-circle-outline', bkcolor: '#34ace0' },
-			{ name: 'ثبت نمره آزمون آنلاین', code: 'white', icon: 'md-checkmark-circle-outline', bkcolor: '#34ace0' }
+			{ name: 'ثبت فعالیت معلم', code: 'white', icon: 'clipboard-outline', bkcolor: '#34ace0' },
+			{ name: 'ثبت نمره آزمون آنلاین', code: 'white', icon: 'checkbox-outline', bkcolor: '#91e0e0' }
 		];
 
 		return (
 			<View style={styles.container}>
 				{/* <Button title="Basic modal" onPress={() => this.refs.modal1.open()} style={styles.btn} /> */}
-				<View>{this.formatHeader()}</View>
+				<View style={{ borderWidth: 0, flexDirection: 'row' }}>{this.formatHeader()}</View>
+
 				<FlatList
 					data={data}
 					renderItem={this.formatRowForSheet}
 					//onEndReached={this.handleScrollEndReached}
 					onEndReachedThreshold={0.005}
 				/>
-				{this.state.loading && <ActivityIndicator />}
+				{this.state.loading && <ActivityIndicator size="small" color="#000" />}
 
 				{/* <Modal
 					visible={this.state.cellpop}
@@ -2431,7 +2508,11 @@ class Sheet extends React.PureComponent {
 						<Timeline std1={this.state.std} groupcode={this.groupcode} coursecode={this.coursecode} />
 					</View>
 				</Modal>
+
 				<Modal
+					animationDuration={0}
+					//	backdrop={false}
+					//coverScreen={true}
 					style={[
 						{
 							borderRadius: 25,
@@ -2452,7 +2533,7 @@ class Sheet extends React.PureComponent {
 					onClosingState={this.onClosingState}
 				>
 					<View style={{ flexDirection: 'column-reverse' }}>
-						<View style={{ flex: 0.7, borderWidth: 0 }}>
+						<View style={{ flex: 0.7, borderTopWidth: 0.5 }}>
 							<FlatGrid
 								itemDimension={45}
 								items={test}
@@ -2467,7 +2548,7 @@ class Sheet extends React.PureComponent {
 										style={{ flex: 1 }}
 									>
 										<View style={[ styles.itemContainer, { backgroundColor: item.bkcolor } ]}>
-											{item.badge > 0 && <Text style={styles.badge}> 2 </Text>}
+											{/* {item.badge > 0 && <Text style={styles.badge}> 2 </Text>} */}
 
 											{/* <Ionicons
 												name={item.icon}
@@ -2497,254 +2578,208 @@ class Sheet extends React.PureComponent {
 						</View>
 						<View style={{ flex: 4, borderWidth: 0 }}>
 							{this.state.acForm == 0 && (
-								<FlatList
-									//ListHeaderComponent={this.renderHeader}
-									stickyHeaderIndices={[ 0 ]}
-									//ListFooterComponent={this._renderFooter}
-									//onScroll={this.onScroll}
-									keyExtractor={(item) => item.id.toString()}
-									initialNumToRender={10}
-									onMomentumScrollBegin={() => {
-										this.onEndReachedCalledDuringMomentum = false;
-									}}
-									ref={(ref) => {
-										this.flatListRef = ref;
-									}}
-									ListEmptyComponent={
-										<View style={{ borderWidth: 0, height: 450 }}>
-											<View
-												style={{
-													borderWidth: 0,
+								<View style={{ borderWidth: 0, flex: 1 }}>
+									{/* <Text>dsfsdfsd</Text> */}
+									<FlatList
+										keyExtractor={(item) => item.id.toString()}
+										refreshControl={
+											<RefreshControl
+												refreshing={this.state.isRefreshing}
+												//	onRefresh={this.onRefresh.bind(this)}
+											/>
+										}
+										ListEmptyComponent={
+											<View style={{ borderWidth: 0, height: 450 }}>
+												<View
+													style={{
+														borderWidth: 0,
 
-													justifyContent: 'center',
-													flex: 1,
-													flexDirection: 'column',
-													alignItems: 'center'
-												}}
-											>
-												{!this.state.dataLoading && (
-													<Text style={defaultStyles.lbl14}> لیست خالی است</Text>
-												)}
+														justifyContent: 'center',
+														flex: 1,
+														flexDirection: 'column',
+														alignItems: 'center'
+													}}
+												>
+													{!this.state.dataLoading && (
+														<Text style={defaultStyles.lbl14}> لیست خالی است</Text>
+													)}
+												</View>
 											</View>
-										</View>
-									}
-									onEndReachedThreshold={0.5}
-									//onEndReached={this._handleLoadMore.bind(this)}
-									refreshControl={
-										<RefreshControl
-											refreshing={this.state.isRefreshing}
-											//	onRefresh={this.onRefresh.bind(this)}
-										/>
-									}
-									style={[ Mstyles.contentList, { marginTop: 15 } ]}
-									columnWrapperStyle={styles.listContainer}
-									data={this.state.datacell}
-									// keyExtractor={(item) => {
-									// 	return item.id;
-									// }}
-									renderItem={({ item, index }) => {
-										return (
-											<TouchableOpacity
-												onPress={() => {
-													const { navigate } = this.props.navigation;
-													//navigate.headerBackTitle = 'shah';
-													//global.eformsID = item.id;
+										}
+										data={this.state.datacell}
+										renderItem={({ item, index }) => {
+											return (
+												<TouchableOpacity
+													onPress={() => {
+														const { navigate } = this.props.navigation;
+														//navigate.headerBackTitle = 'shah';
+														//global.eformsID = item.id;
 
-													this.setState({ insid: item.id });
-													if (item.ax != undefined) this.setState({ acForm: 19 });
-													else if (item.ax == undefined && item.scoreid == '9999')
-														this.setState({ acForm: 18 });
-													else if (item.scoreid != '0' && item.scoreid != '9999')
-														this.setState({ acForm: 22 });
-													else this.setState({ acForm: 17 });
-													//	navigate('reportView', { reportID: item.id, reportName: item.title });
-												}}
-												activeOpacity={0.8}
-												style={{
-													height: 68,
-													borderRadius: 13,
-													backgroundColor: '#F3F3F3',
-													//borderWidth: 1,
-													marginTop: 10,
-													marginLeft: 15,
-													marginRight: 15
-												}}
-											>
-												<View style={[ styles.mainpanel, styles.gradient, { borderWidth: 0 } ]}>
+														this.setState({ insid: item.id });
+														if (item.ax != undefined) this.setState({ acForm: 19 });
+														else if (item.ax == undefined && item.scoreid == '9999')
+															this.setState({ acForm: 18 });
+														else if (item.scoreid != '0' && item.scoreid != '9999')
+															this.setState({ acForm: 22 });
+														else this.setState({ acForm: 17 });
+														//	navigate('reportView', { reportID: item.id, reportName: item.title });
+													}}
+													activeOpacity={0.8}
+													style={{
+														height: 68,
+														borderRadius: 13,
+														//backgroundColor: '#F3F3F3',
+														//borderWidth: 1,
+														marginTop: 10,
+														marginLeft: 15,
+														marginRight: 15
+													}}
+												>
 													<View
-														style={{
-															borderWidth: 0,
-															flex: 1,
-															flexDirection: 'row',
-															marginStart: 0
-														}}
+														style={[
+															styles.mainpanel,
+															styles.gradient,
+															{ borderWidth: 0 }
+														]}
 													>
-														<View style={styles.view1}>
-															<View style={styles.view2}>
-																{/* <View style={styles.view3}> */}
-																{/* <IconAnt
-																		name={iconname_}
-																		style={styles.image}
-																		size={34}
-																		color="white"
-																	/> */}
-																{/* </View> */}
-																<View style={styles.view4}>
-																	<Text
-																		style={[
-																			styles.aztitle,
-																			{ color: 'black', marginTop: 15 }
-																		]}
-																	>
-																		{item.arz}
-																	</Text>
-
-																	{item.ax == undefined &&
-																	item.scoreid == '9999' && (
-																		<Text
-																			numberOfLines={1}
-																			style={[
-																				styles.aztitle,
-																				{ paddingTop: 4, color: 'black' }
-																			]}
-																		>
-																			{toFarsi(item.title)}
-																		</Text>
-																	)}
-
-																	{item.scoreid != '0' &&
-																	item.scoreid != '9999' && (
-																		<Text
-																			style={[
-																				styles.aztitle,
-																				{ paddingTop: 4, color: 'black' }
-																			]}
-																		>
-																			{toFarsi(item.arzv) +
-																				' ' +
-																				toFarsi(item.arzvf)}
-																		</Text>
-																	)}
-
-																	{item.ax != undefined && (
-																		<View
-																			style={[
-																				{
-																					paddingTop: 4,
-																					color: 'black',
-																					flexDirection: 'row'
-																				}
-																			]}
-																		>
-																			<IconA
-																				name="picture"
-																				size={25}
-																				style={[ styles.actionButtonIcon, {} ]}
-																			/>
-																		</View>
-																	)}
-
-																	{item.az != '0' && (
-																		<Text
-																			style={[
-																				styles.aztitle,
-																				{ paddingTop: 4, color: 'black' }
-																			]}
-																		>
-																			{toFarsi(item.title + ' از ' + item.az)}
-																		</Text>
-																	)}
-																</View>
-
-																<View>
-																	<TouchableOpacity
-																		style={{
-																			borderWidth: 0,
-																			height: '100%',
-																			width: 45
-																		}}
-																		onPress={() => {
-																			Alert.alert(
-																				' اخطار',
-																				'آیا مایل به حذف رویداد هستید؟',
-																				[
-																					{
-																						text: 'خیر',
-																						// onPress: () => {
-																						// 	this.setState({
-																						// 		barom_Visible: false
-																						// 	});
-																						// },
-																						style: 'cancel'
-																					},
-																					{
-																						text: 'بله',
-																						onPress: () => {
-																							this.loadAPIDel(
-																								item.id,
-																								index
-																							);
-																						}
-																					}
-																				],
-																				{ cancelable: false }
-																			);
-																		}}
-																	>
-																		<IconA
-																			name="delete"
-																			size={25}
-																			style={[
-																				styles.actionButtonIcon,
-																				{ paddingTop: 15, paddingEnd: 10 }
-																			]}
-																		/>
-																	</TouchableOpacity>
-																</View>
-
-																{/* {global.ttype == 'administrator' ||
-																	(item.access.indexOf(global.username) > -1 && ( */}
-																{/* <TouchableOpacity
-																onPress={() => {
-																	const { navigate } = this.props.navigation;
-																	//global.eformsID = item.id;
-																	navigate('studentlist', {
-																		eformsID: item.id,
-																		mode: 'list'
-																	});
-																}}
-																style={{
-																	alignItems: 'center',
-																	justifyContent: 'center',
-																	flex: 0.5
-																}}
-															>
-																<IconAnt
-																	name="solution1"
+														<View
+															style={{
+																borderWidth: 0,
+																flex: 1,
+																flexDirection: 'row',
+																marginStart: 0
+															}}
+														>
+															<View style={styles.view1}>
+																<View style={styles.view2}>
+																	{/* <View style={styles.view3}> */}
+																	{/* <IconAnt
+																	name={iconname_}
 																	style={styles.image}
 																	size={34}
-																	color="#ccc"
-																/>
-			
-																
-																<Text
-																	style={[
-																		defaultStyles.lbl14,
-																		{ fontSize: 14, color: 'black' }
-																	]}
-																>
-																	لیست
-																</Text>
-															</TouchableOpacity> */}
-																{/* ))} */}
+																	color="white"
+																/> */}
+																	{/* </View> */}
+																	<View style={styles.view4}>
+																		<Text
+																			style={[
+																				styles.aztitle,
+																				{ color: 'black', marginTop: 15 }
+																			]}
+																		>
+																			{item.arz}
+																		</Text>
+
+																		{item.ax == undefined &&
+																		item.scoreid == '9999' && (
+																			<Text
+																				numberOfLines={1}
+																				style={[
+																					styles.aztitle,
+																					{ paddingTop: 4, color: 'black' }
+																				]}
+																			>
+																				{toFarsi(item.title)}
+																			</Text>
+																		)}
+
+																		{item.scoreid != '0' &&
+																		item.scoreid != '9999' && (
+																			<Text
+																				style={[
+																					styles.aztitle,
+																					{ paddingTop: 4, color: 'black' }
+																				]}
+																			>
+																				{toFarsi(item.arzv) +
+																					' ' +
+																					toFarsi(item.arzvf)}
+																			</Text>
+																		)}
+
+																		{item.ax != undefined && (
+																			<View
+																				style={[
+																					{
+																						paddingTop: 4,
+																						color: 'black',
+																						flexDirection: 'row'
+																					}
+																				]}
+																			>
+																				<IconA
+																					name="picture"
+																					size={25}
+																					style={[
+																						styles.actionButtonIcon,
+																						{}
+																					]}
+																				/>
+																			</View>
+																		)}
+
+																		{item.az != '0' && (
+																			<Text
+																				style={[
+																					styles.aztitle,
+																					{ paddingTop: 4, color: 'black' }
+																				]}
+																			>
+																				{toFarsi(item.title + ' از ' + item.az)}
+																			</Text>
+																		)}
+																	</View>
+
+																	<View>
+																		<TouchableOpacity
+																			style={{
+																				borderWidth: 0,
+																				height: '100%',
+																				width: 45
+																			}}
+																			onPress={() => {
+																				Alert.alert(
+																					' اخطار',
+																					'آیا مایل به حذف ردیف  هستید؟',
+																					[
+																						{
+																							text: 'خیر',
+
+																							style: 'cancel'
+																						},
+																						{
+																							text: 'بله',
+																							onPress: () => {
+																								this.loadAPIDel(
+																									item.id,
+																									index
+																								);
+																							}
+																						}
+																					],
+																					{ cancelable: false }
+																				);
+																			}}
+																		>
+																			<IconA
+																				name="delete"
+																				size={25}
+																				style={[
+																					styles.actionButtonIcon,
+																					{ paddingTop: 15, paddingEnd: 10 }
+																				]}
+																			/>
+																		</TouchableOpacity>
+																	</View>
+																</View>
 															</View>
 														</View>
 													</View>
-												</View>
-											</TouchableOpacity>
-										);
-									}}
-								/>
+												</TouchableOpacity>
+											);
+										}}
+									/>
+								</View>
 							)}
 							{this.state.acForm == 17 && (
 								<Eform2
@@ -2800,7 +2835,7 @@ class Sheet extends React.PureComponent {
 							justifyContent: 'center',
 							alignItems: 'center',
 							alignSelf: 'stretch',
-							height: 215
+							height: 225
 						}
 					]}
 					entry={'top'}
@@ -2831,7 +2866,7 @@ class Sheet extends React.PureComponent {
 
 										<Ionicons
 											name={item.icon}
-											size={37}
+											size={32}
 											color={item.code}
 											style={{
 												shadowColor: item.bkcolor,
@@ -2920,6 +2955,27 @@ class Sheet extends React.PureComponent {
 						)}
 					/>
 				</Modal>
+				<Snackbar
+					visible={this.state.issnackin}
+					onDismiss={() => this.setState({ issnackin: false })}
+					style={{ backgroundColor: 'red', fontFamily: 'iransans' }}
+					wrapperStyle={{ fontFamily: 'iransans' }}
+					action={{
+						label: 'بستن',
+						onPress: () => {
+							this.setState({ issnackin: false });
+							this.setState(
+								{
+									//  loading: false,
+									//  save_loading: false
+								}
+							);
+							//this.props.navigation.goBack(null);
+						}
+					}}
+				>
+					{'لطفا دسترسی به اینترنت را چک کنید'}
+				</Snackbar>
 			</View>
 		);
 	}

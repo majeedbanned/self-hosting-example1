@@ -1,0 +1,32 @@
+{
+	"cli": {
+		"version": ">= 0.37.0"
+	},
+	"build": {
+		"development": {
+			"developmentClient": true,
+			"distribution": "internal"
+		},
+		"preview": {
+			"releaseChannel": "staging",
+			"env": {
+				"APP_ENV": "staging"
+			}
+		},
+		"production": {
+			"releaseChannel": "production",
+			"env": {
+				"APP_ENV": "production"
+			}
+		}
+	},
+	"submit": {
+		"production": {
+			"ios": {
+				"appleId": "arsisdevelop@gmail.com",
+				"ascAppId": "1465448344",
+				"appleTeamId": "5TMC73T85X"
+			}
+		}
+	}
+}

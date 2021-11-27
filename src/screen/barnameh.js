@@ -1,8 +1,10 @@
 import React, { PureComponent } from 'react';
-import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+import { userInfo, toFarsi, encrypt, getHttpAdress } from '../components/DB';
 import Modal from 'react-native-modalbox';
 import NetInfo from '@react-native-community/netinfo';
+import i18n from 'i18n-js';
 
+import { Snackbar } from 'react-native-paper';
 import Loading from '../components/loading';
 import { Animated, ActivityIndicator, FlatList, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { TouchableOpacity, TouchableWithoutFeedback, Button, Image } from 'react-native';
@@ -32,12 +34,14 @@ const colorhead = '#06a9ba';
 const colorlight = '#06a9ba';
 
 const styles = StyleSheet.create({
-	container: { backgroundColor: white, marginVertical: 0, marginBottom: 80, alignItems: 'flex-start' },
+	//alignItems: 'flex-start'
+	container: { backgroundColor: white, marginVertical: 0, marginBottom: 80 },
 	header: { flexDirection: 'row', borderTopWidth: 0, borderColor: black },
 	identity: { position: 'absolute', width: CELL_WIDTH },
 	body: {
 		marginLeft: 50
-		//CELL_WIDTH
+		//CELL_WIDTH,
+		//alignSelf: 'flex-start'
 	},
 	itemContainerv: {
 		justifyContent: 'flex-end',
@@ -755,8 +759,8 @@ class Sheet extends React.PureComponent {
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
 		/* #endregion */
 
@@ -788,8 +792,8 @@ class Sheet extends React.PureComponent {
 							{
 								zang: '4',
 								day: 'Part 3',
-								course: 'زبان خارجی 1',
-								teachername: 'علي پور محمد',
+								course: 'Writing Task1',
+								teachername: 'Ema cherles',
 								teachercode: '3010'
 							},
 							{
@@ -802,8 +806,8 @@ class Sheet extends React.PureComponent {
 							{
 								zang: '16',
 								day: 'Part 5',
-								course: 'زبان خارجي1',
-								teachername: 'علي پور محمد',
+								course: 'Reading',
+								teachername: 'Oliver Jake',
 								teachercode: '3010'
 							},
 							{
@@ -842,8 +846,8 @@ class Sheet extends React.PureComponent {
 							{
 								zang: '1',
 								day: 'زنگ اول',
-								course: 'زبان خارجي2',
-								teachername: 'علي پور محمد',
+								course: ' Chemistry',
+								teachername: 'George Reece',
 								teachercode: '3010'
 							},
 							{
@@ -856,8 +860,8 @@ class Sheet extends React.PureComponent {
 							{
 								zang: '4',
 								day: 'زنگ سوم',
-								course: 'زبان خارجي1',
-								teachername: 'علي پور محمد',
+								course: ' Writing Task 2',
+								teachername: 'Oscar	Rhys',
 								teachercode: '3010'
 							},
 							{
@@ -870,8 +874,8 @@ class Sheet extends React.PureComponent {
 							{
 								zang: '16',
 								day: 'زنگ پنجم',
-								course: 'زبان خارجي1',
-								teachername: 'علي پور محمد',
+								course: ' Speaking',
+								teachername: 'William Damian',
 								teachercode: '3010'
 							},
 							{
@@ -914,6 +918,8 @@ class Sheet extends React.PureComponent {
 		}
 
 		try {
+			uurl = encrypt(uurl);
+			//////console.log(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -956,15 +962,15 @@ class Sheet extends React.PureComponent {
 		const { params } = navigation.state;
 
 		return {
-			headerTitle: 'برنامه هفتگی',
+			headerTitle: i18n.t('sch'),
 			headerRight: () => null,
 			headerBackTitle: 'بازگشت',
 			navigationOptions: {
 				headerBackTitle: 'Home'
 			},
 			headerTitleStyle: {
-				fontFamily: 'iransansbold',
-				color: colorhead
+				fontFamily: 'iransans',
+				color: '#000'
 			}
 		};
 	};
@@ -1040,15 +1046,15 @@ class Sheet extends React.PureComponent {
 		}
 	};
 	onClose() {
-		console.log('Modal just closed');
+		//	console.log('Modal just closed');
 	}
 
 	onOpen() {
-		console.log('Modal just opened');
+		//	console.log('Modal just opened');
 	}
 
 	onClosingState(state) {
-		console.log('the open/close of the swipeToClose just changed');
+		//console.log('the open/close of the swipeToClose just changed');
 	}
 	render() {
 		if (!this.state.maindata) return <Loading />;
@@ -1076,14 +1082,14 @@ class Sheet extends React.PureComponent {
 		return (
 			<View style={styles.container}>
 				{/* <Button title="Basic modal" onPress={() => this.refs.modal1.open()} style={styles.btn} /> */}
-				<View>{this.formatHeader()}</View>
+				<View style={{ borderWidth: 0 }}>{this.formatHeader()}</View>
 				<FlatList
 					data={data}
 					renderItem={this.formatRowForSheet}
 					//onEndReached={this.handleScrollEndReached}
 					onEndReachedThreshold={0.005}
 				/>
-				{this.state.loading && <ActivityIndicator />}
+				{this.state.loading && <ActivityIndicator size="small" color="#000" />}
 
 				<Modal
 					style={[
@@ -1209,6 +1215,27 @@ class Sheet extends React.PureComponent {
 						)}
 					/>
 				</Modal>
+				<Snackbar
+					visible={this.state.issnackin}
+					onDismiss={() => this.setState({ issnackin: false })}
+					style={{ backgroundColor: 'red', fontFamily: 'iransans' }}
+					wrapperStyle={{ fontFamily: 'iransans' }}
+					action={{
+						label: 'بستن',
+						onPress: () => {
+							this.setState({ issnackin: false });
+							this.setState(
+								{
+									//  loading: false,
+									//  save_loading: false
+								}
+							);
+							//this.props.navigation.goBack(null);
+						}
+					}}
+				>
+					{'لطفا دسترسی به اینترنت را چک کنید'}
+				</Snackbar>
 			</View>
 		);
 	}

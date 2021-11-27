@@ -7,6 +7,6 @@ class karnameh extends Component {
 		return <WebView source={{ uri: 'https://expo.io' }} style={{ marginTop: 0 }} />;
 	}
 }
-import { from } from 'rxjs/observable/from';
+//import { from } from 'rxjs/observable/from';
 
 export default karnameh;

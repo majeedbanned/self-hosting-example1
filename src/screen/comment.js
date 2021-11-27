@@ -4,6 +4,7 @@ import ActionButton from 'react-native-action-button';
 import defaultStyles from '../config/styles';
 import { SearchBar } from 'react-native-elements';
 
+import { Snackbar } from 'react-native-paper';
 import SlidingUpPanel from 'rn-sliding-up-panel';
 import ImageViewer from 'react-native-image-zoom-viewer';
 
@@ -32,7 +33,7 @@ import NetInfo from '@react-native-community/netinfo';
 // 	SlideAnimation,
 // 	ScaleAnimation
 // } from 'react-native-modals';
-import { userInfo, toFarsi, getHttpAdress, encrypt } from '../components/DB';
+import { userInfo, toFarsi, encrypt, getHttpAdress } from '../components/DB';
 import { FlatList, ScrollView, Image, View, Text, RefreshControl, TouchableOpacity } from 'react-native';
 import GLOBAL from './global';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -82,7 +83,7 @@ class comment extends Component {
 				headerBackTitle: 'Home'
 			},
 			headerTitleStyle: {
-				fontFamily: 'iransansbold',
+				fontFamily: 'iransans',
 				color: colorhead
 			}
 		};
@@ -99,12 +100,11 @@ class comment extends Component {
 
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
-
 		if (!state.isConnected) {
-			//alert(state.isConnected);
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
+
 		/* #endregion */
 
 		const { navigation } = this.props;
@@ -116,9 +116,9 @@ class comment extends Component {
 		let uurl =
 			global.adress + '/pApi.asmx/getMessageid?currentpage=' + this.messageid + '&p=' + param + '&g=' + this.tab;
 		'' + '&mode=list';
-		let hash = encrypt(uurl);
-		uurl = uurl + '&hash=' + hash;
-
+		//let hash = encrypt(uurl);
+		//uurl = uurl + '&hash=' + hash;
+		uurl = encrypt(uurl);
 		console.log(uurl);
 		try {
 			const response = await fetch(uurl);
@@ -196,9 +196,10 @@ class comment extends Component {
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
+
 		/* #endregion */
 		const { navigation } = this.props;
 		this.messageid = navigation.getParam('messageid');
@@ -217,8 +218,10 @@ class comment extends Component {
 			this.state.sort +
 			'&q=' +
 			this.state.searchText;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
+			//////console.log(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -260,7 +263,7 @@ class comment extends Component {
 	};
 	_renderFooter = () => {
 		if (!this.state.isLoading) return null;
-		return <ActivityIndicator style={{ color: 'red' }} size="large" />;
+		return <ActivityIndicator style={{ color: 'red' }} size="small" />;
 	};
 	_handleLoadMore = () => {
 		if (!this.state.isLoading) {
@@ -284,8 +287,10 @@ class comment extends Component {
 
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/delMessageCommentID?p=' + param + '&id=' + id;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
+			//////console.log(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -339,8 +344,10 @@ class comment extends Component {
 
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/MessagestarID?p=' + param + '&id=' + this.messageid;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
+			//////console.log(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -1172,7 +1179,7 @@ class comment extends Component {
 																			onPress={() => {
 																				Alert.alert(
 																					'حذف پیام',
-																					'آیا مایل به حدف پیام هستید؟',
+																					'آیا مایل به حذف پیام هستید؟',
 																					[
 																						// {
 																						// 	text: 'Ask me later',

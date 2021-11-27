@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { SafeAreaView, StyleSheet, Text, View, Alert } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import TimeTableView, { genTimeBlock } from 'react-native-timetable';
-import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+import { userInfo, toFarsi,encrypt, getHttpAdress } from '../components/DB';
 import Loading from '../components/loading';
 
 const events_data = [
@@ -178,7 +178,7 @@ export default class App extends Component {
 			'&mode=' +
 			this.state.selectedItem;
 		if (page == 1) this.setState({ data: [] });
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {

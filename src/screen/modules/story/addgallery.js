@@ -3,10 +3,15 @@ import { userInfo, getHttpAdress } from '../../../components/DB';
 
 import { Input, ButtonGroup } from 'react-native-elements';
 import { RadioButton } from 'react-native-paper';
+import { Snackbar } from 'react-native-paper';
+import * as ImageManipulator from 'expo-image-manipulator';
+import * as Permissions from 'expo-permissions';
+
 import ProgressCircle from 'react-native-progress-circle';
 import RNPickerSelect from 'react-native-picker-select';
 import RadioItem from '../../../components/radioItem';
 import Loading from '../../../components/loading';
+import { useState, useEffect } from 'react';
 
 var Buffer = require('buffer/').Buffer;
 import { withNavigation } from 'react-navigation';
@@ -260,7 +265,7 @@ class addgallery extends Component {
 		const { navigation } = this.props;
 		const storyID = navigation.getParam('storyID');
 		const mode = navigation.getParam('mode');
-
+		//	alert();
 		if (mode == 'edit') {
 			this.loadAPI(storyID);
 		}
@@ -276,19 +281,23 @@ class addgallery extends Component {
 			GLOBAL.main.setState({ isModalVisible: true });
 		}
 		/* #region  check internet */
+
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
+			this.setState({ issnackin: true });
 			return;
 		}
+
 		/* #endregion */
 
 		//this.setState({ loading: true });
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/getStoryID?id=' + storyID + '&p=' + param;
-		//console.log(uurl);
+		//////////console.log(uurl);
 		//return;
 		try {
+			//uurl = encrypt(uurl);
+			//////console.log(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -392,17 +401,25 @@ class addgallery extends Component {
 	};
 	apiPost = async (jsonstr) => {
 		/* #region  check internet */
+
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
+			this.setState({ issnackin: true });
 			return;
 		}
+
 		/* #endregion */
 
 		this.setState({ isSubmitting: true, endaction: true });
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/setStory?p=' + param + '&json=' + jsonstr;
+
 		console.log(uurl);
 		try {
+			console.log('hi');
+			//uurl = encrypt(uurl);
+			//////console.log(uurl);
+
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -413,7 +430,7 @@ class addgallery extends Component {
 					});
 					return;
 				}
-
+				console.log('hi');
 				if (retJson.result == 'ok')
 					this.setState((prevState) => ({
 						formikDefault: {
@@ -604,7 +621,8 @@ class addgallery extends Component {
 
 		let openImage1PickerAsync = async (tt) => {
 			//console.log(tt);
-			let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
+			//const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+			let permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 			if (permissionResult.granted === false) {
 				alert('Permission to access camera roll is required!');
 				return;
@@ -910,7 +928,11 @@ class addgallery extends Component {
 														}}
 														onimgPress={async () => {
 															//console.log(this.state.formikDefault[item.mobileurl]);
-															let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
+															const {
+																status
+															} = await ImagePicker.requestCameraPermissionsAsync();
+
+															let permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 															if (permissionResult.granted === false) {
 																alert('Permission to access camera roll is required!');
 																return;
@@ -922,9 +944,28 @@ class addgallery extends Component {
 																	allowsMultipleSelection: true
 																}
 															);
+
 															if (!pickerResult.cancelled) {
+																let pickerResultNew = await ImageManipulator.manipulateAsync(
+																	pickerResult.uri,
+																	[ { resize: { width: 768 } } ],
+																	{
+																		compress: 0.5,
+																		format: 'jpeg',
+																		base64: true
+																	}
+																);
+
+																try {
+																	let y = await FileSystem.deleteAsync(
+																		pickerResult.uri
+																	);
+																} catch (error) {
+																	console.log(error);
+																}
+
 																//this.ImageUpload1(pickerResult.uri);
-																let url = pickerResult.uri;
+																let url = pickerResultNew.uri;
 																//console.log(url);
 																const xhr = new XMLHttpRequest();
 																//xhr.open('POST', 'http://api.farsmahd.ir/api/upload');
@@ -1242,6 +1283,27 @@ class addgallery extends Component {
 				</ScrollView>
 
 				<DropdownAlert ref={(ref) => (this.dropDownAlertRef = ref)} />
+				<Snackbar
+					visible={this.state.issnackin}
+					onDismiss={() => this.setState({ issnackin: false })}
+					style={{ backgroundColor: 'red', fontFamily: 'iransans' }}
+					wrapperStyle={{ fontFamily: 'iransans' }}
+					action={{
+						label: 'بستن',
+						onPress: () => {
+							this.setState({ issnackin: false });
+							this.setState(
+								{
+									//  loading: false,
+									//  save_loading: false
+								}
+							);
+							//this.props.navigation.goBack(null);
+						}
+					}}
+				>
+					{'لطفا دسترسی به اینترنت را چک کنید'}
+				</Snackbar>
 			</View>
 		);
 	}
@@ -1287,5 +1349,5 @@ const styles = StyleSheet.create({
 	}
 });
 
-console.disableYellowBox = true;
+//console.disableYellowBox = true;
 export default withNavigation(addgallery);

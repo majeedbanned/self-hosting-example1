@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+import { userInfo, toFarsi,encrypt, getHttpAdress } from '../components/DB';
 import Modal from 'react-native-modalbox';
 import Modalm from 'react-native-modal';
 import { REAL_WINDOW_HEIGHT } from 'react-native-extra-dimensions-android';
@@ -1112,7 +1112,7 @@ class teacherStat extends React.PureComponent {
 					//onEndReached={this.handleScrollEndReached}
 					onEndReachedThreshold={0.005}
 				/>
-				{this.state.loading && <ActivityIndicator />}
+				{this.state.loading && <ActivityIndicator size="small" color="#000"/>}
 
 				<Modalm
 					animationInTiming={0.1}

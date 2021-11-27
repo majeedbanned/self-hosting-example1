@@ -9,7 +9,7 @@ class addstory extends Component {
 	state = { formstruct: [] };
 
 	componentDidMount() {
-		console.log('didmount');
+	//	console.log('didmount');
 		this.setState({
 			formstruct: [
 				{

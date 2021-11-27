@@ -5,13 +5,12 @@ import {
 	StyleSheet,
 	SafeAreaView,
 	Image,
-	YellowBox,
 	FlatList,
 	TouchableOpacity,
 	Text,
 	RefreshControl
 } from 'react-native';
-import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+import { userInfo, toFarsi, encrypt, getHttpAdress } from '../components/DB';
 export const Colors = {
 	PRIMARY: '#1abc9c',
 
@@ -25,9 +24,9 @@ export const Colors = {
 	CGRAY: '#ececec',
 	OFFLINE_GRAY: '#535353'
 };
-YellowBox.ignoreWarnings([
-	'VirtualizedLists should never be nested inside plain' // TODO: Remove when fixed
-]);
+// YellowBox.ignoreWarnings([
+// 	'VirtualizedLists should never be nested inside plain' // TODO: Remove when fixed
+// ]);
 class workbookdt extends Component {
 	state = {};
 
@@ -100,7 +99,7 @@ class workbookdt extends Component {
 		});
 	}
 	render() {
-		YellowBox.ignoreWarnings([ 'VirtualizedLists should never be nested' ]);
+		//	YellowBox.ignoreWarnings([ 'VirtualizedLists should never be nested' ]);
 		return (
 			<View>
 				<ScrollView style={{ borderWidth: 0, borderRadius: 20 }}>
@@ -156,7 +155,7 @@ const styles = StyleSheet.create({
 		fontSize: 12
 	},
 	title: {
-		fontFamily: 'iransansbold',
+		fontFamily: 'iransans',
 		fontSize: 14,
 		fontWeight: 'bold',
 		color: Colors.DARKGRAY
@@ -164,7 +163,7 @@ const styles = StyleSheet.create({
 	title1: {
 		alignSelf: 'flex-start',
 		textAlign: 'left',
-		fontFamily: 'iransansbold',
+		fontFamily: 'iransans',
 		//backgroundColor: Colors.GREEN,
 		borderRadius: 8,
 		marginBottom: 3,

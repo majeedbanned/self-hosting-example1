@@ -2,33 +2,34 @@ import React, { Component } from 'react';
 import { StyleSheet, Linking, ActivityIndicator, SafeAreaView } from 'react-native';
 import ActionButton from 'react-native-action-button';
 import defaultStyles from '../../config/styles';
+import { Snackbar } from 'react-native-paper';
 import Loading from '../../components/loading';
-import DropdownAlert from 'react-native-dropdownalert';
+// import DropdownAlert from 'react-native-dropdownalert';
 import { withNavigation } from 'react-navigation';
 import { FlatGrid } from 'react-native-super-grid';
 import Icon from 'react-native-vector-icons/Ionicons';
 import IconAnt from 'react-native-vector-icons/AntDesign';
 
 import Mstyles from '../../components/styles';
-import FormButton from '../../component/FormButton';
-import ExamAdd from '.././examAdd';
-import { AntDesign, Entypo } from '@expo/vector-icons';
-import { Ionicons } from '@expo/vector-icons';
+// import FormButton from '../../component/FormButton';
+// import ExamAdd from '.././examAdd';
+// import { AntDesign, Entypo } from '@expo/vector-icons';
+// import { Ionicons } from '@expo/vector-icons';
 //import SelectUser from './../../selectUser';
 import NetInfo from '@react-native-community/netinfo';
-import Modal, {
-	ModalTitle,
-	ModalContent,
-	ModalFooter,
-	ModalButton,
-	SlideAnimation,
-	ScaleAnimation
-} from 'react-native-modals';
-import { userInfo, toFarsi, getHttpAdress } from '../../components/DB';
+// import Modal, {
+// 	ModalTitle,
+// 	ModalContent,
+// 	ModalFooter,
+// 	ModalButton,
+// 	SlideAnimation,
+// 	ScaleAnimation
+// } from 'react-native-modals';
+import { userInfo, toFarsi, encrypt, getHttpAdress } from '../../components/DB';
 import { FlatList, ScrollView, Image, View, Text, RefreshControl, TouchableOpacity } from 'react-native';
 import GLOBAL from './../global';
-import { LinearGradient } from 'expo-linear-gradient';
-import { NavigationEvents } from 'react-navigation';
+// import { LinearGradient } from 'expo-linear-gradient';
+// import { NavigationEvents } from 'react-navigation';
 
 const colorhead = '#9b59b6';
 const colorlight = '#9b59b6';
@@ -80,7 +81,7 @@ class reports extends Component {
 				headerBackTitle: 'Home'
 			},
 			headerTitleStyle: {
-				fontFamily: 'iransansbold',
+				fontFamily: 'iransans',
 				color: colorhead
 			}
 		};
@@ -97,11 +98,9 @@ class reports extends Component {
 
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
-
 		if (!state.isConnected) {
-			//alert(state.isConnected);
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
 		/* #endregion */
 
@@ -116,8 +115,9 @@ class reports extends Component {
 			'&g=' +
 			this.state.selectedItem +
 			'&mode=list';
-		//console.log(uurl);
+		//////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -150,16 +150,17 @@ class reports extends Component {
 		/* #region  check internet */
 		let state = await NetInfo.fetch();
 		if (!state.isConnected) {
-			//this.dropDownAlertRef.alertWithType('warn', 'اخطار', 'لطفا دسترسی به اینترنت را چک کنید');
-			//return;
+			this.setState({ issnackin: true });
+			return;
 		}
 		/* #endregion */
 
 		this.setState({ loading: true });
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/getReport?id=' + page + '&p=' + param + '&g=' + this.state.selectedItem;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -198,7 +199,7 @@ class reports extends Component {
 	};
 	_renderFooter = () => {
 		if (!this.state.isLoading) return null;
-		return <ActivityIndicator style={{ color: 'red' }} size="large" />;
+		return <ActivityIndicator size="small" color="#000" />;
 	};
 	_handleLoadMore = () => {
 		if (!this.state.isLoading) {
@@ -232,7 +233,15 @@ class reports extends Component {
 					data={this.state.cat}
 					keyExtractor={(item) => item.id.toString()}
 					horizontal
-					style={{ paddingBottom: 4, borderWidth: 0, marginTop: 4, marginRight: 4, marginLeft: 4 }}
+					contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-start' }}
+					style={{
+						flexDirection: 'row-reverse',
+						paddingBottom: 4,
+						borderWidth: 0,
+						marginTop: 4,
+						marginRight: 4,
+						marginLeft: 4
+					}}
 					renderItem={({ item, index }) => {
 						return (
 							<TouchableOpacity
@@ -294,7 +303,7 @@ class reports extends Component {
 										{item.name}
 									</Text>
 									{this.state.selectedItem !== item.id ||
-										(this.state.dataLoading && <ActivityIndicator />)}
+										(this.state.dataLoading && <ActivityIndicator size="small" color="#000"/>)}
 								</View>
 							</TouchableOpacity>
 						);
@@ -465,65 +474,27 @@ class reports extends Component {
 					</ActionButton>
 				) : null}
 
-				<Modal.BottomModal
-					visible={this.state.bottomModalAndTitle}
-					onTouchOutside={() => this.setState({ bottomModalAndTitle: false })}
-					height={0.4}
-					width={1}
-					onSwipeOut={() => this.setState({ bottomModalAndTitle: false })}
-					modalTitle={<ModalTitle title="عملیات آزمون" hasTitleBar />}
+				<Snackbar
+					visible={this.state.issnackin}
+					onDismiss={() => this.setState({ issnackin: false })}
+					style={{ backgroundColor: 'red', fontFamily: 'iransans' }}
+					wrapperStyle={{ fontFamily: 'iransans' }}
+					action={{
+						label: 'بستن',
+						onPress: () => {
+							this.setState({ issnackin: false });
+							this.setState(
+								{
+									//  loading: false,
+									//  save_loading: false
+								}
+							);
+							//this.props.navigation.goBack(null);
+						}
+					}}
 				>
-					<ModalContent
-						style={{
-							flex: 1,
-							backgroundColor: 'fff',
-							borderWidth: 0
-						}}
-					>
-						<FlatGrid
-							itemDimension={80}
-							items={test}
-							style={styles.gridView}
-							// staticDimension={300}
-							// fixed
-							spacing={10}
-							renderItem={({ item }) => (
-								<View style={[ styles.itemContainer, { backgroundColor: item.bkcolor } ]}>
-									{item.badge > 0 && <Text style={styles.badge}> 2 </Text>}
-
-									<TouchableOpacity
-										onPress={() => {
-											this.clickEventListener(item);
-										}}
-										style={{ flex: 1 }}
-									>
-										<Ionicons
-											name={item.icon}
-											size={37}
-											color={item.code}
-											style={{
-												shadowColor: item.bkcolor,
-												flex: 1,
-												alignSelf: 'center',
-												paddingTop: 5,
-												shadowColor: item.code,
-												shadowOffset: {
-													width: 1,
-													height: 1
-												},
-												shadowOpacity: 0.37,
-												shadowRadius: 2.49,
-												elevation: 3
-											}}
-										/>
-									</TouchableOpacity>
-
-									<Text style={styles.itemName}>{item.caption}</Text>
-								</View>
-							)}
-						/>
-					</ModalContent>
-				</Modal.BottomModal>
+					{'لطفا دسترسی به اینترنت را چک کنید'}
+				</Snackbar>
 			</View>
 		);
 	}

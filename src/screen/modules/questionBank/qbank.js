@@ -21,6 +21,7 @@ import { withNavigation } from 'react-navigation';
 import { FlatGrid } from 'react-native-super-grid';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Iconaw from 'react-native-vector-icons/FontAwesome';
+import { RFPercentage, RFValue } from 'react-native-responsive-fontsize';
 
 import Mstyles from '../../../components/styles';
 import FormButton from '../../../component/FormButton';
@@ -38,7 +39,7 @@ import {
 	SlideAnimation,
 	ScaleAnimation
 } from 'react-native-modals';
-import { userInfo, toFarsi, getHttpAdress, getHttpAdressPure } from '../../../components/DB';
+import { userInfo, toFarsi, encrypt, getHttpAdress, getHttpAdressPure } from '../../../components/DB';
 import { FlatList, ScrollView, Image, View, Text, RefreshControl, TouchableOpacity } from 'react-native';
 import GLOBAL from '../../global';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -343,7 +344,7 @@ class PureQ extends React.PureComponent {
 				<View style={{ flexDirection: 'row' }}>
 					<HTML
 						html={
-							'<span style="text-align:left;direction:rtl;font-family:iransans;font-size:15;line-height:35px" >' +
+							'<span style="text-align:left;direction:rtl;font-family:iransans;font-size:14;line-height:35px" >' +
 							item.soal +
 							'</span>'
 						}
@@ -362,7 +363,7 @@ class PureQ extends React.PureComponent {
 
 							<HTML
 								html={
-									'<span style="text-align:left;direction:rtl;font-family:iransans;font-size:15;line-height:35px" >' +
+									'<span style="text-align:left;direction:rtl;font-family:iransans;font-size:14;line-height:35px" >' +
 									item.g1 +
 									'</span>'
 								}
@@ -378,7 +379,7 @@ class PureQ extends React.PureComponent {
 							)}
 							<HTML
 								html={
-									'<span style="text-align:left;direction:rtl;font-family:iransans;font-size:15;line-height:35px" >' +
+									'<span style="text-align:left;direction:rtl;font-family:iransans;font-size:14;line-height:35px" >' +
 									item.g2 +
 									'</span>'
 								}
@@ -394,7 +395,7 @@ class PureQ extends React.PureComponent {
 							)}
 							<HTML
 								html={
-									'<span style="text-align:left;direction:rtl;font-family:iransans;font-size:15;line-height:35px" >' +
+									'<span style="text-align:left;direction:rtl;font-family:iransans;font-size:14;line-height:35px" >' +
 									item.g3 +
 									'</span>'
 								}
@@ -411,7 +412,7 @@ class PureQ extends React.PureComponent {
 
 							<HTML
 								html={
-									'<span style="text-align:left;direction:rtl;font-family:iransans;font-size:15;line-height:35px" >' +
+									'<span style="text-align:left;direction:rtl;font-family:iransans;font-size:14;line-height:35px" >' +
 									item.g4 +
 									'</span>'
 								}
@@ -695,9 +696,10 @@ class qbank extends Component {
 			this.state.selectedItem +
 			'&teachercode=' +
 			global.username;
-		console.log(uurl);
+		////////console.log(uurl);
 
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -718,7 +720,7 @@ class qbank extends Component {
 				return 1;
 			}
 		} catch (e) {
-			console.log('err');
+			//	console.log('err');
 			this.dropDownAlertRef.alertWithType('error', 'پیام', 'خطادر دستیابی به اطلاعات');
 			this.setState({});
 			return false;
@@ -764,11 +766,13 @@ class qbank extends Component {
 			this.state.selectedFasl +
 			'&start=' +
 			this.start;
-		console.log(uurl);
+		//
 		try {
+			uurl = encrypt(uurl);
+			//console.log(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
-				console.log('complete');
+				//	console.log('complete');
 				let retJson = await response.json();
 				if (Object.keys(retJson).length == 0) {
 					this.setState({
@@ -859,8 +863,9 @@ class qbank extends Component {
 			'&mode=' +
 			this.state.selectedItem +
 			'&dars=&fasl=';
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -904,7 +909,7 @@ class qbank extends Component {
 				return false;
 			}
 		} catch (e) {
-			console.log('err');
+			//	console.log('err');
 			this.dropDownAlertRef.alertWithType('error', 'پیام', 'خطادر دستیابی به اطلاعات');
 			this.setState(
 				{
@@ -920,7 +925,7 @@ class qbank extends Component {
 
 	_renderFooter = () => {
 		if (!this.state.isLoading) return null;
-		return <ActivityIndicator style={{ color: 'red' }} size="large" />;
+		return <ActivityIndicator style={{ color: 'red' }} size="small" color="#000" />;
 	};
 	_handleLoadMore = () => {
 		if (!this.state.isLoading) {
@@ -934,7 +939,8 @@ class qbank extends Component {
 		this.setState({ searchText: text });
 		if (text == '' || text == undefined) {
 			this.page = 1;
-			this.setState({ data: [], _pages: [ { id: 1, name: 1 } ], srchloading: true });
+			this.setState({ data: [], _pages: [ { id: 1, name: 1 } ], srchloading: true, selected_pages: 1 });
+			//alert();
 			setTimeout(() => {
 				this.loadAPI(1, '');
 			}, 1000);
@@ -942,7 +948,7 @@ class qbank extends Component {
 		}
 		if (text.length < 2) return;
 		this.page = 1;
-		this.setState({ data: [], _pages: [ { id: 1, name: 1 } ], srchloading: true });
+		this.setState({ data: [], _pages: [ { id: 1, name: 1 } ], srchloading: true, selected_pages: 1 });
 
 		setTimeout(() => {
 			this.loadAPI(1, '');
@@ -983,8 +989,9 @@ class qbank extends Component {
 		this.setState({ isRefreshing: true });
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/getExamList?currentPage=' + '1' + '&p=' + param;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
+			uurl = encrypt(uurl);
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();
@@ -1157,8 +1164,9 @@ class qbank extends Component {
 					data={this.state.cat}
 					keyExtractor={(item) => item.id.toString()}
 					horizontal
+					contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-start' }}
 					style={{
-						flexDirection: 'column-reverse',
+						flexDirection: 'row-reverse',
 						paddingBottom: 4,
 						borderWidth: 0,
 						marginTop: 4,
@@ -1179,10 +1187,10 @@ class qbank extends Component {
 										this.state.selectedItem === item.id ? (
 											{
 												flexDirection: 'row',
-												backgroundColor: '#36D1DC',
+												backgroundColor: '#2980b9',
 												fontFamily: 'iransans',
 												borderWidth: 1,
-												borderColor: '#36D1DC',
+												borderColor: '#2980b9',
 												borderRadius: 15,
 												margin: 3,
 												paddingTop: 8,
@@ -1196,7 +1204,7 @@ class qbank extends Component {
 												backgroundColor: 'white',
 												fontFamily: 'iransans',
 												borderWidth: 1,
-												borderColor: '#36D1DC',
+												borderColor: '#2980b9',
 												borderRadius: 15,
 												margin: 3,
 												paddingTop: 8,
@@ -1211,12 +1219,15 @@ class qbank extends Component {
 										style={
 											this.state.selectedItem === item.id ? (
 												{
+													fontSize: 12.2,
 													color: 'white',
 													fontFamily: 'iransans'
 												}
 											) : (
 												{
-													color: '#36D1DC',
+													fontSize: 12.2,
+
+													color: '#2980b9',
 
 													fontFamily: 'iransans'
 												}
@@ -1226,7 +1237,7 @@ class qbank extends Component {
 										{item.name}
 									</Text>
 									{this.state.selectedItem !== item.id ||
-										(this.state.dataLoading && <ActivityIndicator />)}
+										(this.state.dataLoading && <ActivityIndicator size="small" color="#000" />)}
 								</View>
 							</TouchableOpacity>
 						);
@@ -1264,10 +1275,10 @@ class qbank extends Component {
 												this.state.selected_pages === item.id ? (
 													{
 														flexDirection: 'row',
-														backgroundColor: '#36D1DC',
+														backgroundColor: '#2980b9',
 														fontFamily: 'iransans',
 														borderWidth: 1,
-														borderColor: '#36D1DC',
+														borderColor: '#2980b9',
 														borderRadius: 20,
 														margin: 3,
 														paddingTop: 3,
@@ -1281,7 +1292,7 @@ class qbank extends Component {
 														backgroundColor: 'white',
 														fontFamily: 'iransans',
 														borderWidth: 1,
-														borderColor: '#36D1DC',
+														borderColor: '#2980b9',
 														borderRadius: 20,
 														margin: 3,
 														paddingTop: 3,
@@ -1301,7 +1312,7 @@ class qbank extends Component {
 														}
 													) : (
 														{
-															color: '#36D1DC',
+															color: '#2980b9',
 
 															fontFamily: 'iransans'
 														}
@@ -1311,7 +1322,9 @@ class qbank extends Component {
 												{toFarsi(item.name)}
 											</Text>
 											{this.state.selected_pages !== item.id ||
-												(this.state.dataLoading_page && <ActivityIndicator />)}
+												(this.state.dataLoading_page && (
+													<ActivityIndicator size="small" color="#000" />
+												))}
 										</View>
 									</TouchableOpacity>
 								);
@@ -1333,10 +1346,10 @@ class qbank extends Component {
 								<View
 									style={{
 										flexDirection: 'row',
-										backgroundColor: '#36D1DC',
+										backgroundColor: '#2980b9',
 										fontFamily: 'iransans',
 										borderWidth: 1,
-										borderColor: '#36D1DC',
+										borderColor: '#2980b9',
 										borderRadius: 20,
 										margin: 4,
 										marginStart: 10,
@@ -1347,7 +1360,9 @@ class qbank extends Component {
 										paddingBottom: 4
 									}}
 								>
-									<Text style={{ color: 'white', fontWeight: 'bold', fontSize: 14 }}>{'>'}</Text>
+									<Text style={{ color: 'white', fontWeight: 'bold', fontSize: 12.2 }}>
+										{'>'}
+									</Text>
 								</View>
 							</TouchableOpacity>
 							<TextInput
@@ -1357,7 +1372,7 @@ class qbank extends Component {
 									paddingTop: 5,
 									textAlign: 'center',
 									width: 40,
-									borderColor: '#36D1DC',
+									borderColor: '#2980b9',
 									borderRadius: 10,
 									borderWidth: 1
 								}}
@@ -1384,10 +1399,10 @@ class qbank extends Component {
 								<View
 									style={{
 										flexDirection: 'row',
-										backgroundColor: '#36D1DC',
+										backgroundColor: '#2980b9',
 										fontFamily: 'iransans',
 										borderWidth: 1,
-										borderColor: '#36D1DC',
+										borderColor: '#2980b9',
 										borderRadius: 20,
 										margin: 4,
 										paddingTop: 3,
@@ -1396,12 +1411,14 @@ class qbank extends Component {
 										paddingBottom: 4
 									}}
 								>
-									<Text style={{ color: 'white', fontWeight: 'bold', fontSize: 14 }}>{'<'}</Text>
+									<Text style={{ color: 'white', fontWeight: 'bold', fontSize: 12.2 }}>
+										{'<'}
+									</Text>
 								</View>
 							</TouchableOpacity>
 							{!this.state.onlinePagingLoading ? (
 								<Text
-									style={{ fontFamily: 'iransans', marginTop: 7, marginStart: 5, color: '#36D1DC' }}
+									style={{ fontFamily: 'iransans', marginTop: 7, marginStart: 5, color: '#2980b9' }}
 								>
 									{toFarsi(this.state.onlineCount) + ' صفحه '}
 								</Text>
@@ -1480,7 +1497,12 @@ class qbank extends Component {
 								lightTheme
 								showLoading={this.state.srchloading}
 								round
-								inputStyle={{ textAlign: 'center', margin: 0, fontSize: 14, fontFamily: 'iransans' }}
+								inputStyle={{
+									textAlign: 'center',
+									margin: 0,
+									fontSize: 12.2,
+									fontFamily: 'iransans'
+								}}
 								//showLoading={this.state.loading}
 								onChangeText={(text) => this.searchFilterFunction(text)}
 								autoCorrect={false}
@@ -1608,7 +1630,7 @@ class qbank extends Component {
 						height: '100%'
 					}}
 				>
-					<ActivityIndicator style={{ color: '#000' }} />
+					<ActivityIndicator size="small" color="#000" />
 				</View>
 			);
 		}
@@ -1646,7 +1668,9 @@ class qbank extends Component {
 								}}
 							>
 								{this.state.selectedItem != 1 &&
-								!this.state.dataLoading && <Text style={defaultStyles.lbl14}>سئوالی پیدا نشد</Text>}
+								!this.state.dataLoading && (
+									<Text style={([ defaultStyles.lbl14 ], { color: '#2980b9' })}>سئوالی پیدا نشد</Text>
+								)}
 
 								{this.state.selectedItem == 1 &&
 								!this.state.dataLoading && <Text style={defaultStyles.lbl14}>لیست خالی است</Text>}
@@ -2002,7 +2026,7 @@ class qbank extends Component {
 										{(this.state.selectedItem == 1 || this.state.selectedItem == 2) && (
 											<Button
 												loading={false}
-												labelStyle={{ color: '#36D1DC', fontFamily: 'iransans' }}
+												labelStyle={{ color: '#2980b9', fontFamily: 'iransans' }}
 												icon="pen"
 												mode="outlined"
 												onPress={() => {
@@ -2023,7 +2047,7 @@ class qbank extends Component {
 										{(this.state.selectedItem == 1 || this.state.selectedItem == 2) && (
 											<Button
 												loading={this.state.delload}
-												labelStyle={{ color: '#36D1DC', fontFamily: 'iransans' }}
+												labelStyle={{ color: '#2980b9', fontFamily: 'iransans' }}
 												icon="delete"
 												mode="outlined"
 												onPress={async () => {
@@ -2104,7 +2128,7 @@ class qbank extends Component {
 										{this.start != 'start' && (
 											<Button
 												loading={false}
-												labelStyle={{ color: '#36D1DC', fontFamily: 'iransans' }}
+												labelStyle={{ color: '#2980b9', fontFamily: 'iransans' }}
 												mode="outlined"
 												//	defaultStyles={{ borderColor: 'red' }}
 												onPress={() => {
@@ -2615,7 +2639,7 @@ const styles = StyleSheet.create({
 		backgroundColor: defaultStyles.colors.lightblue,
 		fontFamily: 'iransans',
 		//borderWidth: 1,
-		borderColor: '#36D1DC',
+		borderColor: '#2980b9',
 		borderRadius: 10,
 		margin: 3,
 		width: 125,

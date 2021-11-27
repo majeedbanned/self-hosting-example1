@@ -28,7 +28,7 @@ export default {
 		fontSize: 14,
 		marginStart: 10,
 
-		fontFamily: 'iransansbold'
+		fontFamily: 'iransans'
 	},
 	leftIconContainerStyle: {
 		borderWidth: 1,
@@ -87,7 +87,7 @@ export default {
 	lblformcaption: {
 		marginBottom: 15,
 		textAlign: 'center',
-		fontFamily: 'iransansbold',
+		fontFamily: 'iransans',
 		color: colors.primary,
 		fontSize: 16
 	},

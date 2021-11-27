@@ -20,7 +20,7 @@ class menu extends Component {
 	async componentDidMount() {
 		// await Font.loadAsync({
 		// 	iransans: require('./../../assets/IRANSansMobile.ttf'),
-		// 	iransansbold: require('./../../assets/IRANSansMobile_Bold.ttf')
+		// 	iransans: require('./../../assets/IRANSansMobile_Bold.ttf')
 		// });
 
 		// useFonts.loadAsync({

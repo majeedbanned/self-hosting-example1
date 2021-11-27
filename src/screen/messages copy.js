@@ -7,7 +7,7 @@ import { I18nManager, Platform, Button } from 'react-native';
 import { Video } from 'expo-av';
 
 import { Ionicons, AntDesign, Entypo } from '@expo/vector-icons';
-import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+import { userInfo, toFarsi,encrypt, getHttpAdress } from '../components/DB';
 import { Menu, MenuOptions, MenuOption, MenuTrigger } from 'react-native-popup-menu';
 import {
 	ActivityIndicator,
@@ -100,7 +100,7 @@ class messages extends Component {
 		let param = userInfo();
 
 		let uurl = global.adress + '/pApi.asmx/getMessageList?currentPage=' + '1' + '&p=' + param;
-		//console.log(uurl);
+		//////////console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -189,7 +189,7 @@ class messages extends Component {
 		let param = userInfo();
 
 		let uurl = global.adress + '/pApi.asmx/getMessageList?currentPage=' + page + '&p=' + param;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -275,7 +275,7 @@ class messages extends Component {
 			// 		marginBottom: 0
 			// 	}}
 			// >
-			<ActivityIndicator style={{ color: 'red' }} size="large" />
+			<ActivityIndicator style={{ color: 'red' }} size="small" color="#000" />
 			// </View>
 		);
 	};
@@ -316,7 +316,7 @@ class messages extends Component {
 						height: '100%'
 					}}
 				>
-					<ActivityIndicator style={{ color: '#000' }} />
+					<ActivityIndicator size="small" color="#000" />
 				</View>
 			);
 		}

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { StyleSheet, TextInput, Alert, Dimensions } from 'react-native';
-import { userInfo, toFarsi, getHttpAdress } from '../components/DB';
+import { userInfo, toFarsi,encrypt, getHttpAdress } from '../components/DB';
 import CountDown from 'react-native-countdown-component';
 export default function ExamHeader(props) {
 	return (

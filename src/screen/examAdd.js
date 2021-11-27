@@ -265,7 +265,7 @@ class examAdd extends Component {
 		//this.setState({ loading: true });
 		let param = userInfo();
 		let uurl = global.adress + '/pApi.asmx/getExam?id=' + global.examEditID + '&p=' + param;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -354,7 +354,7 @@ class examAdd extends Component {
 		//global.examID = '26668';
 		//global.adress = 'http://192.168.1.12:8080/';
 		let uurl = global.adress + '/pApi.asmx/setExam?p=' + param + '&json=' + jsonstr;
-		console.log(uurl);
+		////////console.log(uurl);
 		try {
 			const response = await fetch(uurl);
 			if (response.ok) {
@@ -579,7 +579,7 @@ class examAdd extends Component {
 	}
 	render() {
 		let openImagePickerAsync = async () => {
-			let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
+			let permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 
 			if (permissionResult.granted === false) {
 				alert('Permission to access camera roll is required!');
@@ -597,7 +597,7 @@ class examAdd extends Component {
 		};
 
 		let openImagePickerAsync2 = async () => {
-			let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
+			let permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 			if (permissionResult.granted === false) {
 				alert('Permission to access camera roll is required!');
 				return;
@@ -611,7 +611,7 @@ class examAdd extends Component {
 		};
 
 		let openImagePickerAsync3 = async () => {
-			let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
+			let permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 
 			if (permissionResult.granted === false) {
 				alert('Permission to access camera roll is required!');

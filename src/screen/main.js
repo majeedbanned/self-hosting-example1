@@ -10,15 +10,24 @@ import Audio from '../screen/audio';
 import Recorder from '../screen/recorder';
 
 import Webinar from '../screen/webinar';
+import Eventen from '../screen/eventen';
 
 import Vclass from '../screen/vClass';
 import GLOBAL from './global';
 //import { NavigationEvents } from 'react-navigation';
 //import Vclass from '../screen/vClass';
+import * as SQLite from 'expo-sqlite';
 
 import Modal from 'react-native-modal';
 import SelectUser from '../screen/selectUser';
 import Cal from '../screen/event';
+
+import Database from '../components/database';
+const database_name = 'Reactoffline.db';
+const database_version = '1.0';
+const database_displayname = 'SQLite React Offline Database';
+const database_size = 200000;
+const db = SQLite.openDatabase(database_name, database_version, database_displayname, database_size);
 
 GenerateRandomNumber = () => {
 	var RandomNumber = Math.floor(Math.random() * 100) + 1;
@@ -51,37 +60,97 @@ const EventRoute = (er) => {
 	return <Cal />;
 };
 
+const EventenRoute = (er) => {
+	return <Eventen />;
+};
+
 export default class MyComponent extends React.Component {
-	state = {
-		isModalVisible: false,
-		isAudioVisible: false,
+	constructor(props) {
+		super(props);
+		this.state = {
+			isModalVisible: false,
+			isAudioVisible: false,
 
-		index: 0,
-		//	routes: [],
-		routes: [
-			{ key: 'home', title: 'منو', icon: 'home', color: '#1693A5' },
+			index: 0,
+			//	routes: [],
+			routes: [
+				{ key: 'home', title: global.lang == 'fa' ? 'منو' : 'Menu', icon: 'home', color: '#1693A5' },
 
-			{
-				key: 'message',
-				title: 'پیام ها',
-				icon: 'email-outline',
-				iconcolor: 'green',
-				color: '#48bdfe'
-				//badge: '3'
-			},
-			{
-				key: 'vclass',
-				title: ' آزمون آنلاین',
-				icon: 'checkbox-marked-outline',
-				iconcolor: 'red',
-				color: '#a976fb'
-			},
+				{
+					key: 'message',
+					title: global.lang == 'fa' ? 'پیام ها' : 'Messages',
+					icon: 'email-outline',
+					iconcolor: 'green',
+					color: '#48bdfe'
+					//badge: '3'
+				},
+				{
+					key: 'vclass',
+					title: global.lang == 'fa' ? ' آزمون آنلاین' : 'Exams',
+					icon: 'checkbox-marked-outline',
+					iconcolor: 'red',
+					color: '#a976fb'
+				},
 
-			{ key: 'webinar', title: 'کلاس مجازی', icon: 'television-play', color: '#ff8184' },
-			{ key: 'event', title: 'رویداد', icon: 'calendar-range', color: '#3F51B5' }
-			// { key: 'login', title: 'ورود', icon: 'qrcode-scan', color: '#019ac3' }
-		]
-	};
+				{
+					key: 'webinar',
+					title: global.lang == 'fa' ? 'کلاس مجازی' : 'Classes',
+					icon: 'television-play',
+					color: '#ff8184'
+				}
+				// { key: 'event', title: global.lang == 'fa' ? 'رویداد' : 'Events', icon: 'calendar-range', color: '#3F51B5' }
+				// { key: 'login', title: 'ورود', icon: 'qrcode-scan', color: '#019ac3' }
+			]
+		};
+
+		this.props.navigation.addListener('willFocus', async () => {
+			//this.loadAPI(1);
+			//this.loadAPIBadge();
+			// let results = await Database.executeSql('select * from users ', []);
+			// if (results.rows.length == 0) {
+			// 	GLOBAL.main.setState({ isModalVisible: true });
+			// }
+		});
+	}
+
+	componentDidMount() {
+		if (global.lang == 'en')
+			this.setState({
+				routes: [
+					{ key: 'home', title: global.lang == 'fa' ? 'منو' : 'Menu', icon: 'home', color: '#1693A5' },
+
+					// {
+					// 	key: 'message',
+					// 	title: global.lang == 'fa' ? 'پیام ها' : 'Messages',
+					// 	icon: 'email-outline',
+					// 	iconcolor: 'green',
+					// 	color: '#48bdfe'
+					// 	//badge: '3'
+					// },
+					// {
+					// 	key: 'vclass',
+					// 	title: global.lang == 'fa' ? ' آزمون آنلاین' : 'Exams',
+					// 	icon: 'checkbox-marked-outline',
+					// 	iconcolor: 'red',
+					// 	color: '#a976fb'
+					// }
+
+					// {
+					// 	key: 'webinar',
+					// 	title: global.lang == 'fa' ? 'کلاس مجازی' : 'Classes',
+					// 	icon: 'television-play',
+					// 	color: '#ff8184'
+					// }
+					{
+						key: 'eventen',
+						title: global.lang == 'fa' ? 'رویداد' : 'Events',
+						icon: 'calendar-range',
+						color: '#3F51B5'
+					}
+					// { key: 'login', title: 'ورود', icon: 'qrcode-scan', color: '#019ac3' }
+				]
+			});
+	}
 
 	_handleIndexChange = (index) => {
 		this.props.navigation.setParams({
@@ -105,6 +174,9 @@ export default class MyComponent extends React.Component {
 	});
 	renderScene = ({ route, jumpTo }) => {
 		switch (route.key) {
+			case 'eventen':
+				return <EventenRoute jumpTo={jumpTo} />;
+
 			case 'event':
 				return <EventRoute jumpTo={jumpTo} />;
 			case 'message':
