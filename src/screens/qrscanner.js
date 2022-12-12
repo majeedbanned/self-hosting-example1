@@ -2,7 +2,7 @@ import React, { Component, State, useState, useEffect } from 'react';
 import { Text, View, StyleSheet, Button, Dimensions, Image } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import defaultStyles from '../config/styles';
-import { Restart } from 'fiction-expo-restart';
+//import { Restart } from 'fiction-expo-restart';
 
 import { REAL_WINDOW_HEIGHT } from 'react-native-extra-dimensions-android';
 
@@ -125,7 +125,7 @@ export default function App() {
 		let resultsr = await Database.executeSql('select * from users ', []);
 
 		if (resultsr.rows.length == 1) {
-			Restart();
+		//** */	Restart();
 		}
 	};
 

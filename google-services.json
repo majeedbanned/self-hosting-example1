@@ -1,33 +1,33 @@
 {
 	"project_info": {
-		"project_number": "704456431236",
-		"project_id": "maht1-234219",
-		"storage_bucket": "maht1-234219.appspot.com"
+		"project_number": "92538968671",
+		"project_id": "parsamooz-69274",
+		"storage_bucket": "parsamooz-69274.appspot.com"
 	},
 	"client": [
 		{
 			"client_info": {
-				"mobilesdk_app_id": "1:704456431236:android:e8906e033addf707e5d4d1",
+				"mobilesdk_app_id": "1:92538968671:android:77a65204947029ae4b99ea",
 				"android_client_info": {
 					"package_name": "com.arsis.parsamooz"
 				}
 			},
 			"oauth_client": [
 				{
-					"client_id": "704456431236-13a5ris35slrcvs0rra4cglivo9s6jge.apps.googleusercontent.com",
+					"client_id": "92538968671-309bun8e2edhr3desnkq5s3m98s4f8fp.apps.googleusercontent.com",
 					"client_type": 3
 				}
 			],
 			"api_key": [
 				{
-					"current_key": "AIzaSyC9hlnlypn3hnHJ8tr-K5EmVeu_YVON8Uc"
+					"current_key": "AIzaSyBfSt_rOdBddSmhMvyyuIGYQ7DW2jKkpmo"
 				}
 			],
 			"services": {
 				"appinvite_service": {
 					"other_platform_oauth_client": [
 						{
-							"client_id": "704456431236-13a5ris35slrcvs0rra4cglivo9s6jge.apps.googleusercontent.com",
+							"client_id": "92538968671-309bun8e2edhr3desnkq5s3m98s4f8fp.apps.googleusercontent.com",
 							"client_type": 3
 						}
 					]

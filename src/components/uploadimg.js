@@ -3,7 +3,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import ProgressCircle from 'react-native-progress-circle';
 import AnimatedProgressWheel from 'react-native-progress-wheel';
 import {
-	Picker,
+	
 	TextInput,
 	Text,
 	Button,

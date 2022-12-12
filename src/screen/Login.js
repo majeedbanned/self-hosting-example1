@@ -1,6 +1,6 @@
 import Constants from 'expo-constants';
 import * as Notifications from 'expo-notifications';
-import { Restart } from 'fiction-expo-restart';
+//import { Restart } from 'fiction-expo-restart';
 import * as Permissions from 'expo-permissions';
 import GLOBAL from './global';
 
@@ -14,7 +14,6 @@ import Icon from 'react-native-vector-icons/AntDesign';
 var Buffer = require('buffer/').Buffer;
 
 import {
-	Picker,
 	TextInput,
 	Text,
 	Button,
@@ -39,7 +38,7 @@ import * as Network from 'expo-network';
 import FormButton from '../component/FormButton';
 
 import DropdownAlert from 'react-native-dropdownalert';
-import { TextField, FilledTextField, OutlinedTextField } from 'react-native-material-textfield';
+import { TextField, FilledTextField, OutlinedTextField } from '@softmedialab/react-native-material-textfield';
 import * as Application from 'expo-application';
 var MessageBarAlert = require('react-native-message-bar').MessageBar;
 var MessageBarManager = require('react-native-message-bar').MessageBarManager;
@@ -116,9 +115,20 @@ class Appaa extends Component {
 			I18nManager.allowRTL(true);
 			I18nManager.forceRTL(true);
 		}
-		let er = await registerForPushNotificationsAsync();
-		//alert(er);
-		this.setState({ noti: er });
+		//	let er = await registerForPushNotificationsAsync();
+		//	console.log('expoToken: ' + expoToken);
+
+		//	this.setState({ noti: er });
+
+		registerForPushNotificationsAsync().then((token) => console.log(token));
+
+		// notificationListener.current = Notifications.addNotificationReceivedListener((notification) => {
+		// 	setNotification(notification);
+		// });
+
+		// responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
+		// 	console.log(response);
+		// });
 
 		// var text = 'The text to be سلان encrypted';
 		// var securityKey = '357611123qwe!@#A';
@@ -372,7 +382,7 @@ class Appaa extends Component {
 		/* #endregion */
 
 		this.setState({ isSubmitting: true });
-
+		let exp = expoToken;
 		let uurl =
 			'http://' +
 			adress +
@@ -383,10 +393,10 @@ class Appaa extends Component {
 			'`' +
 			schoolcode +
 			'`357611123qwe!@$`' +
-			this.state.noti +
+			exp +
 			'`' +
 			Platform.OS;
-		//	alert(uurl);
+		console.log(uurl);
 
 		let hash = encrypt(uurl);
 		uurl = uurl + '&hash=' + hash;
@@ -517,10 +527,10 @@ class Appaa extends Component {
 					<Formik
 						style={{ backgroundColor: 'red' }}
 						initialValues={{
-							username: '', //۱۹۴۱۰۳۶۷۶۷
-							password: '',
-							schoolcode: '',
-							adress: ''
+							username: '95147729', //۱۹۴۱۰۳۶۷۶۷
+							password: '9846168',
+							schoolcode: '95147729',
+							adress: 'shu.farsamooz.ir'
 						}}
 						validateOnBlur={false}
 						validateOnChange={false}
@@ -834,29 +844,40 @@ const styles = StyleSheet.create({
 });
 async function registerForPushNotificationsAsync() {
 	let token;
+
 	if (Constants.isDevice) {
-		//	alert('isd');
-		const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
+		//alert('isd');
+		//??const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
+		const { status: existingStatus } = await Notifications.getPermissionsAsync();
 		let finalStatus = existingStatus;
-		alert(status);
 		if (existingStatus !== 'granted') {
-			//	alert('granted');
-			const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+			const { status } = await Notifications.requestPermissionsAsync();
 			finalStatus = status;
-			//alert(status);
 		}
 		if (finalStatus !== 'granted') {
 			alert('Failed to get push token for push notification!');
 			return;
 		}
+		//alert(status);
+		// if (existingStatus !== 'granted') {
+		// 	//	alert('granted');
+		// 	const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+		// 	finalStatus = status;
+		// 	//alert(status);
+		// }
+		// if (finalStatus !== 'granted') {
+		// 	alert('Failed to get push token for push notification!');
+		// 	return;
+		// }
 		//alert('before token');
-
+		alert('start');
 		try {
 			//token = await Notifications.getExpoPushTokenAsync();
 			token = (await Notifications.getExpoPushTokenAsync()).data;
-			this.expoToken = token;
+			expoToken = token;
+			alert(token);
 		} catch (e) {
-			//alert(e);
+			alert(e);
 		}
 		//console.log(token);
 		//	alert(token);

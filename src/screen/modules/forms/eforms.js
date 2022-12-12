@@ -43,7 +43,7 @@ import Icon1 from 'react-native-vector-icons/MaterialCommunityIcons';
 import { REAL_WINDOW_HEIGHT } from 'react-native-extra-dimensions-android';
 
 import {
-	Picker,
+
 	TextInput,
 	Text,
 	Button,
@@ -73,7 +73,7 @@ import * as Network from 'expo-network';
 import FormButton from '../../../component/FormButton';
 
 import DropdownAlert from 'react-native-dropdownalert';
-import { TextField, FilledTextField, OutlinedTextField } from 'react-native-material-textfield';
+import { TextField, FilledTextField, OutlinedTextField } from '@softmedialab/react-native-material-textfield';
 import * as Application from 'expo-application';
 var MessageBarAlert = require('react-native-message-bar').MessageBar;
 var MessageBarManager = require('react-native-message-bar').MessageBarManager;

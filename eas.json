@@ -8,12 +8,19 @@
 			"distribution": "internal"
 		},
 		"preview": {
+			"android": {
+				"buildType": "apk"
+			},
+			"distribution": "internal",
 			"releaseChannel": "staging",
 			"env": {
 				"APP_ENV": "staging"
 			}
 		},
 		"production": {
+			"android": {
+				"buildType": "apk"
+			},
 			"releaseChannel": "production",
 			"env": {
 				"APP_ENV": "production"

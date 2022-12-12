@@ -1,7 +1,7 @@
 import React, { Component, useRef } from 'react';
 import i18n from 'i18n-js';
 import {
-	Picker,
+	
 	ActivityIndicator,
 	TextInput,
 	Text,

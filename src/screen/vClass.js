@@ -231,8 +231,9 @@ class vclass extends Component {
 
 		if (page == 1) this.setState({ data: [] });
 		try {
+			console.log(uurl);
 			uurl = encrypt(uurl);
-			//console.log(uurl);
+
 			const response = await fetch(uurl);
 			if (response.ok) {
 				let retJson = await response.json();

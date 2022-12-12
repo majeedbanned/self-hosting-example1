@@ -4,7 +4,7 @@ import RNPickerSelect from 'react-native-picker-select';
 import TimePicker from 'react-native-24h-timepicker';
 //import TimePicker from 'react-native-24h-timepicker';
 import {
-	Picker,
+	
 	TextInput,
 	Text,
 	Button,
@@ -39,7 +39,7 @@ import CheckBox from 'react-native-check-box';
 import AppTextInput from '../components/AppTextInput';
 
 import i18n from 'i18n-js';
-import { TextField, FilledTextField, OutlinedTextField } from 'react-native-material-textfield';
+import { TextField, FilledTextField, OutlinedTextField } from '@softmedialab/react-native-material-textfield';
 import { ScrollView } from 'react-native-gesture-handler';
 import { handleTextInput, withPickerValues, Formik } from 'formik';
 import * as yup from 'yup';

@@ -48,7 +48,7 @@ const HomeScreen = ({ navigation }) => {
 				<Button onPress={() => navigation.navigate('modal')} title="modal" />
 				<Button onPress={() => navigation.navigate('timetable')} title="timetable" />
 				<Button onPress={() => navigation.navigate('formik')} title="formik" />
-				<Button onPress={() => navigation.navigate('tcombform')} title="tcombform" />
+				{/* <Button onPress={() => navigation.navigate('tcombform')} title="tcombform" /> */}
 				<Button onPress={() => navigation.navigate('segmentedTab')} title="segmentedTab" />
 				<Button onPress={() => navigation.navigate('sexytab')} title="sexytab" />
 

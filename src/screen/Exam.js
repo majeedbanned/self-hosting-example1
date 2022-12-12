@@ -66,7 +66,7 @@ import Lightbox from 'react-native-lightbox';
 import { Global } from '@jest/types';
 import fa from '../translations/fa';
 import { red } from 'ansi-colors';
-import { consoleSandbox } from '@sentry/utils';
+//import { consoleSandbox } from '@sentry/utils';
 // I18nManager.allowRTL(true);
 // I18nManager.forceRTL(true);
 

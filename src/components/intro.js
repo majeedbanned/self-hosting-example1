@@ -11,8 +11,8 @@ export default class intro extends React.Component {
 	}
 
 	resetAnimation = () => {
-		//this.animation.reset();
-		//this.animation.play();
+		this.animation.reset();
+		this.animation.play();
 	};
 
 	render() {
@@ -29,12 +29,10 @@ export default class intro extends React.Component {
 						width: 370,
 						height: 370,
 						marginTop: 0,
-						//borderRadius: 13,
+
 						backgroundColor: 'white'
 					}}
 					source={require('../screen/intro.json')}
-					// OR find more Lottie files @ https://lottiefiles.com/featured
-					// Just click the one you like, place that file in the 'assets' folder to the left, and replace the above 'require' statement
 				/>
 			</View>
 		);

@@ -14,7 +14,7 @@ import {
 //import * as Updates from 'expo-updates';
 
 import * as Notifications from 'expo-notifications';
-import { Restart } from 'fiction-expo-restart';
+//import { Restart } from 'fiction-expo-restart';
 import * as Permissions from 'expo-permissions';
 
 import * as Updates from 'expo-updates';
@@ -441,9 +441,9 @@ class page1 extends Component {
 				});
 			});
 
-			setTimeout(async () => {
-				this.updateToken(er, global.username, global.schoolcode, Platform.OS, global.ttype);
-			}, 3000);
+			// setTimeout(async () => {
+			// 	this.updateToken(er, global.username, global.schoolcode, Platform.OS, global.ttype);
+			// }, 3000);
 		}
 
 		this.setState(

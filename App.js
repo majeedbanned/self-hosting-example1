@@ -1,5 +1,5 @@
 //import Bugsnag from '@bugsnag/expo';
-//Bugsnag.start();
+//aBugsnag.start('68460742c6002498ca2e488eaee9df93');
 //"permissions": [ "NOTIFICATIONS" ],
 
 //"updates.url": "https://expo.farsamooz.ir",
@@ -60,6 +60,8 @@ import eforms2 from './src/screen/modules/forms/eforms2';
 import cwebview from './src/screen/modules/forms/Cwebview';
 
 import studentlist from './src/screen/modules/forms/studentlist';
+import notnot from './src/screen/notnot';
+
 import speech from './src/screen/speech';
 
 import studentlistforms from './src/screen/modules/forms/studentlistforms';
@@ -113,7 +115,7 @@ import Forms from './src/screen/forms';
 import help from './src/screen/help';
 import comment from './src/screen/comment';
 
-import * as Sentry from 'sentry-expo';
+//import * as Sentry from 'sentry-expo';
 import tahlil from './src/screen/tahlil';
 import reportView from './src/screen/reportView';
 import monthgrade from './src/screen/monthgrade';
@@ -182,11 +184,11 @@ import SelectContact from './src/screen/selectContact';
 import Settings from './src/screen/settings';
 
 import { MenuProvider } from 'react-native-popup-menu';
-Sentry.init({
-	dsn: 'http://3edfa492e3aa46ccbd686c032a770b96@185.110.191.82:9000/2',
-	enableInExpoDevelopment: true,
-	debug: true
-});
+// Sentry.init({
+// 	dsn: 'http://3edfa492e3aa46ccbd686c032a770b96@185.110.191.82:9000/2',
+// 	enableInExpoDevelopment: true,
+// 	debug: true
+// });
 
 //
 //Bugsnag.start();
@@ -311,6 +313,8 @@ const navigator = createStackNavigator(
 		Main: Main,
 		Recorder: Recorder,
 		Splash: Splash,
+		//qtesti: qtesti,
+		//qtash: qtash,
 		//Test: Test,
 		Classheet: Classheet,
 		// formik:formik,
@@ -371,7 +375,7 @@ const navigator = createStackNavigator(
 		List: ListScreen,
 		barnameh: barnameh,
 		bankfile: bankfile,
-		//Textscr: TextScreen,
+
 		notification: notification,
 		absentList: absentList,
 		webinarparticipateList: webinarparticipateList,
@@ -411,16 +415,19 @@ const navigator = createStackNavigator(
 		},
 		eforms: eforms,
 		eforms2: eforms2,
+		notnot: notnot,
 
 		studentlist: studentlist,
 		qbank: qbank,
-		//qtesti: qtesti,
-		//qtash: qtash,
+
 		participateList: participateList,
 		stdSearch: stdSearch,
 		stdprofile: stdprofile,
 		courseslist: courseslist,
 		storyList: storyList
+
+		//	Textscr: TextScreen
+		///Users/majidghasemi/Projects/reactnative/lab/rn-starter/package.json
 	},
 	{
 		initialRouteName: 'Main',
@@ -712,6 +719,7 @@ export default class App extends React.Component {
 		}
 		//alert();
 		//Bugsnag.notify(new Error('Test error'));
+		//console.log('Test error');
 		//global.lang = 'fa';
 		global.isupdateshowS = true;
 
@@ -742,11 +750,11 @@ export default class App extends React.Component {
 
 		//this.registerForPushNotificationsAsync();
 
-		let er = await registerForPushNotificationsAsync();
+		//let er = await registerForPushNotificationsAsync();
 
-		Notifications.addNotificationReceivedListener(this._handleNotification);
+		//Notifications.addNotificationReceivedListener(this._handleNotification);
 
-		Notifications.addNotificationResponseReceivedListener(this._handleNotificationResponse);
+		//Notifications.addNotificationResponseReceivedListener(this._handleNotificationResponse);
 	}
 
 	_handleNotification = (notification) => {
@@ -779,7 +787,7 @@ export default class App extends React.Component {
 						flex: 1,
 						alignItems: 'center',
 						justifyContent: 'center',
-						backgroundColor: '#ffffff'
+						backgroundColor: '#ffff0f'
 						//borderWidth: 3,
 						//borderColor: 'green'
 					}}
@@ -836,7 +844,6 @@ export default class App extends React.Component {
 			);
 		else
 			return (
-				// <ErrorBoundary FallbackComponent={ErrorView}>
 				<MenuProvider>
 					<FancyAlert
 						visible={this.state.visiblefin}
@@ -857,7 +864,14 @@ export default class App extends React.Component {
 						}
 						style={{ backgroundColor: 'white' }}
 					>
-						<Text style={{ textAlign: 'center', fontFamily: 'iransans', marginTop: -16, marginBottom: 32 }}>
+						<Text
+							style={{
+								textAlign: 'center',
+								fontFamily: 'iransans',
+								marginTop: -16,
+								marginBottom: 32
+							}}
+						>
 							نگارش جدید پارس آموز آماده اجرا میباشد...
 						</Text>
 						<Text
@@ -933,7 +947,14 @@ export default class App extends React.Component {
 						}
 						style={{ backgroundColor: 'white' }}
 					>
-						<Text style={{ textAlign: 'center', fontFamily: 'iransans', marginTop: -16, marginBottom: 32 }}>
+						<Text
+							style={{
+								textAlign: 'center',
+								fontFamily: 'iransans',
+								marginTop: -16,
+								marginBottom: 32
+							}}
+						>
 							نگارش جدید پارس آموز در دسترس و در حال دانلود میباشد...
 						</Text>
 
@@ -960,12 +981,11 @@ export default class App extends React.Component {
 					</FancyAlert>
 					<AppContainer />
 				</MenuProvider>
-				// </ErrorBoundary>
 			);
 	}
 }
 
 //@connectCallModal
 //class App extends React.Component {}
-AppRegistry.registerComponent('App', () => App);
+AppRegistry.registerComponent('App', () => <App />);
 //export default createAppContainer(navigator);

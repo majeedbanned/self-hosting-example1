@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Picker, TextInput, Text, Button, Alert, View, StyleSheet } from 'react-native';
+import {  TextInput, Text, Button, Alert, View, StyleSheet } from 'react-native';
 import * as yup from 'yup';
 import { compose } from 'recompose';
 import { handleTextInput, withPickerValues, Formik } from 'formik';
@@ -7,7 +7,7 @@ import FormInput from '../component/FormInput';
 //import AppPickerInput from '../component/picker';
 
 import FormButton from '../component/FormButton';
-import { TextField, FilledTextField, OutlinedTextField } from 'react-native-material-textfield';
+import { TextField, FilledTextField, OutlinedTextField } from '@softmedialab/react-native-material-textfield';
 import RNPickerSelect from 'react-native-picker-select';
 import MultiSelect from 'react-native-multiple-select';
 import ErrorMessage from '../component/ErrorMessage';
@@ -203,7 +203,7 @@ export default class Appaa extends Component {
 							items={sports}
 						/>
 
-						<Picker
+						{/* <Picker
 							value={values.sport1}
 							style={styles.picker}
 							itemStyle={styles.pickerItem}
@@ -212,9 +212,8 @@ export default class Appaa extends Component {
 						>
 							{sports.map((item) => <Picker.Item label={item.label} value={item.value} />)}
 
-							{/* <Picker.Item label="Football" value="football" />
-							<Picker.Item label="Baseball" value="baseball" /> */}
-						</Picker>
+							{}
+						</Picker> */}
 
 						<Button
 							color="#3740FE"
